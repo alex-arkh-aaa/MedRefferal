@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание направления - MedReferral</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #0ea5e9;
+            --accent-color: #8b5cf6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-color: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0da271;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .page-header h1 i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        /* Form Sections */
+        .form-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--gray-color);
+            margin-bottom: 20px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--danger-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+            margin-top: 5px;
+        }
+
+        /* Patient Search */
+        .patient-search-container {
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .search-toggle {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            flex: 1;
+            text-align: center;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Existing Patients */
+        .patients-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .patient-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .patient-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .patient-item.selected {
+            background-color: #eff6ff;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .patient-item:last-child {
+            border-bottom: none;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .patient-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        /* Date Range */
+        .date-range-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .date-range-container .form-group {
+            flex: 1;
+        }
+
+        .date-range-separator {
+            color: var(--gray-color);
+            font-weight: 600;
+        }
+
+        /* Clinic and Service Selection */
+        .clinic-service-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .clinic-service-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .clinic-card,
+        .service-card {
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .clinic-card:hover,
+        .service-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .clinic-card.selected,
+        .service-card.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .clinic-name,
+        .service-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .clinic-details,
+        .service-details {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 10px;
+        }
+
+        .service-price {
+            font-weight: 600;
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+
+        /* Commission Info */
+        .commission-info {
+            background-color: #f0fdf4;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .commission-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .commission-total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success-color);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #bbf7d0;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin-top: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+
+        .timeline-item.active .timeline-dot {
+            background-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background-color: var(--success-color);
+        }
+
+        /* Actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .progress-steps {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .step-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+        }
+
+        .step-indicator.active {
+            background-color: var(--primary-color);
+        }
+
+        .step-indicator.completed {
+            background-color: var(--success-color);
+        }
+
+        /* Recent Referrals */
+        .recent-referrals {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .referrals-list {
+            margin-top: 15px;
+        }
+
+        .referral-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .referral-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .referral-info {
+            flex: 1;
+        }
+
+        .referral-patient {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .referral-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .referral-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-created {
+            background-color: #dbeafe;
+            color: var(--primary-color);
+        }
+
+        .status-confirmed {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .status-scheduled {
+            background-color: #d1fae5;
+            color: var(--success-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .sidebar-menu a.active {
+                border-left: none;
+                border-bottom-color: var(--primary-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range-container {
+                flex-direction: column;
+            }
+            
+            .date-range-separator {
+                transform: rotate(90deg);
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-hospital-alt"></i>
+                    MedReferral
+                </a>
+                
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar">ИИ</div>
+                        <div>
+                            <div style="font-weight: 600;">Иван Иванов</div>
+                            <div style="font-size: 0.9rem; color: var(--gray-color);">Агент #A-04567</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                </li>
+                <li>
+                    <a href="create-referral.html" class="active">
+                        <i class="fas fa-plus-circle"></i> Новое направление
+                    </a>
+                </li>
+                <li>
+                    <a href="referrals.html">
+                        <i class="fas fa-list"></i> Мои направления
+                    </a>
+                </li>
+                <li>
+                    <a href="patients.html">
+                        <i class="fas fa-user-injured"></i> Пациенты
+                    </a>
+                </li>
+                <li>
+                    <a href="clinics.html">
+                        <i class="fas fa-hospital"></i> Клиники
+                    </a>
+                </li>
+                <li>
+                    <a href="reports.html">
+                        <i class="fas fa-chart-bar"></i> Отчеты
+                    </a>
+                </li>
+                <li>
+                    <a href="earnings.html">
+                        <i class="fas fa-money-bill-wave"></i> Заработок
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html">
+                        <i class="fas fa-user-cog"></i> Настройки
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1><i class="fas fa-plus-circle"></i> Создание нового направления</h1>
+                <div class="progress-steps">
+                    <div class="step-indicator completed"></div>
+                    <div class="step-indicator active"></div>
+                    <div class="step-indicator"></div>
+                    <div class="step-indicator"></div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="form-container">
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot"></div>
+                        <div style="font-weight: 600;">Выбор клиники и услуги</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">Завершено</div>
+                    </div>
+                    
+                    <div class="timeline-item active">
+                        <div class="timeline-dot"></div>
+                        <div style="font-weight: 600;">Данные пациента</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">Текущий шаг</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div style="font-weight: 600;">Дата и время визита</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">Следующий</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div style="font-weight: 600;">Подтверждение</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">Последний</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Form -->
+            <form id="referralForm" class="form-container">
+                <!-- Section 1: Patient Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-injured"></i> Информация о пациенте
+                    </h2>
+                    
+                    <div class="patient-search-container">
+                        <div class="search-toggle">
+                            <div class="toggle-btn active" id="existingPatientToggle">
+                                Выбрать из моих пациентов
+                            </div>
+                            <div class="toggle-btn" id="newPatientToggle">
+                                Добавить нового пациента
+                            </div>
+                        </div>
+                        
+                        <!-- Existing Patients -->
+                        <div id="existingPatientsSection">
+                            <div class="form-group">
+                                <label>Поиск пациента</label>
+                                <input type="text" id="patientSearch" placeholder="Введите ФИО, телефон или email...">
+                            </div>
+                            
+                            <div class="patients-list" id="patientsList">
+                                <!-- Patient items will be populated by JavaScript -->
+                                <div class="patient-item" data-patient-id="1">
+                                    <div class="patient-name">Петров Алексей Сергеевич</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (912) 345-67-89</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 45 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 3 обращения</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="2">
+                                    <div class="patient-name">Смирнова Ольга Викторовна</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (923) 456-78-90</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 38 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 1 обращение</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="3">
+                                    <div class="patient-name">Козлов Дмитрий Иванович</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (934) 567-89-01</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 52 года</span>
+                                        <span><i class="fas fa-file-medical"></i> 5 обращений</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="4">
+                                    <div class="patient-name">Николаева Анна Петровна</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (945) 678-90-12</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 29 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 2 обращения</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-hint" style="margin-top: 10px;">
+                                Выберите пациента из списка или <a href="#" id="showAllPatients">показать всех</a>
+                            </div>
+                        </div>
+                        
+                        <!-- New Patient Form -->
+                        <div id="newPatientSection" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>ФИО пациента <span class="required">*</span></label>
+                                    <input type="text" id="patientFullName" placeholder="Иванов Иван Иванович">
+                                    <div class="error-message" id="nameError">Поле обязательно для заполнения</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Дата рождения</label>
+                                    <input type="date" id="patientBirthDate">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Телефон <span class="required">*</span></label>
+                                    <input type="tel" id="patientPhone" placeholder="+7 (999) 123-45-67">
+                                    <div class="error-message" id="phoneError">Введите корректный номер телефона</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="patientEmail" placeholder="patient@example.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Пол</label>
+                                    <select id="patientGender">
+                                        <option value="">Выберите пол</option>
+                                        <option value="male">Мужской</option>
+                                        <option value="female">Женский</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label>Комментарий</label>
+                                    <textarea id="patientComment" rows="3" placeholder="Дополнительная информация о пациенте..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Visit Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-check"></i> Информация о визите
+                    </h2>
+                    <p class="section-subtitle">Укажите период, в который пациент планирует посетить клинику (не более 30 дней)</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Ожидаемый период визита <span class="required">*</span></label>
+                            <div class="date-range-container">
+                                <div class="form-group">
+                                    <input type="date" id="visitStartDate" min="">
+                                </div>
+                                <div class="date-range-separator">—</div>
+                                <div class="form-group">
+                                    <input type="date" id="visitEndDate" min="">
+                                </div>
+                            </div>
+                            <div class="error-message" id="dateError">Период не должен превышать 30 дней</div>
+                            <div class="form-hint">
+                                Максимальный период - 30 дней. Клиника подтвердит точную дату и время в течение 24 часов.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Желаемое время суток</label>
+                            <select id="preferredTime">
+                                <option value="">Любое время</option>
+                                <option value="morning">Утро (9:00 - 12:00)</option>
+                                <option value="day">День (12:00 - 17:00)</option>
+                                <option value="evening">Вечер (17:00 - 20:00)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Срочность</label>
+                            <select id="urgencyLevel">
+                                <option value="normal">Обычная (в течение периода)</option>
+                                <option value="urgent">Срочная (в первые 3 дня)</option>
+                                <option value="flexible">Гибкая (любая дата в периоде)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Clinic and Service (Pre-selected) -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-hospital"></i> Выбранные клиника и услуга
+                    </h2>
+                    
+                    <div class="clinic-service-container">
+                        <div class="clinic-card selected">
+                            <div class="clinic-name">Медицинский центр "Элита"</div>
+                            <div class="clinic-details">
+                                <div><i class="fas fa-map-marker-alt"></i> Москва, ул. Лечебная, 15</div>
+                                <div><i class="fas fa-phone"></i> +7 (495) 123-45-67</div>
+                                <div><i class="fas fa-star"></i> Рейтинг: 4.8/5</div>
+                            </div>
+                        </div>
+                        
+                        <div class="service-card selected">
+                            <div class="service-name">Консультация кардиолога</div>
+                            <div class="service-details">
+                                <div><i class="fas fa-user-md"></i> Врач: Петров А.С.</div>
+                                <div><i class="fas fa-clock"></i> Длительность: 60 мин</div>
+                                <div class="service-price">5,500 ₽</div>
+                            </div>
+                            <div class="form-hint" style="margin-top: 10px;">
+                                <a href="#" onclick="openChangeModal()"><i class="fas fa-exchange-alt"></i> Изменить клинику/услугу</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Commission Information -->
+                    <div class="commission-info">
+                        <div class="commission-row">
+                            <span>Стоимость услуги:</span>
+                            <span style="font-weight: 600;">5,500 ₽</span>
+                        </div>
+                        <div class="commission-row">
+                            <span>Ваша комиссия (15%):</span>
+                            <span style="font-weight: 600; color: var(--success-color);">825 ₽</span>
+                        </div>
+                        <div class="commission-row commission-total">
+                            <span>Ваш заработок с этого направления:</span>
+                            <span>825 ₽</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Additional Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-file-medical-alt"></i> Дополнительная информация
+                    </h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Полис ОМС/ДМС</label>
+                            <input type="text" id="insurancePolicy" placeholder="Номер полиса">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Направляющий врач</label>
+                            <input type="text" id="referringDoctor" placeholder="ФИО врача (если есть)">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label>Медицинские показания / жалобы</label>
+                            <textarea id="medicalIndications" rows="4" placeholder="Опишите симптомы, диагноз или причину обращения..."></textarea>
+                            <div class="form-hint">
+                                Эта информация поможет врачу подготовиться к приему
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label>Особые пожелания</label>
+                            <textarea id="specialRequests" rows="3" placeholder="Особые требования или пожелания пациента..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="saveDraft()">
+                        <i class="fas fa-save"></i> Сохранить черновик
+                    </button>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <button type="button" class="btn btn-outline" onclick="goBack()">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            Создать направление <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Recent Referrals -->
+            <div class="recent-referrals">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i> Последние направления
+                </h2>
+                
+                <div class="referrals-list">
+                    <div class="referral-item">
+                        <div class="referral-info">
+                            <div class="referral-patient">Петров Алексей Сергеевич</div>
+                            <div class="referral-details">
+                                <span>МЦ "Элита"</span>
+                                <span>Консультация кардиолога</span>
+                                <span>15 дек 2024</span>
+                            </div>
+                        </div>
+                        <div class="referral-status status-scheduled">Назначен</div>
+                    </div>
+                    
+                    <div class="referral-item">
+                        <div class="referral-info">
+                            <div class="referral-patient">Смирнова Ольга Викторовна</div>
+                            <div class="referral-details">
+                                <span>Клиника "Здоровье+"</span>
+                                <span>УЗИ брюшной полости</span>
+                                <span>10 дек 2024</span>
+                            </div>
+                        </div>
+                        <div class="referral-status status-confirmed">Подтвержден</div>
+                    </div>
+                    
+                    <div class="referral-item">
+                        <div class="referral-info">
+                            <div class="referral-patient">Козлов Дмитрий Иванович</div>
+                            <div class="referral-details">
+                                <span>Стоматология "Улыбка"</span>
+                                <span>Лечение кариеса</span>
+                                <span>5 дек 2024</span>
+                            </div>
+                        </div>
+                        <div class="referral-status status-created">Создан</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Change Clinic/Service Modal -->
+    <div class="modal" id="changeModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeChangeModal()">&times;</button>
+            <h2 style="margin-bottom: 20px;">Изменить клинику и услугу</h2>
+            
+            <div class="form-group">
+                <label>Выберите клинику</label>
+                <select id="clinicSelect" style="width: 100%;">
+                    <option value="1" selected>Медицинский центр "Элита"</option>
+                    <option value="2">Клиника "Здоровье+"</option>
+                    <option value="3">Стоматология "Улыбка"</option>
+                    <option value="4">Диагностический центр "МРТ-Эксперт"</option>
+                    <option value="5">Гинекология "Мать и дитя"</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Выберите услугу</label>
+                <select id="serviceSelect" style="width: 100%;">
+                    <option value="1" selected>Консультация кардиолога (5,500 ₽)</option>
+                    <option value="2">ЭКГ с расшифровкой (2,300 ₽)</option>
+                    <option value="3">Суточное мониторирование ЭКГ (8,500 ₽)</option>
+                    <option value="4">УЗИ сердца (4,800 ₽)</option>
+                </select>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: right;">
+                <button type="button" class="btn btn-outline" onclick="closeChangeModal()">
+                    Отмена
+                </button>
+                <button type="button" class="btn btn-primary" onclick="updateClinicService()">
+                    <i class="fas fa-check"></i> Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div style="text-align: center; padding: 30px;">
+                <div style="width: 80px; height: 80px; background-color: #d1fae5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                    <i class="fas fa-check" style="font-size: 2.5rem; color: var(--success-color);"></i>
+                </div>
+                <h2 style="margin-bottom: 15px;">Направление создано!</h2>
+                <p style="color: var(--gray-color); margin-bottom: 30px;">
+                    Направление #REF-202412-00045 успешно создано.<br>
+                    Клиника получит уведомление и подтвердит точную дату визита в течение 24 часов.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="button" class="btn btn-outline" onclick="closeSuccessModal()">
+                        Создать еще одно
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="viewReferral()">
+                        <i class="fas fa-eye"></i> Посмотреть направление
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#clinicSelect').select2({
+                placeholder: "Выберите клинику",
+                allowClear: true
+            });
+            
+            $('#serviceSelect').select2({
+                placeholder: "Выберите услугу",
+                allowClear: true
+            });
+        });
+
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 60); // 60 days from now
+        
+        document.getElementById('visitStartDate').min = today;
+        document.getElementById('visitStartDate').max = maxDate.toISOString().split('T')[0];
+        
+        // Set patient birth date max to today
+        document.getElementById('patientBirthDate').max = today;
+
+        // Patient toggle functionality
+        const existingPatientToggle = document.getElementById('existingPatientToggle');
+        const newPatientToggle = document.getElementById('newPatientToggle');
+        const existingPatientsSection = document.getElementById('existingPatientsSection');
+        const newPatientSection = document.getElementById('newPatientSection');
+        const patientsList = document.getElementById('patientsList');
+        const patientSearch = document.getElementById('patientSearch');
+
+        existingPatientToggle.addEventListener('click', () => {
+            existingPatientToggle.classList.add('active');
+            newPatientToggle.classList.remove('active');
+            existingPatientsSection.style.display = 'block';
+            newPatientSection.style.display = 'none';
+        });
+
+        newPatientToggle.addEventListener('click', () => {
+            newPatientToggle.classList.add('active');
+            existingPatientToggle.classList.remove('active');
+            newPatientSection.style.display = 'block';
+            existingPatientsSection.style.display = 'none';
+        });
+
+        // Patient selection
+        let selectedPatientId = null;
+        
+        patientsList.querySelectorAll('.patient-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove selection from all items
+                patientsList.querySelectorAll('.patient-item').forEach(i => {
+                    i.classList.remove('selected');
+                });
+                
+                // Add selection to clicked item
+                item.classList.add('selected');
+                selectedPatientId = item.getAttribute('data-patient-id');
+                
+                // Fill form with patient data (simulated)
+                const patientName = item.querySelector('.patient-name').textContent;
+                console.log('Selected patient:', patientName, 'ID:', selectedPatientId);
+                
+                // Show success message
+                showToast(`Выбран пациент: ${patientName}`);
+            });
+        });
+
+        // Patient search functionality
+        patientSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = patientsList.querySelectorAll('.patient-item');
+            
+            items.forEach(item => {
+                const name = item.querySelector('.patient-name').textContent.toLowerCase();
+                const details = item.querySelector('.patient-details').textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || details.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Date range validation
+        const startDateInput = document.getElementById('visitStartDate');
+        const endDateInput = document.getElementById('visitEndDate');
+        const dateError = document.getElementById('dateError');
+
+        startDateInput.addEventListener('change', validateDateRange);
+        endDateInput.addEventListener('change', validateDateRange);
+
+        function validateDateRange() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (startDate && endDate) {
+                // Calculate difference in days
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays > 30) {
+                    dateError.classList.add('show');
+                    startDateInput.classList.add('error');
+                    endDateInput.classList.add('error');
+                    return false;
+                } else {
+                    dateError.classList.remove('show');
+                    startDateInput.classList.remove('error');
+                    endDateInput.classList.remove('error');
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+            
+            // Check if patient is selected or new patient form is filled
+            const isNewPatient = newPatientToggle.classList.contains('active');
+            
+            if (isNewPatient) {
+                // Validate new patient form
+                const fullName = document.getElementById('patientFullName').value.trim();
+                const phone = document.getElementById('patientPhone').value.trim();
+                
+                if (!fullName) {
+                    document.getElementById('nameError').classList.add('show');
+                    document.getElementById('patientFullName').classList.add('error');
+                    isValid = false;
+                }
+                
+                if (!phone || phone.length < 10) {
+                    document.getElementById('phoneError').classList.add('show');
+                    document.getElementById('patientPhone').classList.add('error');
+                    isValid = false;
+                }
+            } else {
+                // Check if existing patient is selected
+                if (!selectedPatientId) {
+                    showToast('Пожалуйста, выберите пациента из списка', 'error');
+                    isValid = false;
+                }
+            }
+            
+            // Validate date range
+            if (!validateDateRange()) {
+                isValid = false;
+            }
+            
+            // Check if dates are filled
+            if (!startDateInput.value || !endDateInput.value) {
+                dateError.textContent = 'Пожалуйста, укажите период визита';
+                dateError.classList.add('show');
+                startDateInput.classList.add('error');
+                endDateInput.classList.add('error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Form submission
+        document.getElementById('referralForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                // Simulate API call
+                const formData = {
+                    patientId: selectedPatientId,
+                    startDate: startDateInput.value,
+                    endDate: endDateInput.value,
+                    preferredTime: document.getElementById('preferredTime').value,
+                    urgencyLevel: document.getElementById('urgencyLevel').value,
+                    medicalIndications: document.getElementById('medicalIndications').value,
+                    specialRequests: document.getElementById('specialRequests').value
+                };
+                
+                console.log('Form data:', formData);
+                
+                // Show success modal
+                document.getElementById('successModal').style.display = 'flex';
+                
+                // In real app, here would be:
+                // fetch('/api/referrals/create', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(formData)
+                // })
+                // .then(response => response.json())
+                // .then(data => {
+                //     showSuccessModal(data.referralNumber);
+                // })
+                // .catch(error => {
+                //     showToast('Ошибка при создании направления', 'error');
+                // });
+            }
+        });
+
+        // Modal functions
+        function openChangeModal() {
+            document.getElementById('changeModal').style.display = 'flex';
+        }
+
+        function closeChangeModal() {
+            document.getElementById('changeModal').style.display = 'none';
+        }
+
+        function updateClinicService() {
+            const clinicSelect = document.getElementById('clinicSelect');
+            const serviceSelect = document.getElementById('serviceSelect');
+            
+            // In real app, update the clinic and service cards
+            // based on selected values
+            
+            showToast('Клиника и услуга обновлены');
+            closeChangeModal();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+            // Reset form
+            document.getElementById('referralForm').reset();
+            patientsList.querySelectorAll('.patient-item').forEach(i => {
+                i.classList.remove('selected');
+            });
+            selectedPatientId = null;
+            newPatientToggle.click();
+        }
+
+        function viewReferral() {
+            // Redirect to referral detail page
+            window.location.href = 'referral-detail.html?id=REF-202412-00045';
+        }
+
+        // Helper functions
+        function saveDraft() {
+            // Save form data to localStorage or send to backend
+            const formData = {
+                patientId: selectedPatientId,
+                startDate: startDateInput.value,
+                endDate: endDateInput.value,
+                // ... other fields
+            };
+            
+            localStorage.setItem('referralDraft', JSON.stringify(formData));
+            showToast('Черновик сохранен');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function showToast(message, type = 'success') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: ${type === 'error' ? '#fee2e2' : '#d1fae5'};
+                color: ${type === 'error' ? '#991b1b' : '#065f46'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: var(--shadow);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}" style="margin-right: 10px;"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Auto-fill dates for demo
+        window.addEventListener('load', () => {
+            // Set default date range (next 7 days)
+            const start = new Date();
+            start.setDate(start.getDate() + 2);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 5);
+            
+            startDateInput.value = start.toISOString().split('T')[0];
+            endDateInput.value = end.toISOString().split('T')[0];
+            
+            // Select first patient by default
+            const firstPatient = patientsList.querySelector('.patient-item');
+            if (firstPatient) {
+                firstPatient.click();
+            }
+        });
+    </script>
+</body>
+</html>

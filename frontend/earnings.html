@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заработок - MedReferral</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #0ea5e9;
+            --accent-color: #8b5cf6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --gray-color: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0da271;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .page-header h1 i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        /* Earnings Summary */
+        .earnings-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        .summary-card.total::before {
+            background-color: var(--success-color);
+        }
+
+        .summary-card.available::before {
+            background-color: var(--primary-color);
+        }
+
+        .summary-card.pending::before {
+            background-color: var(--warning-color);
+        }
+
+        .summary-card.withdrawn::before {
+            background-color: var(--accent-color);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .summary-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .summary-trend.positive {
+            color: var(--success-color);
+        }
+
+        .summary-trend.negative {
+            color: var(--danger-color);
+        }
+
+        .summary-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 1rem;
+            color: var(--gray-color);
+            margin-bottom: 15px;
+        }
+
+        .summary-progress {
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .summary-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Withdrawal Section */
+        .withdrawal-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .withdrawal-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .method-card {
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .method-card:hover {
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        .method-card.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .method-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .method-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .method-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .method-description {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .withdrawal-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .amount-input {
+            position: relative;
+        }
+
+        .amount-input span {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+            font-weight: 600;
+        }
+
+        /* Transactions Table */
+        .transactions-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transactions-table thead {
+            background-color: #f8fafc;
+        }
+
+        .transactions-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-color);
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .transactions-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .transactions-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .transactions-table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-paid {
+            background-color: #d1fae5;
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .status-processing {
+            background-color: #93c5fd;
+            color: var(--info-color);
+        }
+
+        .status-failed {
+            background-color: #fecaca;
+            color: var(--danger-color);
+        }
+
+        /* Earnings Chart */
+        .chart-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Period Selector */
+        .period-selector {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .period-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .period-tab {
+            padding: 10px 20px;
+            background: none;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--gray-color);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .period-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .date-range-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-input-group input {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .date-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .empty-state p {
+            color: var(--gray-color);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.disabled:hover {
+            background-color: white;
+            color: var(--dark-color);
+            border-color: var(--border-color);
+        }
+
+        /* Tax Info */
+        .tax-info {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .tax-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tax-item {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+        }
+
+        .tax-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 10px;
+        }
+
+        .tax-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                white-space: nowrap;
+            }
+            
+            .sidebar-menu a.active {
+                border-left: none;
+                border-bottom-color: var(--primary-color);
+            }
+            
+            .withdrawal-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .period-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-range-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .withdrawal-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .earnings-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .tax-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .transactions-table {
+                font-size: 0.9rem;
+            }
+            
+            .transactions-table th,
+            .transactions-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-hospital-alt"></i>
+                    MedReferral
+                </a>
+                
+                <div class="user-menu">
+                    <div class="user-info">
+                        <div class="user-avatar">ИИ</div>
+                        <div>
+                            <div style="font-weight: 600;">Иван Иванов</div>
+                            <div style="font-size: 0.9rem; color: var(--gray-color);">Агент #A-04567</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                </li>
+                <li>
+                    <a href="create-referral.html">
+                        <i class="fas fa-plus-circle"></i> Новое направление
+                    </a>
+                </li>
+                <li>
+                    <a href="referrals.html">
+                        <i class="fas fa-list"></i> Мои направления
+                    </a>
+                </li>
+                <li>
+                    <a href="patients.html">
+                        <i class="fas fa-user-injured"></i> Пациенты
+                    </a>
+                </li>
+                <li>
+                    <a href="clinics.html">
+                        <i class="fas fa-hospital"></i> Клиники
+                    </a>
+                </li>
+                <li>
+                    <a href="reports.html">
+                        <i class="fas fa-chart-bar"></i> Отчеты
+                    </a>
+                </li>
+                <li>
+                    <a href="earnings.html" class="active">
+                        <i class="fas fa-money-bill-wave"></i> Заработок
+                    </a>
+                </li>
+                <li>
+                    <a href="profile.html">
+                        <i class="fas fa-user-cog"></i> Настройки
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1><i class="fas fa-money-bill-wave"></i> Заработок</h1>
+                <div class="date-range-selector">
+                    <div class="date-input-group">
+                        <label>Период:</label>
+                        <select id="periodSelect" onchange="changePeriod()">
+                            <option value="current_month" selected>Текущий месяц</option>
+                            <option value="last_month">Прошлый месяц</option>
+                            <option value="current_quarter">Текущий квартал</option>
+                            <option value="current_year">Текущий год</option>
+                            <option value="custom">Произвольный период</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Summary -->
+            <div class="earnings-summary">
+                <div class="summary-card total">
+                    <div class="summary-header">
+                        <div class="summary-icon" style="background-color: #d1fae5; color: var(--success-color);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="summary-trend positive">
+                            <i class="fas fa-arrow-up"></i> 15.2%
+                        </div>
+                    </div>
+                    <div class="summary-value">42,750 ₽</div>
+                    <div class="summary-label">Общий заработок</div>
+                    <div class="summary-progress">
+                        <div class="summary-progress-bar" style="width: 85%; background-color: var(--success-color);"></div>
+                    </div>
+                </div>
+                
+                <div class="summary-card available">
+                    <div class="summary-header">
+                        <div class="summary-icon" style="background-color: #dbeafe; color: var(--primary-color);">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="summary-trend positive">
+                            <i class="fas fa-arrow-up"></i> 8.7%
+                        </div>
+                    </div>
+                    <div class="summary-value">18,250 ₽</div>
+                    <div class="summary-label">Доступно к выводу</div>
+                    <div class="summary-progress">
+                        <div class="summary-progress-bar" style="width: 68%; background-color: var(--primary-color);"></div>
+                    </div>
+                </div>
+                
+                <div class="summary-card pending">
+                    <div class="summary-header">
+                        <div class="summary-icon" style="background-color: #fef3c7; color: var(--warning-color);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-trend positive">
+                            <i class="fas fa-arrow-up"></i> 12.3%
+                        </div>
+                    </div>
+                    <div class="summary-value">6,500 ₽</div>
+                    <div class="summary-label">Ожидает подтверждения</div>
+                    <div class="summary-progress">
+                        <div class="summary-progress-bar" style="width: 40%; background-color: var(--warning-color);"></div>
+                    </div>
+                </div>
+                
+                <div class="summary-card withdrawn">
+                    <div class="summary-header">
+                        <div class="summary-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="summary-trend positive">
+                            <i class="fas fa-arrow-up"></i> 22.1%
+                        </div>
+                    </div>
+                    <div class="summary-value">245,300 ₽</div>
+                    <div class="summary-label">Всего выведено</div>
+                    <div class="summary-progress">
+                        <div class="summary-progress-bar" style="width: 92%; background-color: var(--accent-color);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title">Динамика заработка</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline btn-sm active" onclick="toggleChartType('line')">
+                            График
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="toggleChartType('bar')">
+                            Столбцы
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Withdrawal Section -->
+            <div class="withdrawal-section">
+                <div class="section-header">
+                    <div class="section-title">Вывод средств</div>
+                    <div style="font-weight: 600; color: var(--success-color);">
+                        Доступно: <span style="font-size: 1.3rem;">18,250 ₽</span>
+                    </div>
+                </div>
+                
+                <div class="withdrawal-methods">
+                    <div class="method-card selected" onclick="selectMethod('bank')">
+                        <div class="method-header">
+                            <div class="method-icon" style="color: var(--primary-color);">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div>
+                                <div class="method-title">Банковская карта</div>
+                                <div class="method-description">Visa, Mastercard, МИР</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">
+                            Зачисление в течение 1-3 банковских дней
+                        </div>
+                    </div>
+                    
+                    <div class="method-card" onclick="selectMethod('yoomoney')">
+                        <div class="method-header">
+                            <div class="method-icon" style="color: #ffcc00;">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div>
+                                <div class="method-title">ЮMoney</div>
+                                <div class="method-description">Быстрый вывод на кошелек</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">
+                            Зачисление в течение нескольких часов
+                        </div>
+                    </div>
+                    
+                    <div class="method-card" onclick="selectMethod('sbp')">
+                        <div class="method-header">
+                            <div class="method-icon" style="color: var(--success-color);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div>
+                                <div class="method-title">СБП (Система быстрых платежей)</div>
+                                <div class="method-description">По номеру телефона</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--gray-color);">
+                            Мгновенное зачисление на карту
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="withdrawal-form">
+                    <div class="form-group">
+                        <label>Сумма вывода</label>
+                        <div class="amount-input">
+                            <input type="number" id="withdrawalAmount" placeholder="0" min="100" max="18250" step="100" value="5000">
+                            <span>₽</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setAmount(5000)">5,000 ₽</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setAmount(10000)">10,000 ₽</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="setAmount(18250)">Всю сумму</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Реквизиты</label>
+                        <input type="text" id="withdrawalDetails" placeholder="Номер карты/кошелька" value="**** **** **** 1234">
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <div style="font-size: 0.9rem; color: var(--gray-color);">
+                        Комиссия: <span style="font-weight: 600; color: var(--dark-color);">0%</span>
+                    </div>
+                    <button class="btn btn-success" onclick="requestWithdrawal()">
+                        <i class="fas fa-paper-plane"></i> Заказать выплату
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tax Information -->
+            <div class="tax-info">
+                <div class="section-header">
+                    <div class="section-title">Налоговая информация</div>
+                    <button class="btn btn-outline" onclick="downloadTaxReport()">
+                        <i class="fas fa-file-download"></i> Скачать отчет
+                    </button>
+                </div>
+                
+                <div class="tax-grid">
+                    <div class="tax-item">
+                        <div class="tax-label">НДФЛ 13% за текущий год</div>
+                        <div class="tax-value">31,575 ₽</div>
+                    </div>
+                    
+                    <div class="tax-item">
+                        <div class="tax-label">Уплачено НДФЛ</div>
+                        <div class="tax-value">28,417 ₽</div>
+                    </div>
+                    
+                    <div class="tax-item">
+                        <div class="tax-label">К уплате до 15.07.2025</div>
+                        <div class="tax-value">3,158 ₽</div>
+                    </div>
+                    
+                    <div class="tax-item">
+                        <div class="tax-label">Налоговый вычет</div>
+                        <div class="tax-value">0 ₽</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="transactions-section">
+                <div class="section-header">
+                    <div class="section-title">История операций</div>
+                    <button class="btn btn-outline" onclick="exportTransactions()">
+                        <i class="fas fa-file-export"></i> Экспорт
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Описание</th>
+                                <th>Направление</th>
+                                <th>Тип</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody">
+                            <!-- Transactions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination">
+                    <button class="pagination-btn disabled">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="pagination-btn active">1</button>
+                    <button class="pagination-btn">2</button>
+                    <button class="pagination-btn">3</button>
+                    <button class="pagination-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // Chart instance
+        let earningsChart = null;
+        let currentMethod = 'bank';
+        let chartType = 'line';
+
+        // Sample transactions data
+        const transactionsData = [
+            {
+                id: 1,
+                date: '15.12.2024',
+                description: 'Выплата за направление #REF-202412-00044',
+                referral: 'REF-202412-00044',
+                type: 'commission',
+                amount: 690,
+                status: 'paid'
+            },
+            {
+                id: 2,
+                date: '14.12.2024',
+                description: 'Выплата за направление #REF-202412-00043',
+                referral: 'REF-202412-00043',
+                type: 'commission',
+                amount: 1200,
+                status: 'paid'
+            },
+            {
+                id: 3,
+                date: '12.12.2024',
+                description: 'Выплата за направление #REF-202412-00040',
+                referral: 'REF-202412-00040',
+                type: 'commission',
+                amount: 900,
+                status: 'paid'
+            },
+            {
+                id: 4,
+                date: '10.12.2024',
+                description: 'Выплата за направление #REF-202412-00039',
+                referral: 'REF-202412-00039',
+                type: 'commission',
+                amount: 375,
+                status: 'paid'
+            },
+            {
+                id: 5,
+                date: '08.12.2024',
+                description: 'Выплата за направление #REF-202412-00038',
+                referral: 'REF-202412-00038',
+                type: 'commission',
+                amount: 1275,
+                status: 'paid'
+            },
+            {
+                id: 6,
+                date: '05.12.2024',
+                description: 'Вывод средств на карту ****1234',
+                referral: '-',
+                type: 'withdrawal',
+                amount: -10000,
+                status: 'paid'
+            },
+            {
+                id: 7,
+                date: '01.12.2024',
+                description: 'Налог НДФЛ 13%',
+                referral: '-',
+                type: 'tax',
+                amount: -4167,
+                status: 'paid'
+            },
+            {
+                id: 8,
+                date: '30.11.2024',
+                description: 'Выплата за направление #REF-202411-00037',
+                referral: 'REF-202411-00037',
+                type: 'commission',
+                amount: 1800,
+                status: 'paid'
+            }
+        ];
+
+        // Initialize on page load
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#periodSelect').select2({
+                minimumResultsForSearch: -1
+            });
+            
+            // Initialize chart
+            initializeChart();
+            
+            // Populate transactions table
+            populateTransactionsTable(transactionsData);
+            
+            // Set up amount input listener
+            document.getElementById('withdrawalAmount').addEventListener('input', function() {
+                const maxAmount = 18250;
+                const currentAmount = parseInt(this.value) || 0;
+                
+                if (currentAmount > maxAmount) {
+                    this.value = maxAmount;
+                    showToast(`Максимальная сумма для вывода: ${maxAmount.toLocaleString()} ₽`, 'warning');
+                }
+                
+                if (currentAmount < 100 && currentAmount > 0) {
+                    showToast('Минимальная сумма для вывода: 100 ₽', 'warning');
+                }
+            });
+        });
+
+        // Initialize earnings chart
+        function initializeChart() {
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            
+            earningsChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+                    datasets: [
+                        {
+                            label: 'Заработок',
+                            data: [28500, 31200, 29800, 35400, 41000, 38500, 42300, 45600, 43800, 51200, 48700, 42750],
+                            borderColor: '#10b981',
+                            backgroundColor: chartType === 'bar' ? '#10b981' : 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: chartType === 'line',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Заработок: ${context.parsed.y.toLocaleString()} ₽`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' ₽';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toggle chart type
+        function toggleChartType(type) {
+            chartType = type;
+            
+            // Update button states
+            document.querySelectorAll('.chart-header .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update chart
+            if (earningsChart) {
+                earningsChart.destroy();
+            }
+            initializeChart();
+        }
+
+        // Change period
+        function changePeriod() {
+            const period = document.getElementById('periodSelect').value;
+            
+            // In real app, fetch data for selected period
+            // fetch(`/api/earnings?period=${period}`)
+            // .then(response => response.json())
+            // .then(data => {
+            //     updateChartData(data);
+            //     updateSummaryData(data);
+            //     updateTransactions(data.transactions);
+            // });
+            
+            // For demo, show a toast
+            let periodText = '';
+            switch(period) {
+                case 'current_month': periodText = 'Текущий месяц'; break;
+                case 'last_month': periodText = 'Прошлый месяц'; break;
+                case 'current_quarter': periodText = 'Текущий квартал'; break;
+                case 'current_year': periodText = 'Текущий год'; break;
+                case 'custom': periodText = 'Произвольный период'; break;
+            }
+            
+            showToast(`Показаны данные за: ${periodText}`, 'info');
+        }
+
+        // Select withdrawal method
+        function selectMethod(method) {
+            currentMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.method-card').classList.add('selected');
+            
+            // Update form based on method
+            const detailsInput = document.getElementById('withdrawalDetails');
+            switch(method) {
+                case 'bank':
+                    detailsInput.placeholder = 'Номер банковской карты';
+                    detailsInput.value = '**** **** **** 1234';
+                    break;
+                case 'yoomoney':
+                    detailsInput.placeholder = 'Номер кошелька ЮMoney';
+                    detailsInput.value = '4100**********';
+                    break;
+                case 'sbp':
+                    detailsInput.placeholder = 'Номер телефона';
+                    detailsInput.value = '+7 (***) ***-**-**';
+                    break;
+            }
+        }
+
+        // Set withdrawal amount
+        function setAmount(amount) {
+            document.getElementById('withdrawalAmount').value = amount;
+        }
+
+        // Request withdrawal
+        function requestWithdrawal() {
+            const amount = parseInt(document.getElementById('withdrawalAmount').value) || 0;
+            const details = document.getElementById('withdrawalDetails').value.trim();
+            
+            // Validation
+            if (amount < 100) {
+                showToast('Минимальная сумма для вывода: 100 ₽', 'error');
+                return;
+            }
+            
+            if (amount > 18250) {
+                showToast('Недостаточно средств для вывода', 'error');
+                return;
+            }
+            
+            if (!details) {
+                showToast('Укажите реквизиты для вывода', 'error');
+                return;
+            }
+            
+            // In real app, send withdrawal request to API
+            // fetch('/api/withdrawals', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         amount: amount,
+            //         method: currentMethod,
+            //         details: details
+            //     })
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     showToast('Запрос на вывод средств успешно отправлен', 'success');
+            //     // Refresh data
+            //     changePeriod();
+            // });
+            
+            // For demo, simulate API call
+            showToast(`Запрос на вывод ${amount.toLocaleString()} ₽ отправлен. Средства будут зачислены в течение 1-3 дней.`, 'success');
+            
+            // Reset form
+            setTimeout(() => {
+                document.getElementById('withdrawalAmount').value = '';
+                document.getElementById('withdrawalDetails').value = '';
+            }, 2000);
+        }
+
+        // Populate transactions table
+        function populateTransactionsTable(data) {
+            const tableBody = document.getElementById('transactionsTableBody');
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state" style="padding: 20px;">
+                                <i class="fas fa-exchange-alt" style="font-size: 2rem;"></i>
+                                <div style="font-size: 1rem; margin-bottom: 10px; color: var(--dark-color);">Операций не найдено</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.forEach(transaction => {
+                const row = document.createElement('tr');
+                
+                // Get status badge class
+                let statusClass = 'status-paid';
+                let statusText = 'Выплачено';
+                if (transaction.status === 'pending') {
+                    statusClass = 'status-pending';
+                    statusText = 'Ожидает';
+                } else if (transaction.status === 'processing') {
+                    statusClass = 'status-processing';
+                    statusText = 'В обработке';
+                } else if (transaction.status === 'failed') {
+                    statusClass = 'status-failed';
+                    statusText = 'Ошибка';
+                }
+                
+                // Get type icon and color
+                let typeIcon = 'fas fa-money-bill-wave';
+                let typeColor = 'var(--success-color)';
+                let typeText = 'Комиссия';
+                
+                if (transaction.type === 'withdrawal') {
+                    typeIcon = 'fas fa-arrow-up';
+                    typeColor = 'var(--primary-color)';
+                    typeText = 'Вывод';
+                } else if (transaction.type === 'tax') {
+                    typeIcon = 'fas fa-file-invoice-dollar';
+                    typeColor = 'var(--danger-color)';
+                    typeText = 'Налог';
+                } else if (transaction.type === 'refund') {
+                    typeIcon = 'fas fa-undo';
+                    typeColor = 'var(--warning-color)';
+                    typeText = 'Возврат';
+                }
+                
+                // Format amount
+                const amountFormatted = transaction.amount.toLocaleString();
+                const amountColor = transaction.amount >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+                const amountPrefix = transaction.amount >= 0 ? '+' : '';
+                
+                row.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${transaction.date}</div>
+                    </td>
+                    <td>
+                        <div>${transaction.description}</div>
+                        <div style="font-size: 0.85rem; color: var(--gray-color);">
+                            ${transaction.referral !== '-' ? 'Направление: ' + transaction.referral : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="${typeIcon}" style="color: ${typeColor};"></i>
+                            <span>${typeText}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: ${amountColor};">
+                            ${amountPrefix}${amountFormatted} ₽
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Export transactions
+        function exportTransactions() {
+            showToast('Экспорт данных в Excel...', 'info');
+            
+            // Simulate export
+            setTimeout(() => {
+                showToast('Файл успешно экспортирован', 'success');
+            }, 1500);
+        }
+
+        // Download tax report
+        function downloadTaxReport() {
+            showToast('Подготовка налогового отчета...', 'info');
+            
+            // Simulate download
+            setTimeout(() => {
+                showToast('Налоговый отчет готов к скачиванию', 'success');
+                
+                // In real app, this would trigger a file download
+                // window.open('/api/tax/report', '_blank');
+            }, 2000);
+        }
+
+        // Helper functions
+        function showToast(message, type = 'success') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: ${type === 'error' ? '#fee2e2' : type === 'info' ? '#dbeafe' : '#d1fae5'};
+                color: ${type === 'error' ? '#991b1b' : type === 'info' ? '#1e40af' : '#065f46'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: var(--shadow);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            const icon = type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle';
+            
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
