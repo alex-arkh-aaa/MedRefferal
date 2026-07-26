@@ -12,7 +12,10 @@ psql -U admin -d users_db
 \l
 
 \x auto
-+ select * from users;
+select * from users;
+
+DELETE FROM users;
+DROP TABLE users;
 
 
 

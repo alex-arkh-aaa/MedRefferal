@@ -5,10 +5,10 @@ import enum
 from .database import Base
 
 
-class UserRole(str, enum.Enum):
-    USER = "user"
-    ADMIN = "admin"
-    PARTNER = "partner"
+# class UserRole(str, enum.Enum):
+#     USER = "user"
+#     ADMIN = "admin"
+#     PARTNER = "partner"
 
 
 class User(Base):
@@ -19,7 +19,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
-    role = Column(Enum(UserRole), default=UserRole.USER)
+    # role = Column(Enum(UserRole), default=UserRole.USER)
     is_active = Column(Boolean, default=True)  # soft delete: False = удалён
     deleted_at = Column(DateTime, nullable=True)  # когда запросил удаление
     created_at = Column(DateTime, default=datetime.utcnow)

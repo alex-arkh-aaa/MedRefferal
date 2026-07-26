@@ -113,31 +113,31 @@ async def get_current_user(
     return user
 
 
-async def get_current_partner(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-) -> Partner:
-    """Проверяет, что текущий пользователь — партнёр, и возвращает объект Partner"""
+# async def get_current_partner(
+#     current_user: User = Depends(get_current_user),
+#     db: AsyncSession = Depends(get_db)
+# ) -> Partner:
+#     """Проверяет, что текущий пользователь — партнёр, и возвращает объект Partner"""
     
-    if current_user.role != UserRole.PARTNER:
-        raise HTTPException(status_code=403, detail="Доступ только для партнёров")
+#     if current_user.role != UserRole.PARTNER:
+#         raise HTTPException(status_code=403, detail="Доступ только для партнёров")
     
-    partner = await crud.get_partner_by_user_email(db, current_user.email)
-    if not partner or not partner.is_approved:
-        raise HTTPException(status_code=403, detail="Партнёр не одобрен администратором")
+#     partner = await crud.get_partner_by_user_email(db, current_user.email)
+#     if not partner or not partner.is_approved:
+#         raise HTTPException(status_code=403, detail="Партнёр не одобрен администратором")
     
-    return partner
+#     return partner
 
 
-async def get_current_admin(
-    current_user: User = Depends(get_current_user)
-) -> User:
-    """Проверяет, что текущий пользователь — администратор"""
+# async def get_current_admin(
+#     current_user: User = Depends(get_current_user)
+# ) -> User:
+#     """Проверяет, что текущий пользователь — администратор"""
     
-    if current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Доступ только для администраторов")
+#     if current_user.role != UserRole.ADMIN:
+#         raise HTTPException(status_code=403, detail="Доступ только для администраторов")
     
-    return current_user
+#     return current_user
 
 
 # ==================== Health ====================
@@ -171,8 +171,8 @@ async def send_code(
 
     email_data = {
         "email": email,
-        "subject": "Добро пожаловать в StudentPass!",
-        "message": f"{code} - Ваш код для регистрации на платформе студенческих скидок StudentPass",
+        "subject": "Добро пожаловать в MedRefferal!",
+        "message": f"{code} - Ваш код для регистрации на портале",
     }
     
     await broker.publish(email_data, queue="email_queue")
@@ -201,23 +201,23 @@ async def register_user(
         hashed_password = get_password_hash(data.password)
         
         # Создаём пользователя
-        if data.email == 'alex.arkhangelskiy@yandex.ru':
-            new_user = await crud.create_user(
-                db=db,
-                email=data.email,
-                password_hash=hashed_password,
-                full_name=data.full_name,
-                role=UserRole.ADMIN
-            )
+        # if data.email == 'alex.arkhangelskiy@yandex.ru':
+        #     new_user = await crud.create_user(
+        #         db=db,
+        #         email=data.email,
+        #         password_hash=hashed_password,
+        #         full_name=data.full_name,
+        #         role=UserRole.ADMIN
+        #     )
         
-        else:
-            new_user = await crud.create_user(
-                db=db,
-                email=data.email,
-                password_hash=hashed_password,
-                full_name=data.full_name,
-                role=UserRole.USER
-            )
+        
+        new_user = await crud.create_user(
+            db=db,
+            email=data.email,
+            password_hash=hashed_password,
+            full_name=data.full_name,
+            phone=data.phone
+        )
 
         await crud.delete_email_verification(db, data.email)
         
@@ -228,57 +228,57 @@ async def register_user(
 
 
 
-@app.post("/api/v1/auth/register-partner", response_model=MessageResponse)
-async def register_partner(
-    data: UserRegisterPartner,
-    db: AsyncSession = Depends(get_db)
-):
-    # Проверяем email
-    existing_user = await crud.get_user_by_email_including_inactive(db, data.email)
-    if existing_user:
-        if not existing_user.is_active:
-            raise HTTPException(status_code=400, detail="Этот email был удалён")
+# @app.post("/api/v1/auth/register-partner", response_model=MessageResponse)
+# async def register_partner(
+#     data: UserRegisterPartner,
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     # Проверяем email
+#     existing_user = await crud.get_user_by_email_including_inactive(db, data.email)
+#     if existing_user:
+#         if not existing_user.is_active:
+#             raise HTTPException(status_code=400, detail="Этот email был удалён")
         
-    if not existing_user:    
-        raise HTTPException(status_code=400, detail="Вам сначала нужно зарегистрироваться")
+#     if not existing_user:    
+#         raise HTTPException(status_code=400, detail="Вам сначала нужно зарегистрироваться")
     
     
-    existing_partner = await crud.get_partner_request_by_user_email(db, existing_user.email)
-    if existing_partner:
-        if existing_partner.status == 'pending': 
-            raise HTTPException(status_code=400, detail="Ваше сотрудничество уже рассматривается!")
+#     existing_partner = await crud.get_partner_request_by_user_email(db, existing_user.email)
+#     if existing_partner:
+#         if existing_partner.status == 'pending': 
+#             raise HTTPException(status_code=400, detail="Ваше сотрудничество уже рассматривается!")
         
-        if existing_partner.status == 'rejected': 
-            raise HTTPException(status_code=400, detail="Извините, ваша заявка отклонена!")
+#         if existing_partner.status == 'rejected': 
+#             raise HTTPException(status_code=400, detail="Извините, ваша заявка отклонена!")
         
-        if existing_partner.status == 'approved': 
-            raise HTTPException(status_code=400, detail="Этот аккаунт уже является партнером!")     
+#         if existing_partner.status == 'approved': 
+#             raise HTTPException(status_code=400, detail="Этот аккаунт уже является партнером!")     
 
-    # Создаём пользователя с ролью PARTNER (но is_active=True, ждёт одобрения админом)
-    # hashed_password = get_password_hash(data.password)
-    # new_user = await crud.create_user(
-    #     db=db,
-    #     email=data.email,
-    #     password_hash=hashed_password,
-    #     full_name=data.full_name,
-    #     phone=data.phone,
-    #     role=UserRole.PARTNER
-    # )
+#     # Создаём пользователя с ролью PARTNER (но is_active=True, ждёт одобрения админом)
+#     # hashed_password = get_password_hash(data.password)
+#     # new_user = await crud.create_user(
+#     #     db=db,
+#     #     email=data.email,
+#     #     password_hash=hashed_password,
+#     #     full_name=data.full_name,
+#     #     phone=data.phone,
+#     #     role=UserRole.PARTNER
+#     # )
     
-    # Создаём заявку на партнёрство
-    await crud.create_partner_request(
-        db=db,
-        user_email=existing_user.email,
-        company_name=data.company_name,
-        contact_person=data.full_name,
-        phone=data.phone,
-        description=data.description
-    )
+#     # Создаём заявку на партнёрство
+#     await crud.create_partner_request(
+#         db=db,
+#         user_email=existing_user.email,
+#         company_name=data.company_name,
+#         contact_person=data.full_name,
+#         phone=data.phone,
+#         description=data.description
+#     )
 
     
     
-    return MessageResponse(message="Заявка на партнёрство отправлена. " \
-    "После одобрения администратором Вы сможете размещать объявления!")
+#     return MessageResponse(message="Заявка на партнёрство отправлена. " \
+#     "После одобрения администратором Вы сможете размещать объявления!")
 
 
 
@@ -289,6 +289,10 @@ async def login(
     db: AsyncSession = Depends(get_db)
 ):
     user = await crud.get_user_by_email(db, data.email)
+    print(user, '-----------------------------------', file=sys.stderr)
+    if not user:
+        raise HTTPException(status_code=401, detail="Такого пользователя не существует")
+
     if user.is_active == False:
         raise HTTPException(status_code=401, detail="Этот аккаунт является удаленным")
     
@@ -298,7 +302,6 @@ async def login(
     token_data = {
         "sub": user.email,
         "user_id": user.id,
-        "role": user.role,
         "full_name": user.full_name
     }
     access_token = create_access_token(data=token_data)
@@ -328,7 +331,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
-        role=current_user.role,
+        phone=current_user.phone,
         is_active=current_user.is_active,
         created_at=current_user.created_at
     )
@@ -605,237 +608,237 @@ async def get_partner_ads(
 
 # ==================== Partner Cabinet Routes (role=partner) ====================
 
-@app.get("/api/v1/partner/ads", response_model=PartnerAdsResponse)
-async def get_my_ads(
-    page: int = 1,
-    limit: int = 20,
-    current_partner: Partner = Depends(get_current_partner),
-    db: AsyncSession = Depends(get_db)
-):
-    skip = (page - 1) * limit
-    ads, total = await crud.get_ads_by_partner(db, current_partner.user_email, skip, limit, include_inactive=True)
-    ads_used = await crud.get_partner_ads_count(db, current_partner.user_email)
-    items = []
-    for ad in ads:
-        items.append(AdResponse(
-            id=ad.id,
-            title=ad.title,
-            description=ad.description,
-            discount_percent=ad.discount_percent,
-            url=ad.url,
-            address=ad.address,
-            end_date=ad.end_date,
-            clicks_count=ad.clicks_count,
-            partner_email=current_partner.user_email,
-            partner_name=current_partner.company_name,
-            categories=[cat.name for cat in ad.categories],
-            is_favorite=False,
-            emodzi_id=ad.emodzi_id,
-            prioritet=ad.prioritet
-        ))
+# @app.get("/api/v1/partner/ads", response_model=PartnerAdsResponse)
+# async def get_my_ads(
+#     page: int = 1,
+#     limit: int = 20,
+#     current_partner: Partner = Depends(get_current_partner),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     skip = (page - 1) * limit
+#     ads, total = await crud.get_ads_by_partner(db, current_partner.user_email, skip, limit, include_inactive=True)
+#     ads_used = await crud.get_partner_ads_count(db, current_partner.user_email)
+#     items = []
+#     for ad in ads:
+#         items.append(AdResponse(
+#             id=ad.id,
+#             title=ad.title,
+#             description=ad.description,
+#             discount_percent=ad.discount_percent,
+#             url=ad.url,
+#             address=ad.address,
+#             end_date=ad.end_date,
+#             clicks_count=ad.clicks_count,
+#             partner_email=current_partner.user_email,
+#             partner_name=current_partner.company_name,
+#             categories=[cat.name for cat in ad.categories],
+#             is_favorite=False,
+#             emodzi_id=ad.emodzi_id,
+#             prioritet=ad.prioritet
+#         ))
     
-    pages = (total + limit - 1) // limit
-    return PartnerAdsResponse(
-        items=items,
-        total=total,
-        page=page,
-        limit=limit,
-        pages=pages,
-        ads_used=ads_used,
-        ads_limit=current_partner.ads_limit
-    )
+#     pages = (total + limit - 1) // limit
+#     return PartnerAdsResponse(
+#         items=items,
+#         total=total,
+#         page=page,
+#         limit=limit,
+#         pages=pages,
+#         ads_used=ads_used,
+#         ads_limit=current_partner.ads_limit
+#     )
 
 
-@app.post("/api/v1/partner/ads", response_model=MessageResponse)
-async def create_ad(
-    data: AdCreate,
-    current_partner: Partner = Depends(get_current_partner),
-    db: AsyncSession = Depends(get_db)
-):
-    # Проверяем лимит объявлений
-    current_count = await crud.get_partner_ads_count(db, current_partner.user_email)
-    if current_count >= current_partner.ads_limit:
-        raise HTTPException(status_code=400, detail=f"Превышен лимит объявлений (максимум {current_partner.ads_limit})")
+# @app.post("/api/v1/partner/ads", response_model=MessageResponse)
+# async def create_ad(
+#     data: AdCreate,
+#     current_partner: Partner = Depends(get_current_partner),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     # Проверяем лимит объявлений
+#     current_count = await crud.get_partner_ads_count(db, current_partner.user_email)
+#     if current_count >= current_partner.ads_limit:
+#         raise HTTPException(status_code=400, detail=f"Превышен лимит объявлений (максимум {current_partner.ads_limit})")
     
-    # Проверяем, что категории существуют
-    for cat_id in data.category_ids:
-        category = await crud.get_category_by_id(db, cat_id)
-        if not category:
-            raise HTTPException(status_code=400, detail=f"Категория с id {cat_id} не найдена")
+#     # Проверяем, что категории существуют
+#     for cat_id in data.category_ids:
+#         category = await crud.get_category_by_id(db, cat_id)
+#         if not category:
+#             raise HTTPException(status_code=400, detail=f"Категория с id {cat_id} не найдена")
     
-    await crud.create_ad(
-        db=db,
-        partner_email=current_partner.user_email,
-        title=data.title,
-        description=data.description,
-        discount_percent=data.discount_percent,
-        url=data.url,
-        address=data.address,
-        end_date=data.end_date,
-        category_ids=data.category_ids,
-        emodzi_id=data.emodzi_id,
-        prioritet=data.prioritet
-    )
+#     await crud.create_ad(
+#         db=db,
+#         partner_email=current_partner.user_email,
+#         title=data.title,
+#         description=data.description,
+#         discount_percent=data.discount_percent,
+#         url=data.url,
+#         address=data.address,
+#         end_date=data.end_date,
+#         category_ids=data.category_ids,
+#         emodzi_id=data.emodzi_id,
+#         prioritet=data.prioritet
+#     )
     
-    return MessageResponse(message="Объявление создано")
+#     return MessageResponse(message="Объявление создано")
 
 
-@app.put("/api/v1/partner/ads/{ad_id}", response_model=MessageResponse)
-async def update_ad(
-    ad_id: int,
-    data: AdUpdate,
-    current_partner: Partner = Depends(get_current_partner),
-    db: AsyncSession = Depends(get_db)
-):
-    # Проверяем, что объявление принадлежит партнёру
-    ad = await crud.get_ad_by_id(db, ad_id)
-    if not ad or ad.partner_email != current_partner.user_email:
-        raise HTTPException(status_code=404, detail="Объявление не найдено")
+# @app.put("/api/v1/partner/ads/{ad_id}", response_model=MessageResponse)
+# async def update_ad(
+#     ad_id: int,
+#     data: AdUpdate,
+#     current_partner: Partner = Depends(get_current_partner),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     # Проверяем, что объявление принадлежит партнёру
+#     ad = await crud.get_ad_by_id(db, ad_id)
+#     if not ad or ad.partner_email != current_partner.user_email:
+#         raise HTTPException(status_code=404, detail="Объявление не найдено")
     
-    # Обновляем только переданные поля
-    update_data = data.dict(exclude_unset=True)
-    if "category_ids" in update_data:
-        # TODO: Обновление категорий (сначала удалить старые, потом добавить новые)
-        pass
+#     # Обновляем только переданные поля
+#     update_data = data.dict(exclude_unset=True)
+#     if "category_ids" in update_data:
+#         # TODO: Обновление категорий (сначала удалить старые, потом добавить новые)
+#         pass
     
-    await crud.update_ad(db, ad_id, **update_data)
-    return MessageResponse(message="Объявление обновлено")
+#     await crud.update_ad(db, ad_id, **update_data)
+#     return MessageResponse(message="Объявление обновлено")
 
 
-@app.delete("/api/v1/partner/ads/{ad_id}", response_model=MessageResponse)
-async def delete_ad(
-    ad_id: int,
-    current_partner: Partner = Depends(get_current_partner),
-    db: AsyncSession = Depends(get_db)
-):
-    # Проверяем, что объявление принадлежит партнёру
-    ad = await crud.get_ad_by_id(db, ad_id)
-    if not ad or ad.partner_email != current_partner.user_email:
-        raise HTTPException(status_code=404, detail="Объявление не найдено")
+# @app.delete("/api/v1/partner/ads/{ad_id}", response_model=MessageResponse)
+# async def delete_ad(
+#     ad_id: int,
+#     current_partner: Partner = Depends(get_current_partner),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     # Проверяем, что объявление принадлежит партнёру
+#     ad = await crud.get_ad_by_id(db, ad_id)
+#     if not ad or ad.partner_email != current_partner.user_email:
+#         raise HTTPException(status_code=404, detail="Объявление не найдено")
     
-    await crud.delete_ad(db, ad_id)
-    return MessageResponse(message="Объявление удалено")
+#     await crud.delete_ad(db, ad_id)
+#     return MessageResponse(message="Объявление удалено")
 
 
-# ==================== Admin Routes (role=admin) ====================
+# # ==================== Admin Routes (role=admin) ====================
 
-@app.get("/api/v1/admin/partner-requests", response_model=AdminPartnerRequestListResponse)
-async def get_partner_requests(
-    status: Optional[PartnerRequestStatus] = None,
-    page: int = 1,
-    limit: int = 20,
-    current_admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db)
-):
-    skip = (page - 1) * limit
-    requests, total = await crud.get_partner_requests(db, status, skip, limit)
+# @app.get("/api/v1/admin/partner-requests", response_model=AdminPartnerRequestListResponse)
+# async def get_partner_requests(
+#     status: Optional[PartnerRequestStatus] = None,
+#     page: int = 1,
+#     limit: int = 20,
+#     current_admin: User = Depends(get_current_admin),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     skip = (page - 1) * limit
+#     requests, total = await crud.get_partner_requests(db, status, skip, limit)
     
-    items = []
-    for req in requests:
-        items.append(PartnerRequestResponse(
-            id=req.id,
-            user_email=req.user_email,
-            company_name=req.company_name,
-            contact_person=req.contact_person,
-            phone=req.phone,
-            description=req.description,
-            status=req.status,
-            admin_comment=req.admin_comment,
-            created_at=req.created_at
-        ))
+#     items = []
+#     for req in requests:
+#         items.append(PartnerRequestResponse(
+#             id=req.id,
+#             user_email=req.user_email,
+#             company_name=req.company_name,
+#             contact_person=req.contact_person,
+#             phone=req.phone,
+#             description=req.description,
+#             status=req.status,
+#             admin_comment=req.admin_comment,
+#             created_at=req.created_at
+#         ))
     
-    pages = (total + limit - 1) // limit
-    return AdminPartnerRequestListResponse(
-        items=items,
-        total=total,
-        page=page,
-        limit=limit,
-        pages=pages
-    )
+#     pages = (total + limit - 1) // limit
+#     return AdminPartnerRequestListResponse(
+#         items=items,
+#         total=total,
+#         page=page,
+#         limit=limit,
+#         pages=pages
+#     )
 
 
-@app.post("/api/v1/admin/partner-requests/{user_email}", response_model=MessageResponse)
-async def approve_partner_request(
-    user_email: str, 
-    current_admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db)
-):
+# @app.post("/api/v1/admin/partner-requests/{user_email}", response_model=MessageResponse)
+# async def approve_partner_request(
+#     user_email: str, 
+#     current_admin: User = Depends(get_current_admin),
+#     db: AsyncSession = Depends(get_db)
+# ):
 
-    partner_request = await crud.get_partner_request_by_user_email(
-        db, user_email
-    )
+#     partner_request = await crud.get_partner_request_by_user_email(
+#         db, user_email
+#     )
 
-    if not partner_request:
-        raise HTTPException(status_code=404, detail="Заявка не найдена")
-
-
-    # Создаём партнёра
-    await crud.create_partner(
-        db=db,
-        user_email=user_email,
-        company_name=partner_request.company_name,
-        description=partner_request.description
-    )
-
-    await crud.delete_partner_request_by_user_email(db, user_email)
-
-    return MessageResponse(message=f"Заявка обработана")
+#     if not partner_request:
+#         raise HTTPException(status_code=404, detail="Заявка не найдена")
 
 
-@app.get("/api/v1/admin/users", response_model=AdminUserListResponse)
-async def get_users(
-    role: Optional[UserRole] = None,
-    search: Optional[str] = None,
-    page: int = 1,
-    limit: int = 20,
-    current_admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db)
-):
-    skip = (page - 1) * limit
-    users, total = await crud.get_users(db, skip, limit, role, search)
+#     # Создаём партнёра
+#     await crud.create_partner(
+#         db=db,
+#         user_email=user_email,
+#         company_name=partner_request.company_name,
+#         description=partner_request.description
+#     )
+
+#     await crud.delete_partner_request_by_user_email(db, user_email)
+
+#     return MessageResponse(message=f"Заявка обработана")
+
+
+# @app.get("/api/v1/admin/users", response_model=AdminUserListResponse)
+# async def get_users(
+#     role: Optional[UserRole] = None,
+#     search: Optional[str] = None,
+#     page: int = 1,
+#     limit: int = 20,
+#     current_admin: User = Depends(get_current_admin),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     skip = (page - 1) * limit
+#     users, total = await crud.get_users(db, skip, limit, role, search)
     
-    items = []
-    for user in users:
-        items.append(AdminUserResponse(
-            id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            role=user.role,
-            is_active=user.is_active,
-            created_at=user.created_at
-        ))
+#     items = []
+#     for user in users:
+#         items.append(AdminUserResponse(
+#             id=user.id,
+#             email=user.email,
+#             full_name=user.full_name,
+#             role=user.role,
+#             is_active=user.is_active,
+#             created_at=user.created_at
+#         ))
     
-    pages = (total + limit - 1) // limit
-    return AdminUserListResponse(
-        items=items,
-        total=total,
-        page=page,
-        limit=limit,
-        pages=pages
-    )
+#     pages = (total + limit - 1) // limit
+#     return AdminUserListResponse(
+#         items=items,
+#         total=total,
+#         page=page,
+#         limit=limit,
+#         pages=pages
+#     )
 
 
-@app.delete("/api/v1/admin/users/{user_id}", response_model=MessageResponse)
-async def change_user_role(
-    user_id: int,
-    current_admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db)
-):
+# @app.delete("/api/v1/admin/users/{user_id}", response_model=MessageResponse)
+# async def change_user_role(
+#     user_id: int,
+#     current_admin: User = Depends(get_current_admin),
+#     db: AsyncSession = Depends(get_db)
+# ):
     
-    await crud.admin_delete_user(db, user_id)
+#     await crud.admin_delete_user(db, user_id)
 
-    return MessageResponse(message=f"Пользователь был полностью удален")
+#     return MessageResponse(message=f"Пользователь был полностью удален")
 
 
-@app.post("/api/v1/admin/categories", response_model=CategoryResponse)
-async def create_category(
-    data: CategoryCreate,
-    current_admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db)
-):
-    existing = await crud.get_category_by_name(db, data.name)
-    if existing:
-        raise HTTPException(status_code=400, detail="Категория уже существует")
+# @app.post("/api/v1/admin/categories", response_model=CategoryResponse)
+# async def create_category(
+#     data: CategoryCreate,
+#     current_admin: User = Depends(get_current_admin),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     existing = await crud.get_category_by_name(db, data.name)
+#     if existing:
+#         raise HTTPException(status_code=400, detail="Категория уже существует")
     
-    category = await crud.create_category(db, data.name, is_custom=False)
-    return CategoryResponse(id=category.id, name=category.name, is_custom=category.is_custom)
+#     category = await crud.create_category(db, data.name, is_custom=False)
+#     return CategoryResponse(id=category.id, name=category.name, is_custom=category.is_custom)

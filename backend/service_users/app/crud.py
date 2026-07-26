@@ -16,14 +16,12 @@ async def create_user(
     password_hash: str,
     full_name: str,
     phone: Optional[str] = None,
-    role: UserRole = UserRole.USER
 ) -> User:
     user = User(
         email=email,
         password_hash=password_hash,
         full_name=full_name,
         phone=phone,
-        role=role,
         is_active=True
     )
     db.add(user)
@@ -56,13 +54,10 @@ async def get_users(
     db: AsyncSession,
     skip: int = 0,
     limit: int = 100,
-    role: Optional[UserRole] = None,
     search: Optional[str] = None
 ) -> Tuple[List[User], int]:
     query = select(User).where(User.is_active == True)
     
-    if role:
-        query = query.where(User.role == role)
     
     if search:
         query = query.where(

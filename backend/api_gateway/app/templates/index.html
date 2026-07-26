@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedReferral — портал для медицинских агентов</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: white;
+      padding: 16px 0;
+      border-bottom: 1px solid #e9edf2;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0b2b3f;
+      letter-spacing: -0.5px;
+    }
+    .logo i {
+      color: #2364de;
+      margin-right: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      font-weight: 500;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #1e293b;
+      font-size: 1.05rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #2364de;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #b9c7d4;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 500;
+      color: #1e293b;
+      transition: 0.2s;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .btn-outline:hover {
+      border-color: #2364de;
+      color: #2364de;
+      background: #f0f7fc;
+    }
+
+    .btn-primary {
+      background: #2364de;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 40px;
+      font-weight: 500;
+      color: white;
+      transition: 0.2s;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(35, 100, 222, 0.3);
+      font-size: 0.95rem;
+    }
+    .btn-primary:hover {
+      background: #1b4fa8;
+      transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #0b2b3f;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero h1 span {
+      color: #2364de;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: #3a4e62;
+      max-width: 700px;
+      margin: 0 auto 40px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 48px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+      border: 1px solid #eef2f6;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #0b3b5c;
+    }
+    .stat-label {
+      color: #4e6479;
+      font-weight: 450;
+    }
+
+    /* Sections */
+    section {
+      padding: 60px 0;
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #0b2b3f;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .feature-card {
+      background: white;
+      padding: 28px 22px;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      border: 1px solid #eef2f6;
+      transition: 0.2s;
+    }
+    .feature-card:hover {
+      border-color: #cbdae6;
+      transform: translateY(-2px);
+    }
+    .feature-card i {
+      font-size: 2.2rem;
+      color: #2364de;
+      background: #e5edfb;
+      padding: 12px;
+      border-radius: 18px;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      color: #0b2b3f;
+    }
+    .feature-card p {
+      color: #3f566b;
+      font-size: 0.95rem;
+    }
+
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 10px;
+    }
+    .step {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 32px;
+      flex: 1 0 180px;
+      max-width: 240px;
+      border: 1px solid #eef2f6;
+      text-align: center;
+    }
+    .step .num {
+      background: #2364de;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+    .step h4 {
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+    .step p {
+      color: #3f566b;
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: #0b1e2b;
+      color: #d4dfe9;
+      padding: 48px 0 24px;
+      margin-top: 30px;
+      border-radius: 40px 40px 0 0;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer h4 {
+      color: white;
+      font-weight: 600;
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+    .footer p,
+    .footer a {
+      color: #b4c9db;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .footer a:hover {
+      color: white;
+    }
+    .footer .copyright {
+      border-top: 1px solid #1f3648;
+      padding-top: 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #94aebe;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal {
+      background: white;
+      max-width: 460px;
+      width: 92%;
+      max-height: 90vh;
+      padding: 32px 28px;
+      border-radius: 40px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: modalIn 0.2s ease;
+      overflow-y: auto;
+    }
+    .modal::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    .modal::-webkit-scrollbar-thumb {
+      background: #2364de;
+      border-radius: 10px;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .modal-close {
+      position: sticky;
+      top: 0;
+      float: right;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #859faf;
+      background: none;
+      border: none;
+      transition: 0.2s;
+      z-index: 10;
+    }
+    .modal-close:hover {
+      color: #1a2e3f;
+      transform: rotate(90deg);
+    }
+    .modal h2 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+      color: #0b2b3f;
+      margin-top: 0;
+    }
+    .modal .sub {
+      color: #4a6379;
+      margin-bottom: 24px;
+    }
+    .modal .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      border-bottom: 2px solid #e9edf2;
+      padding-bottom: 8px;
+    }
+    .modal .tab {
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      font-weight: 600;
+      color: #6b7f92;
+      cursor: pointer;
+      border-radius: 40px;
+      transition: 0.15s;
+      font-size: 0.95rem;
+    }
+    .modal .tab.active {
+      background: #e5edfb;
+      color: #2364de;
+    }
+    .modal .form-group {
+      margin-bottom: 18px;
+    }
+    .modal label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #1e3a4f;
+      font-size: 0.9rem;
+    }
+    .modal input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d6e1ea;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      background: #f9fcfe;
+      transition: 0.2s;
+    }
+    .modal input:focus {
+      outline: none;
+      border-color: #2364de;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(35, 100, 222, 0.1);
+    }
+    .modal .btn-block {
+      width: 100%;
+      padding: 14px;
+      background: #2364de;
+      border: none;
+      border-radius: 40px;
+      font-weight: 600;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      margin: 10px 0 6px;
+      transition: 0.2s;
+    }
+    .modal .btn-block:hover {
+      background: #1b4fa8;
+    }
+    .modal .btn-block:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .modal .btn-secondary {
+      background: #e9edf2;
+      color: #1e293b;
+    }
+    .modal .btn-secondary:hover {
+      background: #d6dce4;
+    }
+    .modal .note {
+      font-size: 0.8rem;
+      color: #6e899e;
+      margin-top: 12px;
+      text-align: center;
+    }
+    .modal .switch-link {
+      color: #2364de;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+    }
+    .modal .switch-link:hover {
+      text-decoration: underline;
+    }
+
+    .tab-content.hidden {
+      display: none;
+    }
+
+    /* Registration step indicator */
+    .reg-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .reg-step .step-badge {
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #e5edfb;
+      color: #2364de;
+    }
+    .reg-step .step-badge.active {
+      background: #2364de;
+      color: white;
+    }
+    .reg-step .step-line {
+      flex: 1;
+      height: 2px;
+      background: #e9edf2;
+    }
+    .reg-step .step-line.done {
+      background: #2364de;
+    }
+
+    .reg-step2-fields {
+      display: none;
+    }
+    .reg-step2-fields.visible {
+      display: block;
+    }
+
+    .reg-step1-fields.hidden {
+      display: none;
+    }
+
+    /* User info in navbar */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-name {
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2364de;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    .logout-btn {
+      background: none;
+      border: 1px solid #e9edf2;
+      padding: 6px 14px;
+      border-radius: 40px;
+      cursor: pointer;
+      color: #64748b;
+      transition: 0.2s;
+    }
+    .logout-btn:hover {
+      border-color: #2364de;
+      color: #2364de;
+    }
+
+    /* Messages */
+    .toast {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+    }
+    .toast.success {
+      background: #22c55e;
+    }
+    .toast.error {
+      background: #ef4444;
+    }
+    .toast.info {
+      background: #2364de;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      .stats {
+        gap: 20px;
+        padding: 20px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .modal {
+        max-height: 95vh;
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container">
+      <div class="logo"><i class="fas fa-heartbeat"></i> MedReferral</div>
+      <div class="nav-links">
+        <a href="#features">Возможности</a>
+        <a href="#howitworks">Как это работает</a>
+        <a href="#agents">Агентам</a>
+        <a href="#clinics">Клиникам</a>
+        <a href="#contacts">Контакты</a>
+      </div>
+      <div class="nav-actions" id="navActions">
+        <div id="authButtons">
+          <button class="btn-outline" id="loginOpenBtn"><i class="fas fa-sign-in-alt"></i> Вход</button>
+          <button class="btn-primary" id="registerOpenBtn">Регистрация</button>
+        </div>
+        <div id="userPanel" style="display: none;">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">А</div>
+            <span class="user-name" id="userName">Алексей</span>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero container">
+    <h1>Портал для <span>медицинских агентов</span></h1>
+    <p>Автоматизируйте процесс направления пациентов в клиники. Управляйте заявками, отслеживайте статусы и получайте комиссию в удобной системе.</p>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-number">250+</div><div class="stat-label">Клиник партнеров</div></div>
+      <div class="stat-item"><div class="stat-number">5,000+</div><div class="stat-label">Направлений ежемесячно</div></div>
+      <div class="stat-item"><div class="stat-number">15M ₽</div><div class="stat-label">Выплачено агентам</div></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="container">
+    <h2 class="section-title">Возможности платформы</h2>
+    <div class="features-grid">
+      <div class="feature-card"><i class="fas fa-hospital"></i><h3>База клиник и услуг</h3><p>Доступ к каталогу из 250+ клиник с подробными профилями, услугами и расписанием.</p></div>
+      <div class="feature-card"><i class="fas fa-file-signature"></i><h3>Электронный договор</h3><p>Подписывайте договора онлайн с использованием электронной подписи.</p></div>
+      <div class="feature-card"><i class="fas fa-clock"></i><h3>Отслеживание статусов</h3><p>Мгновенное уведомление о посещении пациентом клиники в реальном времени.</p></div>
+      <div class="feature-card"><i class="fas fa-calculator"></i><h3>Автоматический расчет</h3><p>Система автоматически рассчитывает вашу комиссию и формирует отчеты.</p></div>
+      <div class="feature-card"><i class="fas fa-hand-holding-usd"></i><h3>Прозрачные выплаты</h3><p>Начисление процентов каждый месяц с детализацией по каждому направлению.</p></div>
+      <div class="feature-card"><i class="fas fa-headset"></i><h3>Поддержка 24/7</h3><p>Круглосуточная поддержка агентов и помощь в сложных ситуациях.</p></div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="howitworks" class="container">
+    <h2 class="section-title">Как стать агентом?</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h4>Регистрация</h4><p>Заполните анкету и подтвердите email. Это займет всего 5 минут.</p></div>
+      <div class="step"><div class="num">2</div><h4>Подписание договора</h4><p>Подпишите договор онлайн с использованием электронной подписи.</p></div>
+      <div class="step"><div class="num">3</div><h4>Выбор профилей</h4><p>Выберите медицинские профили, по которым будете работать.</p></div>
+      <div class="step"><div class="num">4</div><h4>Начало работы</h4><p>Получите доступ к базе клиник и начните направлять пациентов.</p></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contacts">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h4 style="font-size:1.4rem; margin-bottom:8px;">MedReferral</h4>
+          <p style="max-width:260px;">Платформа для медицинских агентов. Создаем удобные инструменты для эффективной работы.</p>
+        </div>
+        <div>
+          <h4>Для агентов</h4>
+          <a href="#">Как начать работать</a>
+          <a href="#">Тарифы и комиссии</a>
+          <a href="#">База знаний</a>
+          <a href="#">Вопросы и ответы</a>
+        </div>
+        <div>
+          <h4>Для клиник</h4>
+          <a href="#">Стать партнером</a>
+          <a href="#">Подключение к системе</a>
+          <a href="#">API документация</a>
+        </div>
+        <div>
+          <h4>Контакты</h4>
+          <p><i class="fas fa-phone-alt" style="margin-right:8px;"></i> +7 (495) 123-45-67</p>
+          <p><i class="fas fa-envelope" style="margin-right:8px;"></i> support@medreferral.ru</p>
+          <p><i class="fas fa-map-marker-alt" style="margin-right:8px;"></i> Москва, ул. Медицинская, 15</p>
+        </div>
+      </div>
+      <div class="copyright">© 2024 MedReferral. Все права защищены.</div>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+      <h2 id="modalTitle">Вход</h2>
+      <div class="sub" id="modalSub">Войдите в свой аккаунт</div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Вход</button>
+        <button class="tab" data-tab="register">Регистрация</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="loginForm" class="tab-content">
+        <form id="loginFormElement">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="example@mail.ru" required>
+          </div>
+          <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-block" id="loginBtn">Войти</button>
+          <div class="note">Нет аккаунта? <button type="button" class="switch-link" id="switchToRegister">Зарегистрироваться</button></div>
+        </form>
+      </div>
+
+      <!-- Register form (2 шага) -->
+      <div id="registerForm" class="tab-content hidden">
+        <form id="registerFormElement">
+          <!-- Индикатор шагов -->
+          <div class="reg-step">
+            <span class="step-badge active" id="step1Badge">Шаг 1</span>
+            <span class="step-line" id="stepLine"></span>
+            <span class="step-badge" id="step2Badge">Шаг 2</span>
+          </div>
+
+          <!-- Шаг 1: только email -->
+          <div class="reg-step1-fields" id="step1Fields">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="regEmail" placeholder="example@mail.ru" required>
+            </div>
+            <button type="button" class="btn-block" id="sendCodeBtn">Отправить код</button>
+            <div class="note" style="margin-top:8px;">На указанный email придет 6-значный код</div>
+          </div>
+
+          <!-- Шаг 2: остальные поля + код -->
+          <div class="reg-step2-fields" id="step2Fields">
+            <div class="form-group">
+              <label>Полное имя</label>
+              <input type="text" id="regFullName" placeholder="Иванов Иван" required>
+            </div>
+            <div class="form-group">
+              <label>Телефон</label>
+              <input type="text" id="regPhone" placeholder="+7 900 123-45-67" required>
+            </div>
+            <div class="form-group">
+              <label>Пароль</label>
+              <input type="password" id="regPassword" placeholder="минимум 6 символов" required>
+            </div>
+            <div class="form-group">
+              <label>Код из письма</label>
+              <input type="text" id="regCode" placeholder="6 цифр" required>
+            </div>
+            <button type="submit" class="btn-block" id="registerBtn">Зарегистрироваться</button>
+            <button type="button" class="btn-block btn-secondary" id="backToStep1Btn" style="margin-top:4px;">← Назад</button>
+          </div>
+
+          <div class="note">Уже есть аккаунт? <button type="button" class="switch-link" id="switchToLogin">Войти</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
+    // ============================================================
+    const API_BASE = '/api/v1/auth';
+
+    // DOM элементы
+    const modal = document.getElementById('authModal');
+    const loginOpenBtn = document.getElementById('loginOpenBtn');
+    const registerOpenBtn = document.getElementById('registerOpenBtn');
+    const closeBtn = document.getElementById('modalCloseBtn');
+    const loginTab = document.querySelector('[data-tab="login"]');
+    const registerTab = document.querySelector('[data-tab="register"]');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin = document.getElementById('switchToLogin');
+    const authButtons = document.getElementById('authButtons');
+    const userPanel = document.getElementById('userPanel');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Регистрация - шаги
+    const step1Fields = document.getElementById('step1Fields');
+    const step2Fields = document.getElementById('step2Fields');
+    const step1Badge = document.getElementById('step1Badge');
+    const step2Badge = document.getElementById('step2Badge');
+    const stepLine = document.getElementById('stepLine');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const backToStep1Btn = document.getElementById('backToStep1Btn');
+
+    let registrationEmail = '';
+
+    // Toast уведомления
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(40px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Открыть модалку
+    function openModal(tab = 'login') {
+      modal.classList.add('active');
+      // Сбрасываем регистрацию на шаг 1
+      resetRegistrationSteps();
+
+      if (tab === 'register') {
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        document.getElementById('modalTitle').textContent = 'Регистрация';
+        document.getElementById('modalSub').textContent = 'Создайте аккаунт агента';
+      } else {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        document.getElementById('modalTitle').textContent = 'Вход';
+        document.getElementById('modalSub').textContent = 'Войдите в свой аккаунт';
+      }
+    }
+
+    function resetRegistrationSteps() {
+      step1Fields.classList.remove('hidden');
+      step2Fields.classList.remove('visible');
+      step2Fields.style.display = 'none';
+      step1Badge.className = 'step-badge active';
+      step2Badge.className = 'step-badge';
+      stepLine.className = 'step-line';
+      document.getElementById('regEmail').value = '';
+      document.getElementById('regFullName').value = '';
+      document.getElementById('regPhone').value = '';
+      document.getElementById('regPassword').value = '';
+      document.getElementById('regCode').value = '';
+      registrationEmail = '';
+      sendCodeBtn.disabled = false;
+      sendCodeBtn.textContent = 'Отправить код';
+    }
+
+    function goToStep2() {
+      step1Fields.classList.add('hidden');
+      step2Fields.style.display = 'block';
+      step2Fields.classList.add('visible');
+      step1Badge.className = 'step-badge';
+      step2Badge.className = 'step-badge active';
+      stepLine.className = 'step-line done';
+    }
+
+    function goToStep1() {
+      step1Fields.classList.remove('hidden');
+      step2Fields.classList.remove('visible');
+      step2Fields.style.display = 'none';
+      step1Badge.className = 'step-badge active';
+      step2Badge.className = 'step-badge';
+      stepLine.className = 'step-line';
+    }
+
+    // Закрыть модалку
+    function closeModal() {
+      modal.classList.remove('active');
+      document.getElementById('loginFormElement').reset();
+      resetRegistrationSteps();
+    }
+
+    // Обновить UI в зависимости от авторизации
+    function updateUI(user) {
+      if (user) {
+        authButtons.style.display = 'none';
+        userPanel.style.display = 'block';
+        const name = user.full_name || user.email || 'Пользователь';
+        userName.textContent = name;
+        userAvatar.textContent = name.charAt(0).toUpperCase();
+      } else {
+        authButtons.style.display = 'flex';
+        userPanel.style.display = 'none';
+      }
+    }
+
+    // Проверить текущего пользователя при загрузке
+    async function checkAuth() {
+      try {
+        const response = await fetch(`${API_BASE}/me`, {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const user = await response.json();
+          updateUI(user);
+          return user;
+        }
+        updateUI(null);
+        return null;
+      } catch (err) {
+        updateUI(null);
+        return null;
+      }
+    }
+
+    // Редирект на dashboard
+    function redirectToDashboard() {
+      window.location.href = '/dashboard.html';
+    }
+
+    // ----- ЛОГИН -----
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Вход...';
+
+      try {
+        const response = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showToast('✅ Вход выполнен!', 'success');
+          closeModal();
+          await checkAuth();
+          setTimeout(() => redirectToDashboard(), 500);
+        } else {
+          showToast('❌ ' + (data.detail || 'Ошибка входа'), 'error');
+        }
+      } catch (err) {
+        showToast('⚠️ Ошибка соединения с сервером', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Войти';
+      }
+    });
+
+    // ----- РЕГИСТРАЦИЯ: ШАГ 1 - ОТПРАВКА КОДА -----
+    sendCodeBtn.addEventListener('click', async () => {
+      const email = document.getElementById('regEmail').value.trim();
+      if (!email) {
+        showToast('⚠️ Введите email', 'error');
+        return;
+      }
+
+      sendCodeBtn.disabled = true;
+      sendCodeBtn.textContent = 'Отправка...';
+
+      try {
+        const response = await fetch(`${API_BASE}/send_code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          registrationEmail = email;
+          showToast('📧 Код отправлен на email!', 'success');
+          goToStep2();
+        } else {
+          showToast('❌ ' + (data.detail || 'Ошибка отправки кода'), 'error');
+          sendCodeBtn.disabled = false;
+          sendCodeBtn.textContent = 'Отправить код';
+        }
+      } catch (err) {
+        showToast('⚠️ Ошибка соединения с сервером', 'error');
+        sendCodeBtn.disabled = false;
+        sendCodeBtn.textContent = 'Отправить код';
+      }
+    });
+
+    // ----- РЕГИСТРАЦИЯ: ШАГ 2 - ЗАВЕРШЕНИЕ -----
+    document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const full_name = document.getElementById('regFullName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const code = document.getElementById('regCode').value.trim();
+      const btn = document.getElementById('registerBtn');
+
+      if (!full_name || !phone || !password || !code) {
+        showToast('⚠️ Заполните все поля', 'error');
+        return;
+      }
+
+      if (!registrationEmail) {
+        showToast('⚠️ Сначала отправьте код на email', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Регистрация...';
+
+      try {
+        const response = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: registrationEmail,
+            password,
+            full_name,
+            phone,
+            code: Number(code)
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showToast('✅ ' + (data.message || 'Регистрация успешна!'), 'success');
+          closeModal();
+          // Переключаем на вкладку входа
+          setTimeout(() => {
+            showToast('👋 Теперь войдите в аккаунт', 'info');
+            openModal('login');
+          }, 600);
+        } else {
+          showToast('❌ ' + (data.detail || data.message || 'Ошибка регистрации'), 'error');
+        }
+      } catch (err) {
+        showToast('⚠️ Ошибка соединения с сервером', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Зарегистрироваться';
+      }
+    });
+
+    // ----- НАЗАД К ШАГУ 1 -----
+    backToStep1Btn.addEventListener('click', () => {
+      goToStep1();
+      sendCodeBtn.disabled = false;
+      sendCodeBtn.textContent = 'Отправить код';
+    });
+
+    // ----- ВЫХОД -----
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(`${API_BASE}/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        if (response.ok) {
+          showToast('✅ Выход выполнен', 'success');
+          updateUI(null);
+          await checkAuth();
+        }
+      } catch (err) {
+        showToast('⚠️ Ошибка при выходе', 'error');
+      }
+    });
+
+    // ----- Обработчики модалки -----
+    loginOpenBtn.addEventListener('click', () => openModal('login'));
+    registerOpenBtn.addEventListener('click', () => openModal('register'));
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Переключение табов
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      document.getElementById('modalTitle').textContent = 'Вход';
+      document.getElementById('modalSub').textContent = 'Войдите в свой аккаунт';
+      resetRegistrationSteps();
+    });
+
+    registerTab.addEventListener('click', () => {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      document.getElementById('modalTitle').textContent = 'Регистрация';
+      document.getElementById('modalSub').textContent = 'Создайте аккаунт агента';
+      resetRegistrationSteps();
+    });
+
+    switchToRegister.addEventListener('click', () => registerTab.click());
+    switchToLogin.addEventListener('click', () => loginTab.click());
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Проверяем авторизацию при загрузке
+    checkAuth();
+  </script>
+</body>
+</html>

@@ -24,6 +24,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
     full_name: str = Field(..., min_length=1)
+    phone: str = Field(...)
     code: int = Field(...)
 
 
@@ -66,7 +67,7 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     full_name: str
-    role: UserRole
+    phone: str
     is_active: bool
     created_at: datetime
 

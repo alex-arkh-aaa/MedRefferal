@@ -40,7 +40,7 @@ async def auth_middleware(request: Request, call_next):
     public_paths = [
         '/', '/api/v1/auth/login', '/register', '/api/v1/health',
         '/api/v1/login',
-        '/api/v1/auth/register', '/api/v1/auth/send_code'
+        '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico'
     ]
 
 
@@ -53,7 +53,7 @@ async def auth_middleware(request: Request, call_next):
         if request.url.path.startswith('/api/'):
             return JSONResponse(status_code=401, content={"error": "Unauthorized"})
         else:
-            return RedirectResponse(url="/login")
+            return RedirectResponse(url="/")
         
     try:
         payload = jwt.decode(
@@ -66,13 +66,13 @@ async def auth_middleware(request: Request, call_next):
         if request.url.path.startswith('/api/'):
             return JSONResponse(status_code=401, content={"error": "Token expired"})
         else:
-            return RedirectResponse(url="/login")
+            return RedirectResponse(url="/")
     except jwt.JWTError as e:
         logger.error(f"❌ JWT validation error: {e}")
         if request.url.path.startswith('/api/'):
             return JSONResponse(status_code=401, content={"error": "Invalid token"})
         else:
-            return RedirectResponse(url="/login")
+            return RedirectResponse(url="/")
     
     request.state.user = payload
     response = await call_next(request)
@@ -81,18 +81,18 @@ async def auth_middleware(request: Request, call_next):
 # ================== HTML РОУТЫ ==================
 @app.get("/", response_class=HTMLResponse)
 async def root_page(request: Request):
-    html_content = render_template("login.html")
+    html_content = render_template("index.html")
     return HTMLResponse(content=html_content)
 
-@app.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
-    html_content = render_template("login.html")
-    return HTMLResponse(content=html_content)
+# @app.get("/login", response_class=HTMLResponse)
+# async def login_page(request: Request):
+#     html_content = render_template("login.html")
+#     return HTMLResponse(content=html_content)
 
-@app.get("/register", response_class=HTMLResponse)  
-async def register_page(request: Request):
-    html_content = render_template("register.html")
-    return HTMLResponse(content=html_content)
+# @app.get("/register", response_class=HTMLResponse)  
+# async def register_page(request: Request):
+#     html_content = render_template("register.html")
+#     return HTMLResponse(content=html_content)
 
 @app.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
