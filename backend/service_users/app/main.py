@@ -8,7 +8,7 @@ import sys
 
 from app.models import *
 
-from .database import get_db, create_tables
+from .database import get_db
 from . import crud
 from .schemas import *
 from .security import *
@@ -24,8 +24,8 @@ broker = RabbitBroker("amqp://guest:guest@rabbitmq:5672/")
 async def lifespan(app: FastAPI):
     print("🔄 Начинаем создание таблиц...", file=sys.stderr)
     try:
-        await create_tables()
-        print("✅ Таблицы созданы/проверены", file=sys.stderr)
+        # await create_tables()
+        # print("✅ Таблицы созданы/проверены", file=sys.stderr)
 
         # Подключаем брокера С ПОВТОРНЫМИ ПОПЫТКАМИ
         print("🔄 Подключение к RabbitMQ...", file=sys.stderr)
