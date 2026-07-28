@@ -224,7 +224,7 @@ async def register_user(
         return MessageResponse(message="Вы успешно зарегистрировались!")
     
     else:
-        return MessageResponse(message="Код не подходит! Попробуйте еще раз")
+        raise HTTPException(status_code=400, detail="Код не подходит! Попробуйте еще раз")
 
 
 
