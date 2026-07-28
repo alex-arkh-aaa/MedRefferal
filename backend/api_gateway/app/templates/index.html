@@ -424,6 +424,7 @@
             color: var(--gray-color);
             z-index: 10;
             padding: 5px 10px;
+            margin-left: auto;
         }
 
         .close-modal:hover {
@@ -435,7 +436,7 @@
             margin-bottom: 30px;
             border-bottom: 2px solid #e2e8f0;
             position: sticky;
-            top: 0;
+            top: -40px;
             background: white;
             z-index: 5;
             padding-top: 5px;
@@ -843,16 +844,15 @@
     <!-- Auth Modal -->
     <div class="modal" id="authModal">
         <div class="modal-content">
-            <button class="close-modal" id="modalCloseBtn">&times;</button>
-            
-            <h2 id="modalTitle" style="margin-bottom: 5px;">Вход</h2>
-            <p id="modalSub" style="color: var(--gray-color); margin-bottom: 20px;">Войдите в свой аккаунт</p>
             
             <div class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Вход</button>
                 <button class="auth-tab" data-tab="register">Регистрация</button>
+                <button class="close-modal" id="modalCloseBtn">&times;</button>
             </div>
-            
+
+            <h2 id="modalTitle" style="margin-bottom: 5px;">Вход</h2>
+            <p id="modalSub" style="color: var(--gray-color); margin-bottom: 20px;">Войдите в свой аккаунт</p>
             <!-- Login Form -->
             <form id="loginFormElement" class="auth-form active">
                 <div class="form-group">
@@ -928,9 +928,9 @@
                         <input type="text" id="regCode" placeholder="Введите 6-значный код" maxlength="6" required>
                     </div>
                     
-                    <label style="display: flex; align-items: start; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+                    <label style="align-items: start; margin-bottom: 20px; font-size: 0.9rem;">
                         <input type="checkbox" id="termsCheck" required>
-                        Я соглашаюсь с <a href="#" style="color: var(--primary-color);">условиями использования</a> и <a href="#" style="color: var(--primary-color);">политикой конфиденциальности</a>
+                        Я соглашаюсь с <a href="terms_and_privacy.html" target="_blank" rel="noopener noreferrer"  style="color: var(--primary-color);">условиями использования и  политикой конфиденциальности</a>
                     </label>
                     
                     <button type="submit" class="btn btn-success" style="width: 100%;" id="registerBtn">

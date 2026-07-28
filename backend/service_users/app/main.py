@@ -156,8 +156,6 @@ async def send_code(
     # Проверяем, существует ли пользователь (включая неактивных)
     existing_user = await crud.get_user_by_email_including_inactive(db, email)
     if existing_user:
-        if not existing_user.is_active:
-            raise HTTPException(status_code=400, detail="Этот email был удалён. Восстановление невозможно, зарегистрируйтесь с другим email")
         raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
         
     # Генерируем код подтверждения (6 цифр)

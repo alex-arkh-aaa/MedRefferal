@@ -38,7 +38,7 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
     
     public_paths = [
-        '/', '/api/v1/auth/login', '/register', '/api/v1/health',
+        '/', '/terms_and_privacy', '/api/v1/auth/login', '/register', '/api/v1/health',
         '/api/v1/login',
         '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico'
     ]
@@ -82,6 +82,12 @@ async def auth_middleware(request: Request, call_next):
 @app.get("/", response_class=HTMLResponse)
 async def root_page(request: Request):
     html_content = render_template("index.html")
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/terms_and_privacy", response_class=HTMLResponse)
+async def root_page(request: Request):
+    html_content = render_template("terms_and_privacy.html")
     return HTMLResponse(content=html_content)
 
 # @app.get("/login", response_class=HTMLResponse)

@@ -24,8 +24,8 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Связи
-    partner = relationship("Partner", back_populates="user", uselist=False)
-    favorites = relationship("Favorite", back_populates="user")
+    # partner = relationship("Partner", back_populates="user", uselist=False)
+    # favorites = relationship("Favorite", back_populates="user")
 
 
 class EmailVerification(Base):
