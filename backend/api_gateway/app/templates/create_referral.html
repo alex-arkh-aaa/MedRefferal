@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание направления - MedReferral</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #0ea5e9;
+            --accent-color: #8b5cf6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-color: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu a.active {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .page-header h1 i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        /* Form Sections */
+        .form-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--gray-color);
+            margin-bottom: 20px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--danger-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--gray-color);
+            margin-top: 5px;
+        }
+
+        /* Clinic Selection */
+        .clinic-select-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color);
+        }
+
+        .clinic-select-container label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .clinic-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .clinic-option {
+            padding: 20px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .clinic-option:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .clinic-option.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .clinic-option-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .clinic-option-address {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        /* Patient Search */
+        .patient-search-container {
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .search-toggle {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            flex: 1;
+            text-align: center;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Existing Patients */
+        .patients-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .patient-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .patient-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .patient-item.selected {
+            background-color: #eff6ff;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .patient-item:last-child {
+            border-bottom: none;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .patient-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Confirm Modal */
+        .confirm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+        }
+
+        .confirm-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .confirm-label {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+            margin-bottom: 3px;
+        }
+
+        .confirm-value {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+
+        /* User Panel */
+        #userPanel {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            margin-left: 15px;
+        }
+
+        #userName {
+            font-weight: 500;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        #userName span {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        #userAvatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            max-width: 420px;
+            animation: slideIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success-color);
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.info {
+            background: var(--primary-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+            
+            .sidebar-menu a {
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .sidebar-menu a.active {
+                border-left: none;
+                border-bottom-color: var(--primary-color);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .clinic-options {
+                grid-template-columns: 1fr;
+            }
+
+            .confirm-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast контейнер -->
+    <div id="toastContainer"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="index" class="logo">
+                    <i class="fas fa-hospital-alt"></i>
+                    MedReferral
+                </a>
+                
+                <div id="userPanel" style="display: none;">
+                    <span id="userName" style="font-weight: 500;"></span>
+                    <div id="userAvatar"></div>
+                    <button class="btn btn-outline" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard">
+                        <i class="fas fa-home"></i> Главная
+                    </a>
+                </li>
+                <li>
+                    <a href="create_referral" class="active">
+                        <i class="fas fa-plus-circle"></i> Новое направление
+                    </a>
+                </li>
+                <li>
+                    <a href="referrals">
+                        <i class="fas fa-list"></i> Мои направления
+                    </a>
+                </li>
+                <li>
+                    <a href="patients">
+                        <i class="fas fa-user-injured"></i> Пациенты
+                    </a>
+                </li>
+                <li>
+                    <a href="clinics">
+                        <i class="fas fa-hospital"></i> Клиники
+                    </a>
+                </li>
+                <li>
+                    <a href="reports">
+                        <i class="fas fa-chart-bar"></i> Отчеты
+                    </a>
+                </li>
+                <li>
+                    <a href="earnings">
+                        <i class="fas fa-money-bill-wave"></i> Заработок
+                    </a>
+                </li>
+                <li>
+                    <a href="profile">
+                        <i class="fas fa-user-cog"></i> Настройки
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1><i class="fas fa-plus-circle"></i> Создание нового направления</h1>
+            </div>
+
+            <!-- Main Form -->
+            <form id="referralForm" class="form-container">
+                <!-- Clinic Selection -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-hospital"></i> Выбор клиники
+                    </h2>
+                    
+                    <div class="clinic-select-container">
+                        <label>Выберите клинику для направления <span class="required">*</span></label>
+                        <div class="clinic-options" id="clinicOptions">
+                            <!-- Клиники будут подгружаться сюда -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 1: Patient Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-injured"></i> Информация о пациенте
+                    </h2>
+                    
+                    <div class="patient-search-container">
+                        <div class="search-toggle">
+                            <div class="toggle-btn active" id="existingPatientToggle">
+                                Выбрать из моих пациентов
+                            </div>
+                            <div class="toggle-btn" id="newPatientToggle">
+                                Добавить нового пациента
+                            </div>
+                        </div>
+                        
+                        <!-- Existing Patients -->
+                        <div id="existingPatientsSection">
+                            <div class="form-group">
+                                <label>Поиск пациента</label>
+                                <input type="text" id="patientSearch" placeholder="Введите ФИО, телефон или email...">
+                            </div>
+                            
+                            <div class="patients-list" id="patientsList">
+                                <div class="patient-item" data-patient-id="1">
+                                    <div class="patient-name">Петров Алексей Сергеевич</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (912) 345-67-89</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 45 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 3 обращения</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="2">
+                                    <div class="patient-name">Смирнова Ольга Викторовна</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (923) 456-78-90</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 38 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 1 обращение</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="3">
+                                    <div class="patient-name">Козлов Дмитрий Иванович</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (934) 567-89-01</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 52 года</span>
+                                        <span><i class="fas fa-file-medical"></i> 5 обращений</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="patient-item" data-patient-id="4">
+                                    <div class="patient-name">Николаева Анна Петровна</div>
+                                    <div class="patient-details">
+                                        <span><i class="fas fa-phone"></i> +7 (945) 678-90-12</span>
+                                        <span><i class="fas fa-birthday-cake"></i> 29 лет</span>
+                                        <span><i class="fas fa-file-medical"></i> 2 обращения</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-hint" style="margin-top: 10px;">
+                                Выберите пациента из списка
+                            </div>
+                        </div>
+                        
+                        <!-- New Patient Form -->
+                        <div id="newPatientSection" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>ФИО пациента <span class="required">*</span></label>
+                                    <input type="text" id="patientFullName" placeholder="Иванов Иван Иванович">
+                                    <div class="error-message" id="nameError">Поле обязательно для заполнения</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Дата рождения</label>
+                                    <input type="date" id="patientBirthDate">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Телефон <span class="required">*</span></label>
+                                    <input type="tel" id="patientPhone" placeholder="+7 (999) 123-45-67">
+                                    <div class="error-message" id="phoneError">Введите корректный номер телефона</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="patientEmail" placeholder="patient@example.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Пол</label>
+                                    <select id="patientGender">
+                                        <option value="">Выберите пол</option>
+                                        <option value="male">Мужской</option>
+                                        <option value="female">Женский</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <button type="button" class="btn btn-primary" onclick="openAddPatientModal()">
+                                        <i class="fas fa-user-plus"></i> Добавить пациента
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Visit Information -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-check"></i> Информация о визите
+                    </h2>
+                    <p class="section-subtitle">Укажите период, в который пациент планирует посетить клинику (не более 30 дней)</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Ожидаемый период визита <span class="required">*</span></label>
+                            <div class="date-range-container" style="display: flex; gap: 15px; align-items: center;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <input type="date" id="visitStartDate" min="">
+                                </div>
+                                <div style="color: var(--gray-color); font-weight: 600;">—</div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <input type="date" id="visitEndDate" min="">
+                                </div>
+                            </div>
+                            <div class="error-message" id="dateError">Период не должен превышать 30 дней</div>
+                            <div class="form-hint">
+                                Максимальный период - 30 дней. Клиника подтвердит точную дату и время в течение 24 часов.
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Медицинские показания / жалобы</label>
+                            <textarea id="medicalIndications" rows="4" placeholder="Опишите симптомы, диагноз или причину обращения..."></textarea>
+                            <div class="form-hint">
+                                Эта информация поможет врачу подготовиться к приему
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label>Особые пожелания</label>
+                            <textarea id="specialRequests" rows="3" placeholder="Особые требования или пожелания пациента..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        Создать направление <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Confirm Patient Modal -->
+    <div class="modal" id="confirmPatientModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeConfirmPatientModal()">&times;</button>
+            
+            <div class="modal-header">
+                <h2><i class="fas fa-user-check"></i> Подтверждение данных</h2>
+            </div>
+            
+            <p style="margin-bottom: 15px; color: var(--dark-color); font-size: 1.05rem;">
+                Все верно? Проверьте введенные данные:
+            </p>
+            
+            <div class="confirm-grid" id="confirmGrid">
+                <!-- Данные будут подставлены сюда -->
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeConfirmPatientModal()">
+                    Назад
+                </button>
+                <button type="button" class="btn btn-success" onclick="confirmAddPatient()">
+                    <i class="fas fa-user-plus"></i> Добавить пациента
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div style="text-align: center; padding: 30px;">
+                <div style="width: 80px; height: 80px; background-color: #d1fae5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                    <i class="fas fa-check" style="font-size: 2.5rem; color: var(--success-color);"></i>
+                </div>
+                <h2 style="margin-bottom: 15px;">Направление создано!</h2>
+                <p style="color: var(--gray-color); margin-bottom: 30px;">
+                    Направление успешно создано.<br>
+                    Клиника получит уведомление и подтвердит точную дату визита в течение 24 часов.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="button" class="btn btn-outline" onclick="closeSuccessModal()">
+                        Создать еще одно
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="viewReferral()">
+                        <i class="fas fa-eye"></i> Посмотреть направление
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
+        // ============================================================
+        const API_BASE = '/api/v1/auth';
+
+        // DOM элементы для авторизации
+        const userPanel = document.getElementById('userPanel');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Toast уведомления
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(40px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Обновить UI в зависимости от авторизации
+        function updateUI(user) {
+            if (user) {
+                userPanel.style.display = 'flex';
+                const fullName = user.full_name || user.email || 'Пользователь';
+                
+                const nameParts = fullName.trim().split(' ');
+                let firstName = '';
+                let lastName = '';
+                
+                if (nameParts.length >= 2) {
+                    lastName = nameParts[0];
+                    firstName = nameParts.slice(1).join(' ');
+                } else {
+                    firstName = fullName;
+                }
+                
+                userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
+                userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
+            } else {
+                userPanel.style.display = 'none';
+                window.location.href = '/';
+            }
+        }
+
+        // Проверить текущего пользователя
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/me`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    updateUI(user);
+                    return user;
+                }
+                updateUI(null);
+                return null;
+            } catch (err) {
+                updateUI(null);
+                return null;
+            }
+        }
+
+        // Выход
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    showToast('✅ Выход выполнен', 'success');
+                    updateUI(null);
+                    window.location.href = '/';
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка при выходе', 'error');
+            }
+        });
+
+        // Проверяем авторизацию при загрузке
+        checkAuth();
+
+        // ============================================================
+        // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
+        // ============================================================
+
+        // Моковые данные клиник
+        const clinicsData = [
+            {
+                id: 1,
+                name: "Медицинский центр 'Элита'",
+                address: "Москва, ул. Лечебная, 15"
+            },
+            {
+                id: 2,
+                name: "Клиника 'Здоровье+'",
+                address: "Москва, пр. Мира, 45"
+            }
+        ];
+
+        let selectedClinicId = null;
+        let selectedPatientId = null;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            renderClinics();
+            setupPatientToggle();
+            setupDateValidation();
+            
+            // Set minimum dates
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 60);
+            
+            document.getElementById('visitStartDate').min = today;
+            document.getElementById('visitStartDate').max = maxDate.toISOString().split('T')[0];
+            document.getElementById('patientBirthDate').max = today;
+        });
+
+        // Рендер клиник
+        function renderClinics() {
+            const container = document.getElementById('clinicOptions');
+            container.innerHTML = '';
+            
+            clinicsData.forEach(clinic => {
+                const div = document.createElement('div');
+                div.className = 'clinic-option';
+                div.dataset.clinicId = clinic.id;
+                div.innerHTML = `
+                    <div class="clinic-option-name">${clinic.name}</div>
+                    <div class="clinic-option-address"><i class="fas fa-map-marker-alt"></i> ${clinic.address}</div>
+                `;
+                div.addEventListener('click', () => selectClinic(clinic.id));
+                container.appendChild(div);
+            });
+        }
+
+        // Выбор клиники
+        function selectClinic(clinicId) {
+            selectedClinicId = clinicId;
+            
+            document.querySelectorAll('.clinic-option').forEach(el => {
+                el.classList.toggle('selected', parseInt(el.dataset.clinicId) === clinicId);
+            });
+        }
+
+        // Patient toggle
+        function setupPatientToggle() {
+            const existingToggle = document.getElementById('existingPatientToggle');
+            const newToggle = document.getElementById('newPatientToggle');
+            const existingSection = document.getElementById('existingPatientsSection');
+            const newSection = document.getElementById('newPatientSection');
+            const patientsList = document.getElementById('patientsList');
+            const patientSearch = document.getElementById('patientSearch');
+
+            existingToggle.addEventListener('click', () => {
+                existingToggle.classList.add('active');
+                newToggle.classList.remove('active');
+                existingSection.style.display = 'block';
+                newSection.style.display = 'none';
+            });
+
+            newToggle.addEventListener('click', () => {
+                newToggle.classList.add('active');
+                existingToggle.classList.remove('active');
+                newSection.style.display = 'block';
+                existingSection.style.display = 'none';
+            });
+
+            // Patient selection
+            patientsList.querySelectorAll('.patient-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    patientsList.querySelectorAll('.patient-item').forEach(i => {
+                        i.classList.remove('selected');
+                    });
+                    item.classList.add('selected');
+                    selectedPatientId = item.getAttribute('data-patient-id');
+                    showToast(`Выбран пациент: ${item.querySelector('.patient-name').textContent}`);
+                });
+            });
+
+            // Patient search
+            patientSearch.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                patientsList.querySelectorAll('.patient-item').forEach(item => {
+                    const name = item.querySelector('.patient-name').textContent.toLowerCase();
+                    const details = item.querySelector('.patient-details').textContent.toLowerCase();
+                    item.style.display = (name.includes(searchTerm) || details.includes(searchTerm)) ? 'block' : 'none';
+                });
+            });
+        }
+
+        // Date validation
+        function setupDateValidation() {
+            const startDateInput = document.getElementById('visitStartDate');
+            const endDateInput = document.getElementById('visitEndDate');
+            const dateError = document.getElementById('dateError');
+
+            function validateDateRange() {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                
+                if (startDate && endDate) {
+                    const diffTime = Math.abs(endDate - startDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays > 30) {
+                        dateError.classList.add('show');
+                        startDateInput.classList.add('error');
+                        endDateInput.classList.add('error');
+                        return false;
+                    } else {
+                        dateError.classList.remove('show');
+                        startDateInput.classList.remove('error');
+                        endDateInput.classList.remove('error');
+                        return true;
+                    }
+                }
+                return true;
+            }
+
+            startDateInput.addEventListener('change', validateDateRange);
+            endDateInput.addEventListener('change', validateDateRange);
+        }
+
+        // Confirm Patient Modal
+        function openAddPatientModal() {
+            const fullName = document.getElementById('patientFullName').value.trim();
+            const phone = document.getElementById('patientPhone').value.trim();
+            const birthDate = document.getElementById('patientBirthDate').value;
+            const email = document.getElementById('patientEmail').value.trim();
+            const gender = document.getElementById('patientGender').value;
+            
+            if (!fullName) {
+                showToast('Пожалуйста, укажите ФИО пациента', 'error');
+                return;
+            }
+            
+            if (!phone || phone.length < 10) {
+                showToast('Пожалуйста, укажите корректный номер телефона', 'error');
+                return;
+            }
+            
+            // Заполняем данные для подтверждения
+            const grid = document.getElementById('confirmGrid');
+            grid.innerHTML = `
+                <div class="confirm-item">
+                    <span class="confirm-label">ФИО</span>
+                    <span class="confirm-value">${fullName}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Телефон</span>
+                    <span class="confirm-value">${phone}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Дата рождения</span>
+                    <span class="confirm-value">${birthDate || 'Не указана'}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Email</span>
+                    <span class="confirm-value">${email || 'Не указан'}</span>
+                </div>
+                <div class="confirm-item" style="grid-column: 1 / -1;">
+                    <span class="confirm-label">Пол</span>
+                    <span class="confirm-value">${gender === 'male' ? 'Мужской' : gender === 'female' ? 'Женский' : 'Не указан'}</span>
+                </div>
+            `;
+            
+            document.getElementById('confirmPatientModal').style.display = 'flex';
+        }
+
+        function closeConfirmPatientModal() {
+            document.getElementById('confirmPatientModal').style.display = 'none';
+        }
+
+        function confirmAddPatient() {
+            // В будущем здесь будет POST запрос
+            // const data = {
+            //     full_name: document.getElementById('patientFullName').value.trim(),
+            //     phone: document.getElementById('patientPhone').value.trim(),
+            //     birth_date: document.getElementById('patientBirthDate').value,
+            //     email: document.getElementById('patientEmail').value.trim(),
+            //     gender: document.getElementById('patientGender').value
+            // };
+            // 
+            // fetch('/api/patients', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(data)
+            // })
+            
+            showToast('✅ Пациент успешно добавлен', 'success');
+            closeConfirmPatientModal();
+            
+            // Переключаемся на вкладку "Выбрать из моих пациентов"
+            document.getElementById('existingPatientToggle').click();
+            
+            // Очищаем форму
+            document.getElementById('patientFullName').value = '';
+            document.getElementById('patientBirthDate').value = '';
+            document.getElementById('patientPhone').value = '';
+            document.getElementById('patientEmail').value = '';
+            document.getElementById('patientGender').value = '';
+        }
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+            
+            if (!selectedClinicId) {
+                showToast('Пожалуйста, выберите клинику', 'error');
+                return false;
+            }
+            
+            const isNewPatient = document.getElementById('newPatientToggle').classList.contains('active');
+            
+            if (isNewPatient) {
+                const fullName = document.getElementById('patientFullName').value.trim();
+                const phone = document.getElementById('patientPhone').value.trim();
+                
+                if (!fullName) {
+                    document.getElementById('nameError').classList.add('show');
+                    document.getElementById('patientFullName').classList.add('error');
+                    isValid = false;
+                }
+                
+                if (!phone || phone.length < 10) {
+                    document.getElementById('phoneError').classList.add('show');
+                    document.getElementById('patientPhone').classList.add('error');
+                    isValid = false;
+                }
+            } else {
+                if (!selectedPatientId) {
+                    showToast('Пожалуйста, выберите пациента из списка', 'error');
+                    isValid = false;
+                }
+            }
+            
+            const startDate = document.getElementById('visitStartDate').value;
+            const endDate = document.getElementById('visitEndDate').value;
+            
+            if (!startDate || !endDate) {
+                document.getElementById('dateError').textContent = 'Пожалуйста, укажите период визита';
+                document.getElementById('dateError').classList.add('show');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Form submission
+        document.getElementById('referralForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                document.getElementById('successModal').style.display = 'flex';
+            }
+        });
+
+        // Helper functions
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+            document.getElementById('referralForm').reset();
+            document.querySelectorAll('.clinic-option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.patient-item').forEach(i => i.classList.remove('selected'));
+            selectedClinicId = null;
+            selectedPatientId = null;
+            document.getElementById('newPatientToggle').click();
+        }
+
+        function viewReferral() {
+            window.location.href = 'referral-detail?id=REF-202412-00045';
+        }
+
+        // Закрытие модальных окон по клику на фон
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Автовыбор первой клиники
+        setTimeout(() => {
+            if (clinicsData.length > 0) {
+                selectClinic(clinicsData[0].id);
+            }
+        }, 100);
+
+        // Маска телефона
+        document.getElementById('patientPhone').addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            if (!x) return;
+            e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+        });
+    </script>
+</body>
+</html>

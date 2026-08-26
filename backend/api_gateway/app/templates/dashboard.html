@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная - MedReferral</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -80,24 +79,6 @@
             display: flex;
             align-items: center;
             gap: 20px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
         }
 
         .btn {
@@ -409,10 +390,10 @@
             border-radius: 3px;
         }
 
-        /* Charts Section */
+        /* Recent Activity & Upcoming Appointments */
         .charts-section {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-bottom: 30px;
         }
@@ -423,50 +404,11 @@
             }
         }
 
-        .chart-card {
+        .activity-section {
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 25px;
-            transition: var(--transition);
-        }
-
-        .chart-card:hover {
-            box-shadow: var(--shadow-lg);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .chart-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .chart-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-
-        /* Quick Actions */
-        .quick-actions-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 30px;
         }
 
         .section-header {
@@ -482,62 +424,6 @@
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--dark-color);
-        }
-
-        .quick-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .action-card {
-            background-color: #f8fafc;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            text-align: center;
-            transition: var(--transition);
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .action-card:hover {
-            border-color: var(--primary-color);
-            background-color: white;
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .action-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #eff6ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 1.8rem;
-            color: var(--primary-color);
-        }
-
-        .action-title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .action-description {
-            font-size: 0.9rem;
-            color: var(--gray-color);
-        }
-
-        /* Recent Activity */
-        .activity-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 30px;
         }
 
         .activity-list {
@@ -599,7 +485,6 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 25px;
-            margin-bottom: 30px;
         }
 
         .appointments-list {
@@ -749,30 +634,77 @@
             color: var(--gray-color);
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
+        /* User Panel */
+        #userPanel {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            margin-left: 15px;
         }
 
-        .empty-state i {
-            font-size: 4rem;
-            color: var(--border-color);
-            margin-bottom: 20px;
+        #userName {
+            font-weight: 500;
+            text-align: right;
+            line-height: 1.3;
         }
 
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .empty-state p {
+        #userName span {
+            font-weight: 400;
+            font-size: 0.9rem;
             color: var(--gray-color);
-            margin-bottom: 30px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+        }
+
+        #userAvatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            max-width: 420px;
+            animation: slideIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success-color);
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.info {
+            background: var(--primary-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         /* Responsive */
@@ -832,10 +764,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .quick-actions-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
             .activity-item,
             .appointment-item,
             .clinic-item {
@@ -860,26 +788,26 @@
     </style>
 </head>
 <body>
+    <!-- Toast контейнер -->
+    <div id="toastContainer"></div>
+
     <!-- Header -->
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="index.html" class="logo">
+                <a href="/" class="logo">
                     <i class="fas fa-hospital-alt"></i>
                     MedReferral
                 </a>
                 
                 <div class="user-menu">
-                    <div class="user-info">
-                        <div class="user-avatar">ИИ</div>
-                        <div>
-                            <div style="font-weight: 600;">Иван Иванов</div>
-                            <div style="font-size: 0.9rem; color: var(--gray-color);">Агент #A-04567</div>
-                        </div>
+                    <div id="userPanel" style="display: none;">
+                        <span id="userName" style="font-weight: 500;"></span>
+                        <div id="userAvatar"></div>
+                        <button class="btn btn-outline" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </button>
                     </div>
-                    <button class="btn btn-outline">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
                 </div>
             </nav>
         </div>
@@ -891,42 +819,42 @@
         <aside class="sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="dashboard.html" class="active">
+                    <a href="dashboard" class="active">
                         <i class="fas fa-home"></i> Главная
                     </a>
                 </li>
                 <li>
-                    <a href="create-referral.html">
+                    <a href="create_referral">
                         <i class="fas fa-plus-circle"></i> Новое направление
                     </a>
                 </li>
                 <li>
-                    <a href="referrals.html">
+                    <a href="referrals">
                         <i class="fas fa-list"></i> Мои направления
                     </a>
                 </li>
                 <li>
-                    <a href="patients.html">
+                    <a href="patients">
                         <i class="fas fa-user-injured"></i> Пациенты
                     </a>
                 </li>
                 <li>
-                    <a href="clinics.html">
+                    <a href="clinics">
                         <i class="fas fa-hospital"></i> Клиники
                     </a>
                 </li>
                 <li>
-                    <a href="reports.html">
+                    <a href="reports">
                         <i class="fas fa-chart-bar"></i> Отчеты
                     </a>
                 </li>
                 <li>
-                    <a href="earnings.html">
+                    <a href="earnings">
                         <i class="fas fa-money-bill-wave"></i> Заработок
                     </a>
                 </li>
                 <li>
-                    <a href="profile.html">
+                    <a href="profile">
                         <i class="fas fa-user-cog"></i> Настройки
                     </a>
                 </li>
@@ -939,7 +867,7 @@
             <section class="welcome-section">
                 <div class="welcome-header">
                     <div class="welcome-text">
-                        <h1>Добро пожаловать, Иван!</h1>
+                        <h1 id="welcomeGreeting">Добро пожаловать!</h1>
                         <p>Вот что происходит с вашей работой сегодня</p>
                     </div>
                     <div class="date-info">
@@ -1035,98 +963,6 @@
                 </div>
             </div>
 
-            <!-- Charts Section -->
-            <div class="charts-section">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">Динамика направлений</div>
-                        <div class="chart-actions">
-                            <button class="btn btn-outline btn-sm active" onclick="changeChartPeriod('week')">
-                                Неделя
-                            </button>
-                            <button class="btn btn-outline btn-sm" onclick="changeChartPeriod('month')">
-                                Месяц
-                            </button>
-                            <button class="btn btn-outline btn-sm" onclick="changeChartPeriod('year')">
-                                Год
-                            </button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="referralsChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">Распределение по клиникам</div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="clinicsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions-section">
-                <div class="section-header">
-                    <div class="section-title">Быстрые действия</div>
-                    <div style="font-size: 0.9rem; color: var(--gray-color);">
-                        Часто используемые функции
-                    </div>
-                </div>
-                
-                <div class="quick-actions-grid">
-                    <div class="action-card" onclick="window.location.href='create-referral.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <div class="action-title">Новое направление</div>
-                        <div class="action-description">Создать новое направление пациента</div>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='patients.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="action-title">Добавить пациента</div>
-                        <div class="action-description">Добавить нового пациента в базу</div>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='referrals.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-list"></i>
-                        </div>
-                        <div class="action-title">Все направления</div>
-                        <div class="action-description">Просмотр и управление направлениями</div>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='reports.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div class="action-title">Отчеты</div>
-                        <div class="action-description">Статистика и аналитика работы</div>
-                    </div>
-                    
-                    <div class="action-card" onclick="window.location.href='earnings.html'">
-                        <div class="action-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <div class="action-title">Заказать выплату</div>
-                        <div class="action-description">Вывести заработанные средства</div>
-                    </div>
-                    
-                    <div class="action-card" onclick="openQuickPatientSearch()">
-                        <div class="action-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="action-title">Быстрый поиск</div>
-                        <div class="action-description">Найти пациента или направление</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Recent Activity & Upcoming Appointments -->
             <div class="charts-section">
                 <!-- Recent Activity -->
@@ -1200,7 +1036,7 @@
                 <div class="appointments-section">
                     <div class="section-header">
                         <div class="section-title">Ближайшие визиты</div>
-                        <button class="btn btn-outline btn-sm" onclick="window.location.href='referrals.html'">
+                        <button class="btn btn-outline btn-sm" onclick="window.location.href='referrals'">
                             Все визиты
                         </button>
                     </div>
@@ -1265,7 +1101,7 @@
             <div class="clinics-section">
                 <div class="section-header">
                     <div class="section-title">Топ клиник по направлениям</div>
-                    <button class="btn btn-outline btn-sm" onclick="window.location.href='clinics.html'">
+                    <button class="btn btn-outline btn-sm" onclick="window.location.href='clinics'">
                         Все клиники
                     </button>
                 </div>
@@ -1324,28 +1160,102 @@
     </div>
 
     <script>
-        // Chart instances
-        let referralsChart = null;
-        let clinicsChart = null;
-        let currentChartPeriod = 'week';
+        // ============================================================
+        // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
+        // ============================================================
+        const API_BASE = '/api/v1/auth';
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set current date
-            updateCurrentDate();
-            
-            // Update day progress
-            updateDayProgress();
-            
-            // Initialize charts
-            initializeCharts();
-            
-            // Update charts every minute for real-time feel
-            setInterval(updateCharts, 60000);
-            
-            // Update day progress every minute
-            setInterval(updateDayProgress, 60000);
+        // DOM элементы
+        const userPanel = document.getElementById('userPanel');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Toast уведомления
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(40px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Обновить UI в зависимости от авторизации
+        function updateUI(user) {
+            if (user) {
+                userPanel.style.display = 'flex';
+                const fullName = user.full_name || user.email || 'Пользователь';
+                
+                // Разбиваем ФИО на части
+                const nameParts = fullName.trim().split(' ');
+                let firstName = '';
+                let lastName = '';
+                
+                if (nameParts.length >= 2) {
+                    lastName = nameParts[0];
+                    firstName = nameParts.slice(1).join(' ');
+                } else {
+                    firstName = fullName;
+                }
+                
+                userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
+                userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
+
+                // Обновляем приветствие
+                const welcomeGreeting = document.getElementById('welcomeGreeting');
+                if (welcomeGreeting && firstName) {
+                    welcomeGreeting.textContent = `Добро пожаловать, ${firstName}!`;
+                }
+            } else {
+                userPanel.style.display = 'none';
+                // Если не авторизован - перенаправляем на главную
+                window.location.href = '/';
+            }
+        }
+
+        // Проверить текущего пользователя при загрузке
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/me`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    updateUI(user);
+                    return user;
+                }
+                updateUI(null);
+                return null;
+            } catch (err) {
+                updateUI(null);
+                return null;
+            }
+        }
+
+        // Выход
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    showToast('✅ Выход выполнен', 'success');
+                    updateUI(null);
+                    window.location.href = '/';
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка при выходе', 'error');
+            }
         });
+
+        // Проверяем авторизацию при загрузке
+        checkAuth();
 
         // Update current date display
         function updateCurrentDate() {
@@ -1357,8 +1267,6 @@
                 day: 'numeric' 
             };
             const dateString = now.toLocaleDateString('ru-RU', options);
-            
-            // Capitalize first letter
             document.getElementById('currentDate').textContent = 
                 dateString.charAt(0).toUpperCase() + dateString.slice(1);
         }
@@ -1366,292 +1274,44 @@
         // Update day progress
         function updateDayProgress() {
             const now = new Date();
-            const startOfWork = 9; // 9:00 AM
-            const endOfWork = 18; // 6:00 PM
-            
+            const startOfWork = 9;
+            const endOfWork = 18;
             const currentHour = now.getHours() + now.getMinutes() / 60;
             
             let progressText = '';
             
             if (currentHour < startOfWork) {
-                // Before work
                 const hoursUntilStart = startOfWork - currentHour;
                 progressText = `До начала рабочего дня: ${Math.ceil(hoursUntilStart * 60)} минут`;
             } else if (currentHour > endOfWork) {
-                // After work
                 progressText = 'Рабочий день завершен';
             } else {
-                // During work
                 const hoursWorked = currentHour - startOfWork;
                 const totalHours = endOfWork - startOfWork;
                 const progress = (hoursWorked / totalHours) * 100;
-                
                 const hours = Math.floor(hoursWorked);
                 const minutes = Math.floor((hoursWorked - hours) * 60);
-                
                 progressText = `Рабочий день: ${hours} часов ${minutes} минут (${progress.toFixed(1)}%)`;
             }
             
             document.getElementById('dayProgress').textContent = progressText;
         }
 
-        // Initialize charts
-        function initializeCharts() {
-            // Referrals Chart
-            const referralsCtx = document.getElementById('referralsChart').getContext('2d');
-            referralsChart = new Chart(referralsCtx, {
-                type: 'line',
-                data: getChartDataForPeriod(currentChartPeriod),
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Направлений: ${context.parsed.y}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            });
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            updateDayProgress();
+            setInterval(updateDayProgress, 60000);
+        });
 
-            // Clinics Chart
-            const clinicsCtx = document.getElementById('clinicsChart').getContext('2d');
-            clinicsChart = new Chart(clinicsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['МЦ "Элита"', 'Стоматология "Улыбка"', 'Клиника "Здоровье+"', 'Диагностический центр', 'Другие'],
-                    datasets: [{
-                        data: [5, 4, 3, 2, 1],
-                        backgroundColor: [
-                            '#2563eb',
-                            '#8b5cf6',
-                            '#10b981',
-                            '#f59e0b',
-                            '#64748b'
-                        ],
-                        borderWidth: 2,
-                        borderColor: 'white'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: {
-                                    size: 11
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} направлений (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+        // Дополнительные функции
+        function showAllActivity() {
+            showToast('Переход к полной истории действий', 'info');
         }
 
-        // Get chart data based on period
-        function getChartDataForPeriod(period) {
-            let labels, data;
-            
-            switch(period) {
-                case 'week':
-                    labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-                    data = [3, 5, 4, 6, 7, 2, 1];
-                    break;
-                case 'month':
-                    labels = ['Неделя 1', 'Неделя 2', 'Неделя 3', 'Неделя 4'];
-                    data = [12, 15, 14, 6];
-                    break;
-                case 'year':
-                    labels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
-                    data = [28, 32, 30, 35, 38, 42, 45, 40, 38, 44, 41, 47];
-                    break;
-                default:
-                    labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-                    data = [3, 5, 4, 6, 7, 2, 1];
-            }
-            
-            return {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Направлений',
-                        data: data,
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            };
-        }
-
-        // Change chart period
-        function changeChartPeriod(period) {
-            currentChartPeriod = period;
-            
-            // Update button states
-            document.querySelectorAll('.chart-actions .btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Update chart data
-            referralsChart.data = getChartDataForPeriod(period);
-            referralsChart.update();
-            
-            // Show notification
-            showToast(`Показаны данные за: ${getPeriodName(period)}`, 'info');
-        }
-
-        // Get period name in Russian
-        function getPeriodName(period) {
-            switch(period) {
-                case 'week': return 'неделю';
-                case 'month': return 'месяц';
-                case 'year': return 'год';
-                default: return 'период';
-            }
-        }
-
-        // Update charts with fresh data
-        function updateCharts() {
-            // In real app, fetch fresh data from API
-            // fetch('/api/dashboard/stats')
-            // .then(response => response.json())
-            // .then(data => {
-            //     // Update charts with new data
-            // });
-            
-            // For demo, add some random variation
-            if (referralsChart) {
-                const currentData = referralsChart.data.datasets[0].data;
-                const newData = currentData.map(value => {
-                    // Add small random variation (±1)
-                    const variation = Math.random() > 0.5 ? 1 : -1;
-                    const newValue = value + variation;
-                    return newValue > 0 ? newValue : 1;
-                });
-                
-                referralsChart.data.datasets[0].data = newData;
-                referralsChart.update('none');
-            }
-        }
-
-        // Quick actions
         function openQuickPatientSearch() {
-            // In real app, show search modal
             showToast('Функция быстрого поиска будет доступна в ближайшее время', 'info');
         }
-
-        function showAllActivity() {
-            // In real app, redirect to activity log page
-            showToast('Переход к полной истории действий', 'info');
-            
-            // Simulate redirect
-            setTimeout(() => {
-                // window.location.href = 'activity.html';
-            }, 1000);
-        }
-
-        // Toast notification
-        function showToast(message, type = 'success') {
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background-color: ${type === 'error' ? '#fee2e2' : type === 'info' ? '#dbeafe' : '#d1fae5'};
-                color: ${type === 'error' ? '#991b1b' : type === 'info' ? '#1e40af' : '#065f46'};
-                padding: 15px 20px;
-                border-radius: 8px;
-                box-shadow: var(--shadow);
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
-            
-            const icon = type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle';
-            
-            toast.innerHTML = `
-                <i class="fas fa-${icon}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Remove toast after 3 seconds
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-        }
-
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Auto-refresh dashboard data every 5 minutes
-        setInterval(() => {
-            updateCharts();
-            showToast('Данные на дашборде обновлены', 'info');
-        }, 5 * 60 * 1000);
     </script>
 </body>
 </html>

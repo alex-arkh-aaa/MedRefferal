@@ -22,7 +22,6 @@ async def create_user(
         password_hash=password_hash,
         full_name=full_name,
         phone=phone,
-        is_active=True
     )
     db.add(user)
     await db.commit()
@@ -56,7 +55,7 @@ async def get_users(
     limit: int = 100,
     search: Optional[str] = None
 ) -> Tuple[List[User], int]:
-    query = select(User).where(User.is_active == True)
+    query = select(User)
     
     
     if search:

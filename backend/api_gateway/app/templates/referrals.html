@@ -59,7 +59,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0;
+            padding: 16px 0;
+            flex-wrap: wrap;
         }
 
         .logo {
@@ -74,30 +75,6 @@
 
         .logo i {
             font-size: 1.8rem;
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
         }
 
         .btn {
@@ -126,12 +103,12 @@
         .btn-outline {
             background-color: transparent;
             color: var(--primary-color);
-            border: 2px solid var(--primary-color);
+            border: 2px solid var(--border-color);
         }
 
         .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: white;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .btn-success {
@@ -141,6 +118,8 @@
 
         .btn-success:hover {
             background-color: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
 
         .btn-sm {
@@ -276,19 +255,6 @@
             color: var(--gray-color);
         }
 
-        .stat-change {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .stat-change.positive {
-            color: var(--success-color);
-        }
-
-        .stat-change.negative {
-            color: var(--danger-color);
-        }
-
         /* Filters */
         .filters-container {
             background-color: white;
@@ -313,7 +279,7 @@
 
         .filters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 15px;
         }
 
@@ -356,7 +322,6 @@
         /* Search Box */
         .search-box {
             position: relative;
-            flex: 1;
         }
 
         .search-box input {
@@ -365,6 +330,12 @@
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
             font-size: 0.9rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .search-box i {
@@ -532,52 +503,6 @@
             color: var(--gray-color);
         }
 
-        /* Commission Info */
-        .commission-info {
-            text-align: right;
-        }
-
-        .commission-amount {
-            font-weight: 700;
-            color: var(--success-color);
-            margin-bottom: 5px;
-        }
-
-        .commission-status {
-            font-size: 0.8rem;
-            color: var(--gray-color);
-        }
-
-        .commission-status.paid {
-            color: var(--success-color);
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
-
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: none;
-            background-color: transparent;
-            color: var(--gray-color);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn:hover {
-            background-color: #f3f4f6;
-            color: var(--primary-color);
-        }
-
         /* Table Footer */
         .table-footer {
             display: flex;
@@ -631,6 +556,79 @@
             border-color: var(--border-color);
         }
 
+        /* User Panel */
+        #userPanel {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            margin-left: 15px;
+        }
+
+        #userName {
+            font-weight: 500;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        #userName span {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        #userAvatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            max-width: 420px;
+            animation: slideIn 0.3s ease;
+            transition: all 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success-color);
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        .toast.info {
+            background: var(--primary-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -677,133 +675,6 @@
             color: var(--primary-color);
         }
 
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 30px;
-            position: relative;
-            animation: modalFade 0.3s ease;
-        }
-
-        @keyframes modalFade {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray-color);
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--dark-color);
-        }
-
-        .modal-body {
-            margin-bottom: 30px;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* Timeline in Modal */
-        .timeline {
-            position: relative;
-            padding-left: 30px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: var(--border-color);
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -30px;
-            top: 0;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: var(--border-color);
-        }
-
-        .timeline-item.completed .timeline-dot {
-            background-color: var(--success-color);
-        }
-
-        .timeline-item.current .timeline-dot {
-            background-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
-        }
-
-        .timeline-content {
-            padding: 10px;
-            background-color: #f8fafc;
-            border-radius: var(--border-radius);
-        }
-
-        .timeline-date {
-            font-size: 0.9rem;
-            color: var(--gray-color);
-            margin-bottom: 5px;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .timeline-description {
-            font-size: 0.9rem;
-            color: var(--gray-color);
-        }
-
         /* Responsive */
         @media (max-width: 1200px) {
             .main-layout {
@@ -837,6 +708,10 @@
                 border-left: none;
                 border-bottom-color: var(--primary-color);
             }
+
+            .filters-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         @media (max-width: 768px) {
@@ -854,10 +729,6 @@
                 align-items: stretch;
             }
             
-            .action-buttons {
-                justify-content: flex-start;
-            }
-            
             .referrals-table {
                 font-size: 0.9rem;
             }
@@ -870,24 +741,22 @@
     </style>
 </head>
 <body>
+    <!-- Toast контейнер -->
+    <div id="toastContainer"></div>
+
     <!-- Header -->
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="index.html" class="logo">
+                <a href="index" class="logo">
                     <i class="fas fa-hospital-alt"></i>
                     MedReferral
                 </a>
                 
-                <div class="user-menu">
-                    <div class="user-info">
-                        <div class="user-avatar">ИИ</div>
-                        <div>
-                            <div style="font-weight: 600;">Иван Иванов</div>
-                            <div style="font-size: 0.9rem; color: var(--gray-color);">Агент #A-04567</div>
-                        </div>
-                    </div>
-                    <button class="btn btn-outline">
+                <div id="userPanel" style="display: none;">
+                    <span id="userName" style="font-weight: 500;"></span>
+                    <div id="userAvatar"></div>
+                    <button class="btn btn-outline" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i> Выйти
                     </button>
                 </div>
@@ -901,42 +770,42 @@
         <aside class="sidebar">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="dashboard.html">
+                    <a href="dashboard">
                         <i class="fas fa-home"></i> Главная
                     </a>
                 </li>
                 <li>
-                    <a href="create-referral.html">
+                    <a href="create_referral">
                         <i class="fas fa-plus-circle"></i> Новое направление
                     </a>
                 </li>
                 <li>
-                    <a href="referrals.html" class="active">
+                    <a href="referrals" class="active">
                         <i class="fas fa-list"></i> Мои направления
                     </a>
                 </li>
                 <li>
-                    <a href="patients.html">
+                    <a href="patients">
                         <i class="fas fa-user-injured"></i> Пациенты
                     </a>
                 </li>
                 <li>
-                    <a href="clinics.html">
+                    <a href="clinics">
                         <i class="fas fa-hospital"></i> Клиники
                     </a>
                 </li>
                 <li>
-                    <a href="reports.html">
+                    <a href="reports">
                         <i class="fas fa-chart-bar"></i> Отчеты
                     </a>
                 </li>
                 <li>
-                    <a href="earnings.html">
+                    <a href="earnings">
                         <i class="fas fa-money-bill-wave"></i> Заработок
                     </a>
                 </li>
                 <li>
-                    <a href="profile.html">
+                    <a href="profile">
                         <i class="fas fa-user-cog"></i> Настройки
                     </a>
                 </li>
@@ -948,7 +817,7 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1><i class="fas fa-list"></i> Мои направления</h1>
-                <a href="create-referral.html" class="btn btn-primary">
+                <a href="create_referral" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Новое направление
                 </a>
             </div>
@@ -962,9 +831,6 @@
                     <div class="stat-content">
                         <div class="stat-value">47</div>
                         <div class="stat-label">Всего направлений</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i> +12% за месяц
-                        </div>
                     </div>
                 </div>
                 
@@ -975,9 +841,6 @@
                     <div class="stat-content">
                         <div class="stat-value">32</div>
                         <div class="stat-label">Завершено</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i> +8% за месяц
-                        </div>
                     </div>
                 </div>
                 
@@ -988,22 +851,6 @@
                     <div class="stat-content">
                         <div class="stat-value">8</div>
                         <div class="stat-label">Ожидают визита</div>
-                        <div class="stat-change negative">
-                            <i class="fas fa-arrow-down"></i> -2 за неделю
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">42,500 ₽</div>
-                        <div class="stat-label">Заработано в этом месяце</div>
-                        <div class="stat-change positive">
-                            <i class="fas fa-arrow-up"></i> +15% к прошлому
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1018,6 +865,14 @@
                 </div>
                 
                 <div class="filters-grid">
+                    <div class="form-group">
+                        <label>Пациент</label>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="patientFilter" placeholder="Поиск по пациенту...">
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label>Статус</label>
                         <select id="statusFilter">
@@ -1043,24 +898,6 @@
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Период с</label>
-                        <input type="date" id="dateFromFilter">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Период по</label>
-                        <input type="date" id="dateToFilter">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Пациент</label>
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="patientFilter" placeholder="Поиск по пациенту...">
-                        </div>
-                    </div>
-                    
                     <div class="filter-actions">
                         <button class="btn btn-primary" onclick="applyFilters()">
                             <i class="fas fa-filter"></i> Применить
@@ -1084,8 +921,6 @@
                                 <th>Дата создания</th>
                                 <th>Дата визита</th>
                                 <th>Статус</th>
-                                <th>Комиссия</th>
-                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="referralsTableBody">
@@ -1096,7 +931,7 @@
                 
                 <div class="table-footer">
                     <div class="table-info">
-                        Показано <span id="shownCount">15</span> из <span id="totalCount">47</span> направлений
+                        Показано <span id="shownCount">10</span> из <span id="totalCount">10</span> направлений
                     </div>
                     
                     <div class="pagination">
@@ -1104,10 +939,7 @@
                             <i class="fas fa-chevron-left"></i>
                         </button>
                         <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn">2</button>
-                        <button class="pagination-btn">3</button>
-                        <button class="pagination-btn">4</button>
-                        <button class="pagination-btn">
+                        <button class="pagination-btn disabled">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -1116,382 +948,253 @@
         </main>
     </div>
 
-    <!-- Referral Detail Modal -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeDetailModal()">&times;</button>
-            
-            <div class="modal-header">
-                <h2>Направление #REF-202412-00045</h2>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <span class="status-badge status-scheduled">Назначен визит</span>
-                    <span class="status-badge" style="background-color: #f3f4f6; color: var(--dark-color);">
-                        <i class="fas fa-money-bill-wave"></i> Комиссия: 825 ₽
-                    </span>
-                </div>
-            </div>
-            
-            <div class="modal-body">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-                    <div>
-                        <h3 style="margin-bottom: 15px; color: var(--dark-color);">Информация о пациенте</h3>
-                        <div style="background-color: #f8fafc; padding: 20px; border-radius: var(--border-radius);">
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                                <div class="patient-avatar" style="width: 50px; height: 50px; font-size: 1.2rem;">ПА</div>
-                                <div>
-                                    <div style="font-weight: 700; font-size: 1.2rem;">Петров Алексей Сергеевич</div>
-                                    <div style="color: var(--gray-color);">45 лет</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Телефон</div>
-                                    <div style="font-weight: 600;">+7 (912) 345-67-89</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Email</div>
-                                    <div style="font-weight: 600;">alexey.petrov@email.com</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Полис ОМС</div>
-                                    <div style="font-weight: 600;">1234567890123456</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">СНИЛС</div>
-                                    <div style="font-weight: 600;">123-456-789 01</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3 style="margin-bottom: 15px; color: var(--dark-color);">Информация о визите</h3>
-                        <div style="background-color: #f8fafc; padding: 20px; border-radius: var(--border-radius);">
-                            <div style="margin-bottom: 20px;">
-                                <div style="font-size: 0.9rem; color: var(--gray-color);">Клиника</div>
-                                <div style="font-weight: 700; font-size: 1.1rem;">Медицинский центр "Элита"</div>
-                                <div style="color: var(--gray-color); margin-top: 5px;">
-                                    <i class="fas fa-map-marker-alt"></i> Москва, ул. Лечебная, 15
-                                </div>
-                            </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <div style="font-size: 0.9rem; color: var(--gray-color);">Услуга</div>
-                                <div style="font-weight: 700; font-size: 1.1rem;">Консультация кардиолога</div>
-                                <div style="color: var(--gray-color); margin-top: 5px;">
-                                    <i class="fas fa-user-md"></i> Врач: Петров А.С.
-                                </div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Дата визита</div>
-                                    <div style="font-weight: 600;">18 декабря 2024</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Время</div>
-                                    <div style="font-weight: 600;">14:30</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Стоимость</div>
-                                    <div style="font-weight: 600; color: var(--success-color);">5,500 ₽</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--gray-color);">Ваша комиссия</div>
-                                    <div style="font-weight: 600; color: var(--success-color);">825 ₽</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <h3 style="margin-bottom: 15px; color: var(--dark-color);">История статусов</h3>
-                <div class="timeline">
-                    <div class="timeline-item completed">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">12 декабря 2024, 14:30</div>
-                            <div class="timeline-title">Направление создано</div>
-                            <div class="timeline-description">Агент Иванов И.И. создал направление</div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item completed">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">12 декабря 2024, 16:45</div>
-                            <div class="timeline-title">Отправлено в клинику</div>
-                            <div class="timeline-description">Направление отправлено на подтверждение в клинику</div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item completed">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">13 декабря 2024, 10:15</div>
-                            <div class="timeline-title">Подтверждено клиникой</div>
-                            <div class="timeline-description">Клиника подтвердила возможность приема</div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item current">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">13 декабря 2024, 11:30</div>
-                            <div class="timeline-title">Назначен визит</div>
-                            <div class="timeline-description">Пациенту назначена дата и время визита: 18 декабря 2024, 14:30</div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">Ожидается</div>
-                            <div class="timeline-title">Визит пациента</div>
-                            <div class="timeline-description">Пациент должен посетить клинику</div>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-date">Ожидается</div>
-                            <div class="timeline-title">Начисление комиссии</div>
-                            <div class="timeline-description">После подтверждения визита будет начислена комиссия</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeDetailModal()">
-                    Закрыть
-                </button>
-                <button class="btn btn-primary" onclick="sendReminder()">
-                    <i class="fas fa-bell"></i> Напомнить пациенту
-                </button>
-                <button class="btn btn-success" onclick="printReferral()">
-                    <i class="fas fa-print"></i> Распечатать направление
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Sample data for referrals
+        // ============================================================
+        // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
+        // ============================================================
+        const API_BASE = '/api/v1/auth';
+
+        // DOM элементы для авторизации
+        const userPanel = document.getElementById('userPanel');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Toast уведомления
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(40px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Обновить UI в зависимости от авторизации
+        function updateUI(user) {
+            if (user) {
+                userPanel.style.display = 'flex';
+                const fullName = user.full_name || user.email || 'Пользователь';
+                
+                const nameParts = fullName.trim().split(' ');
+                let firstName = '';
+                let lastName = '';
+                
+                if (nameParts.length >= 2) {
+                    lastName = nameParts[0];
+                    firstName = nameParts.slice(1).join(' ');
+                } else {
+                    firstName = fullName;
+                }
+                
+                userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
+                userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
+            } else {
+                userPanel.style.display = 'none';
+                window.location.href = '/';
+            }
+        }
+
+        // Проверить текущего пользователя
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/me`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    updateUI(user);
+                    return user;
+                }
+                updateUI(null);
+                return null;
+            } catch (err) {
+                updateUI(null);
+                return null;
+            }
+        }
+
+        // Выход
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    showToast('✅ Выход выполнен', 'success');
+                    updateUI(null);
+                    window.location.href = '/';
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка при выходе', 'error');
+            }
+        });
+
+        // Проверяем авторизацию при загрузке
+        checkAuth();
+
+        // ============================================================
+        // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
+        // ============================================================
+
+        // Моковые данные
         const referralsData = [
             {
                 id: "REF-202412-00045",
                 patient: {
                     name: "Петров Алексей Сергеевич",
                     initials: "ПА",
-                    phone: "+7 (912) 345-67-89",
-                    age: "45 лет"
+                    phone: "+7 (912) 345-67-89"
                 },
                 clinic: "МЦ 'Элита'",
                 service: "Консультация кардиолога",
-                doctor: "Петров А.С.",
                 createdDate: "12.12.2024",
                 visitDate: "18.12.2024",
                 visitTime: "14:30",
                 status: "scheduled",
-                statusText: "Назначен визит",
-                commission: 825,
-                commissionStatus: "pending",
-                price: 5500,
-                urgency: "normal"
+                statusText: "Назначен визит"
             },
             {
                 id: "REF-202412-00044",
                 patient: {
                     name: "Смирнова Ольга Викторовна",
                     initials: "СО",
-                    phone: "+7 (923) 456-78-90",
-                    age: "38 лет"
+                    phone: "+7 (923) 456-78-90"
                 },
                 clinic: "Клиника 'Здоровье+'",
                 service: "УЗИ брюшной полости",
-                doctor: "Иванова М.П.",
                 createdDate: "10.12.2024",
                 visitDate: "15.12.2024",
                 visitTime: "11:00",
                 status: "completed",
-                statusText: "Завершено",
-                commission: 690,
-                commissionStatus: "paid",
-                price: 4600,
-                urgency: "normal"
+                statusText: "Завершено"
             },
             {
                 id: "REF-202412-00043",
                 patient: {
                     name: "Козлов Дмитрий Иванович",
                     initials: "КД",
-                    phone: "+7 (934) 567-89-01",
-                    age: "52 года"
+                    phone: "+7 (934) 567-89-01"
                 },
                 clinic: "Стоматология 'Улыбка'",
                 service: "Лечение кариеса",
-                doctor: "Сидоров В.Л.",
                 createdDate: "05.12.2024",
                 visitDate: "12.12.2024",
                 visitTime: "16:45",
                 status: "completed",
-                statusText: "Завершено",
-                commission: 1200,
-                commissionStatus: "paid",
-                price: 8000,
-                urgency: "urgent"
+                statusText: "Завершено"
             },
             {
                 id: "REF-202412-00042",
                 patient: {
                     name: "Николаева Анна Петровна",
                     initials: "НА",
-                    phone: "+7 (945) 678-90-12",
-                    age: "29 лет"
+                    phone: "+7 (945) 678-90-12"
                 },
                 clinic: "Диагностический центр 'МРТ-Эксперт'",
                 service: "МРТ головного мозга",
-                doctor: "Кузнецов П.Р.",
                 createdDate: "03.12.2024",
                 visitDate: "20.12.2024",
                 visitTime: "09:15",
                 status: "confirmed",
-                statusText: "Подтверждено клиникой",
-                commission: 1750,
-                commissionStatus: "pending",
-                price: 12500,
-                urgency: "normal"
+                statusText: "Подтверждено клиникой"
             },
             {
                 id: "REF-202412-00041",
                 patient: {
                     name: "Волков Сергей Михайлович",
                     initials: "ВС",
-                    phone: "+7 (956) 789-01-23",
-                    age: "41 год"
+                    phone: "+7 (956) 789-01-23"
                 },
                 clinic: "МЦ 'Элита'",
                 service: "ЭКГ с расшифровкой",
-                doctor: "Петров А.С.",
                 createdDate: "01.12.2024",
                 visitDate: "05.12.2024",
                 visitTime: "13:30",
                 status: "no-show",
-                statusText: "Пациент не пришел",
-                commission: 0,
-                commissionStatus: "cancelled",
-                price: 2300,
-                urgency: "urgent"
+                statusText: "Пациент не пришел"
             },
             {
                 id: "REF-202412-00040",
                 patient: {
                     name: "Федорова Мария Александровна",
                     initials: "ФМ",
-                    phone: "+7 (967) 890-12-34",
-                    age: "34 года"
+                    phone: "+7 (967) 890-12-34"
                 },
                 clinic: "Гинекология 'Мать и дитя'",
                 service: "Консультация гинеколога",
-                doctor: "Орлова Е.В.",
                 createdDate: "28.11.2024",
                 visitDate: "30.11.2024",
                 visitTime: "10:00",
                 status: "completed",
-                statusText: "Завершено",
-                commission: 900,
-                commissionStatus: "paid",
-                price: 6000,
-                urgency: "normal"
+                statusText: "Завершено"
             },
             {
                 id: "REF-202412-00039",
                 patient: {
                     name: "Григорьев Павел Олегович",
                     initials: "ГП",
-                    phone: "+7 (978) 901-23-45",
-                    age: "47 лет"
+                    phone: "+7 (978) 901-23-45"
                 },
                 clinic: "Клиника 'Здоровье+'",
                 service: "Анализ крови (биохимия)",
-                doctor: "Иванова М.П.",
                 createdDate: "25.11.2024",
                 visitDate: "02.12.2024",
                 visitTime: "08:45",
                 status: "completed",
-                statusText: "Завершено",
-                commission: 375,
-                commissionStatus: "paid",
-                price: 2500,
-                urgency: "flexible"
+                statusText: "Завершено"
             },
             {
                 id: "REF-202412-00038",
                 patient: {
                     name: "Тихонова Елена Владимировна",
                     initials: "ТЕ",
-                    phone: "+7 (989) 012-34-56",
-                    age: "56 лет"
+                    phone: "+7 (989) 012-34-56"
                 },
                 clinic: "МЦ 'Элита'",
                 service: "Суточное мониторирование ЭКГ",
-                doctor: "Петров А.С.",
                 createdDate: "22.11.2024",
                 visitDate: "25.11.2024",
                 visitTime: "15:20",
                 status: "completed",
-                statusText: "Завершено",
-                commission: 1275,
-                commissionStatus: "paid",
-                price: 8500,
-                urgency: "normal"
+                statusText: "Завершено"
             },
             {
                 id: "REF-202412-00037",
                 patient: {
                     name: "Белов Андрей Николаевич",
                     initials: "БА",
-                    phone: "+7 (990) 123-45-67",
-                    age: "33 года"
+                    phone: "+7 (990) 123-45-67"
                 },
                 clinic: "Стоматология 'Улыбка'",
                 service: "Профессиональная чистка",
-                doctor: "Сидоров В.Л.",
                 createdDate: "20.11.2024",
                 visitDate: "25.12.2024",
                 visitTime: "17:30",
                 status: "scheduled",
-                statusText: "Назначен визит",
-                commission: 600,
-                commissionStatus: "pending",
-                price: 4000,
-                urgency: "flexible"
+                statusText: "Назначен визит"
             },
             {
                 id: "REF-202412-00036",
                 patient: {
                     name: "Крылов Игорь Сергеевич",
                     initials: "КИ",
-                    phone: "+7 (901) 234-56-78",
-                    age: "50 лет"
+                    phone: "+7 (901) 234-56-78"
                 },
                 clinic: "Диагностический центр 'МРТ-Эксперт'",
                 service: "КТ грудной клетки",
-                doctor: "Кузнецов П.Р.",
                 createdDate: "18.11.2024",
                 visitDate: "22.11.2024",
                 visitTime: "12:15",
                 status: "cancelled",
-                statusText: "Отменено",
-                commission: 0,
-                commissionStatus: "cancelled",
-                price: 7500,
-                urgency: "urgent"
+                statusText: "Отменено"
             }
         ];
 
@@ -1499,22 +1202,16 @@
         $(document).ready(function() {
             $('#statusFilter').select2({
                 placeholder: "Все статусы",
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
             
             $('#clinicFilter').select2({
                 placeholder: "Все клиники",
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
             
-            // Set date filter defaults
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            
-            document.getElementById('dateFromFilter').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('dateToFilter').value = today.toISOString().split('T')[0];
-            
-            // Populate table
             populateTable(referralsData);
         });
 
@@ -1526,12 +1223,12 @@
             if (data.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="6">
                             <div class="empty-state">
                                 <i class="fas fa-inbox"></i>
                                 <h3>Направления не найдены</h3>
                                 <p>Попробуйте изменить параметры фильтра или создайте новое направление</p>
-                                <a href="create-referral.html" class="btn btn-primary">
+                                <a href="create_referral" class="btn btn-primary">
                                     <i class="fas fa-plus"></i> Создать направление
                                 </a>
                             </div>
@@ -1541,10 +1238,9 @@
                 return;
             }
             
-            data.forEach((referral, index) => {
+            data.forEach((referral) => {
                 const row = document.createElement('tr');
                 
-                // Get status badge class
                 let statusClass = 'status-created';
                 switch(referral.status) {
                     case 'confirmed': statusClass = 'status-confirmed'; break;
@@ -1553,16 +1249,6 @@
                     case 'no-show': statusClass = 'status-no-show'; break;
                     case 'cancelled': statusClass = 'status-cancelled'; break;
                     case 'paid': statusClass = 'status-paid'; break;
-                }
-                
-                // Get commission status text
-                let commissionStatusText = 'Ожидает';
-                let commissionStatusClass = '';
-                if (referral.commissionStatus === 'paid') {
-                    commissionStatusText = 'Выплачено';
-                    commissionStatusClass = 'paid';
-                } else if (referral.commissionStatus === 'cancelled') {
-                    commissionStatusText = 'Отменено';
                 }
                 
                 row.innerHTML = `
@@ -1598,34 +1284,11 @@
                     <td>
                         <div class="status-badge ${statusClass}">${referral.statusText}</div>
                     </td>
-                    <td>
-                        <div class="commission-info">
-                            <div class="commission-amount">${referral.commission.toLocaleString()} ₽</div>
-                            <div class="commission-status ${commissionStatusClass}">${commissionStatusText}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="viewReferral('${referral.id}')" title="Просмотр">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn" onclick="editReferral('${referral.id}')" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn" onclick="sendReminderToPatient('${referral.id}')" title="Напомнить">
-                                <i class="fas fa-bell"></i>
-                            </button>
-                            <button class="action-btn" onclick="cancelReferral('${referral.id}')" title="Отменить" ${referral.status === 'cancelled' || referral.status === 'completed' ? 'disabled style="opacity:0.5;"' : ''}>
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </td>
                 `;
                 
                 tableBody.appendChild(row);
             });
             
-            // Update counts
             document.getElementById('shownCount').textContent = data.length;
             document.getElementById('totalCount').textContent = referralsData.length;
         }
@@ -1634,18 +1297,14 @@
         function applyFilters() {
             const statusFilter = document.getElementById('statusFilter').value;
             const clinicFilter = document.getElementById('clinicFilter').value;
-            const dateFrom = document.getElementById('dateFromFilter').value;
-            const dateTo = document.getElementById('dateToFilter').value;
             const patientFilter = document.getElementById('patientFilter').value.toLowerCase();
             
             let filteredData = [...referralsData];
             
-            // Apply status filter
             if (statusFilter) {
                 filteredData = filteredData.filter(r => r.status === statusFilter);
             }
             
-            // Apply clinic filter
             if (clinicFilter) {
                 filteredData = filteredData.filter(r => {
                     if (clinicFilter === '1') return r.clinic.includes('Элита');
@@ -1656,7 +1315,6 @@
                 });
             }
             
-            // Apply patient filter
             if (patientFilter) {
                 filteredData = filteredData.filter(r => 
                     r.patient.name.toLowerCase().includes(patientFilter) ||
@@ -1664,20 +1322,7 @@
                 );
             }
             
-            // Apply date filter
-            if (dateFrom && dateTo) {
-                filteredData = filteredData.filter(r => {
-                    // Simple date filtering (for demo)
-                    const visitDate = new Date(`2024-${r.visitDate.split('.')[1]}-${r.visitDate.split('.')[0]}`);
-                    const fromDate = new Date(dateFrom);
-                    const toDate = new Date(dateTo);
-                    return visitDate >= fromDate && visitDate <= toDate;
-                });
-            }
-            
             populateTable(filteredData);
-            
-            // Show toast
             showToast(`Найдено ${filteredData.length} направлений`, 'success');
         }
 
@@ -1688,150 +1333,17 @@
             document.getElementById('clinicFilter').value = '';
             $('#clinicFilter').trigger('change');
             
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            
-            document.getElementById('dateFromFilter').value = firstDay.toISOString().split('T')[0];
-            document.getElementById('dateToFilter').value = today.toISOString().split('T')[0];
-            
             document.getElementById('patientFilter').value = '';
             
             populateTable(referralsData);
-            
             showToast('Фильтры сброшены', 'info');
         }
 
-        // Action functions
-        function viewReferral(referralId) {
-            console.log('View referral:', referralId);
-            document.getElementById('detailModal').style.display = 'flex';
-            
-            // In real app, fetch referral details from API
-            // fetch(`/api/referrals/${referralId}`)
-            // .then(response => response.json())
-            // .then(data => {
-            //     updateModalContent(data);
-            // });
-        }
-
-        function editReferral(referralId) {
-            console.log('Edit referral:', referralId);
-            // Redirect to edit page or open edit modal
-            window.location.href = `create-referral.html?edit=${referralId}`;
-        }
-
-        function sendReminderToPatient(referralId) {
-            console.log('Send reminder for:', referralId);
-            
-            // In real app, call API to send reminder
-            // fetch(`/api/referrals/${referralId}/remind`, {
-            //     method: 'POST'
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     showToast('Напоминание отправлено пациенту', 'success');
-            // });
-            
-            showToast('Напоминание отправлено пациенту', 'success');
-        }
-
-        function cancelReferral(referralId) {
-            if (confirm('Вы уверены, что хотите отменить это направление?')) {
-                console.log('Cancel referral:', referralId);
-                
-                // In real app, call API to cancel referral
-                // fetch(`/api/referrals/${referralId}/cancel`, {
-                //     method: 'POST'
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     showToast('Направление отменено', 'success');
-                //     applyFilters(); // Refresh table
-                // });
-                
-                showToast('Направление отменено', 'success');
-            }
-        }
-
-        function sendReminder() {
-            showToast('Напоминание отправлено пациенту', 'success');
-        }
-
-        function printReferral() {
-            window.print();
-        }
-
         function exportToExcel() {
-            // In real app, generate and download Excel file
-            // fetch('/api/referrals/export', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         filters: getCurrentFilters()
-            //     })
-            // })
-            // .then(response => response.blob())
-            // .then(blob => {
-            //     const url = window.URL.createObjectURL(blob);
-            //     const a = document.createElement('a');
-            //     a.href = url;
-            //     a.download = `referrals_${new Date().toISOString().split('T')[0]}.xlsx`;
-            //     document.body.appendChild(a);
-            //     a.click();
-            //     window.URL.revokeObjectURL(url);
-            //     document.body.removeChild(a);
-            // });
-            
             showToast('Экспорт начат. Файл будет скачан автоматически.', 'info');
-            
-            // Simulate download
             setTimeout(() => {
                 showToast('Файл успешно экспортирован', 'success');
             }, 1500);
-        }
-
-        function closeDetailModal() {
-            document.getElementById('detailModal').style.display = 'none';
-        }
-
-        // Helper functions
-        function showToast(message, type = 'success') {
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background-color: ${type === 'error' ? '#fee2e2' : type === 'info' ? '#dbeafe' : '#d1fae5'};
-                color: ${type === 'error' ? '#991b1b' : type === 'info' ? '#1e40af' : '#065f46'};
-                padding: 15px 20px;
-                border-radius: 8px;
-                box-shadow: var(--shadow);
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
-            
-            const icon = type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle';
-            
-            toast.innerHTML = `
-                <i class="fas fa-${icon}"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Remove toast after 3 seconds
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
         }
 
         // Add CSS for animations
@@ -1860,13 +1372,6 @@
             }
         `;
         document.head.appendChild(style);
-
-        // Auto-apply filters on page load
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                applyFilters();
-            }, 100);
-        });
     </script>
 </body>
 </html>

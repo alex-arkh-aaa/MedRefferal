@@ -107,7 +107,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Неверный формат токена")
     
     user = await crud.get_user_by_email(db, user_email)
-    if not user or not user.is_active:
+    if not user:
         raise HTTPException(status_code=401, detail="Пользователь не найден или удалён")
     
     return user
@@ -291,8 +291,6 @@ async def login(
     if not user:
         raise HTTPException(status_code=401, detail="Такого пользователя не существует")
 
-    if user.is_active == False:
-        raise HTTPException(status_code=401, detail="Этот аккаунт является удаленным")
     
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
@@ -330,7 +328,6 @@ async def get_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         full_name=current_user.full_name,
         phone=current_user.phone,
-        is_active=current_user.is_active,
         created_at=current_user.created_at
     )
 

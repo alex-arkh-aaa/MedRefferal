@@ -68,7 +68,6 @@ class UserResponse(BaseModel):
     email: EmailStr
     full_name: str
     phone: str
-    is_active: bool
     created_at: datetime
 
     class Config:

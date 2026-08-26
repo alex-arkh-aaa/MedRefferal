@@ -38,7 +38,7 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
     
     public_paths = [
-        '/', '/terms_and_privacy', '/api/v1/auth/login', '/register', '/api/v1/health',
+        '/', '/index', '/terms_and_privacy', '/api/v1/auth/login', '/register', '/api/v1/health',
         '/api/v1/login',
         '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico'
     ]
@@ -84,11 +84,46 @@ async def root_page(request: Request):
     html_content = render_template("index.html")
     return HTMLResponse(content=html_content)
 
-
-@app.get("/terms_and_privacy", response_class=HTMLResponse)
+@app.get("/index", response_class=HTMLResponse)
 async def root_page(request: Request):
-    html_content = render_template("terms_and_privacy.html")
+    html_content = render_template("index.html")
     return HTMLResponse(content=html_content)
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    html_content = render_template("dashboard.html")
+    return HTMLResponse(content=html_content)
+
+@app.get("/create_referral", response_class=HTMLResponse)
+async def create_referral(request: Request):
+    html_content = render_template("create_referral.html")
+    return HTMLResponse(content=html_content)
+
+@app.get("/referrals", response_class=HTMLResponse)
+async def referrals(request: Request):
+    html_content = render_template("referrals.html")
+    return HTMLResponse(content=html_content)
+
+@app.get("/patients", response_class=HTMLResponse)
+async def patients(request: Request):
+    html_content = render_template("patients.html")
+    return HTMLResponse(content=html_content)
+
+@app.get("/clinics", response_class=HTMLResponse)
+async def clinics(request: Request):
+    html_content = render_template("clinics.html")
+    return HTMLResponse(content=html_content)
+
+@app.get("/reports", response_class=HTMLResponse)
+async def reports(request: Request):
+    html_content = render_template("reports.html")
+    return HTMLResponse(content=html_content)
+
+
+# @app.get("/terms_and_privacy", response_class=HTMLResponse)
+# async def root_page(request: Request):
+#     html_content = render_template("terms_and_privacy.html")
+#     return HTMLResponse(content=html_content)
 
 # @app.get("/login", response_class=HTMLResponse)
 # async def login_page(request: Request):
