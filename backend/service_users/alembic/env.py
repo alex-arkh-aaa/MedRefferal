@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Импортируем Base и модели
 from app.database import Base
-from app.models import User, EmailVerification    #, PartnerRequest, Partner, Category, Ad, AdCategory, Favorite
+from app.models import *    #, PartnerRequest, Partner, Category, Ad, AdCategory, Favorite
 
 # Это объект конфигурации Alembic
 config = context.config 

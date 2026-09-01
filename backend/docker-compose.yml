@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_DB: control_sys_2
+      POSTGRES_DB: med_referral_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d control_sys_2"]
+      test: ["CMD-SHELL", "pg_isready -U admin -d med_referral_db"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -52,7 +52,7 @@ services:
   service_users:
     build: ./service_users
     environment:
-      - DATABASE_URL=postgresql+asyncpg://admin:${POSTGRES_PASSWORD}@postgres:5432/users_db
+      - DATABASE_URL=postgresql+asyncpg://admin:${POSTGRES_PASSWORD}@postgres:5432/med_referral_db
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - ACC_TOKEN_EXP_MIN=${ACC_TOKEN_EXP_MIN}

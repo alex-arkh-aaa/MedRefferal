@@ -2,15 +2,13 @@
 set -e
 
 echo "🔄 Waiting for PostgreSQL to be ready..."
-# Ждем, пока БД поднимется
-until pg_isready -h postgres -U admin -d users_db; do
+until pg_isready -h postgres -U admin -d med_referral_db; do
   echo "⏳ PostgreSQL is not ready yet..."
   sleep 2
 done
 echo "✅ PostgreSQL is ready!"
 
 echo "🔄 Running database migrations..."
-# Применяем миграции
 alembic upgrade head
 echo "✅ Migrations applied successfully!"
 

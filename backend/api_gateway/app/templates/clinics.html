@@ -301,6 +301,19 @@
             color: var(--primary-color);
         }
 
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--gray-color);
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
         /* User Panel */
         #userPanel {
             display: none;
@@ -504,11 +517,6 @@
                     </a>
                 </li>
                 <li>
-                    <a href="earnings">
-                        <i class="fas fa-money-bill-wave"></i> Заработок
-                    </a>
-                </li>
-                <li>
                     <a href="profile">
                         <i class="fas fa-user-cog"></i> Настройки
                     </a>
@@ -530,7 +538,7 @@
                         <i class="fas fa-hospital"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-value">48</div>
+                        <div class="stat-value" id="clinicsCount">0</div>
                         <div class="stat-label">Всего клиник</div>
                     </div>
                 </div>
@@ -538,7 +546,10 @@
 
             <!-- Clinics List -->
             <div class="clinics-list" id="clinicsList">
-                <!-- Клиники будут подгружаться сюда -->
+                <div class="loading-spinner">
+                    <div><i class="fas fa-spinner fa-spin"></i></div>
+                    <div>Загрузка клиник...</div>
+                </div>
             </div>
         </main>
     </div>
@@ -547,7 +558,7 @@
         // ============================================================
         // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
         // ============================================================
-        const API_BASE = '/api/v1/auth';
+        const API_BASE = '/api/v1';
 
         // DOM элементы для авторизации
         const userPanel = document.getElementById('userPanel');
@@ -597,7 +608,7 @@
         // Проверить текущего пользователя
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_BASE}/me`, {
+                const response = await fetch(`${API_BASE}/auth/me`, {
                     credentials: 'include'
                 });
                 if (response.ok) {
@@ -616,7 +627,7 @@
         // Выход
         logoutBtn.addEventListener('click', async () => {
             try {
-                const response = await fetch(`${API_BASE}/logout`, {
+                const response = await fetch(`${API_BASE}/auth/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -637,41 +648,58 @@
         // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
         // ============================================================
 
-        // Моковые данные клиник
-        const clinicsData = [
-            {
-                id: 1,
-                name: "Медицинский центр 'Элита'",
-                address: "Москва, ул. Лечебная, 15"
-            },
-            {
-                id: 2,
-                name: "Клиника 'Здоровье+'",
-                address: "Москва, пр. Мира, 45"
-            },
-            {
-                id: 3,
-                name: "Стоматология 'Улыбка'",
-                address: "Москва, ул. Стоматологическая, 8"
-            },
-            {
-                id: 4,
-                name: "Диагностический центр 'МРТ-Эксперт'",
-                address: "Москва, ул. Диагностическая, 12"
-            },
-            {
-                id: 5,
-                name: "Гинекология 'Мать и дитя'",
-                address: "Москва, ул. Материнская, 3"
-            }
-        ];
-
-        // Рендер клиник
-        function renderClinics() {
+        // Загрузка клиников с сервера
+        async function loadClinics() {
             const container = document.getElementById('clinicsList');
+            
+            try {
+                const response = await fetch(`${API_BASE}/clinics`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки клиников');
+                }
+                
+                const clinics = await response.json();
+                renderClinics(clinics);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить список клиников. Попробуйте позже.</p>
+                        <button class="btn btn-primary" onclick="loadClinics()">
+                            <i class="fas fa-redo"></i> Повторить
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Рендер клиников
+        function renderClinics(clinics) {
+            const container = document.getElementById('clinicsList');
+            
+            // Обновляем счетчик
+            document.getElementById('clinicsCount').textContent = clinics.length;
+            
+            if (clinics.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-hospital"></i>
+                        <h3>Клиники не найдены</h3>
+                        <p>В базе данных пока нет клиник.</p>
+                    </div>
+                `;
+                return;
+            }
+            
             container.innerHTML = '';
             
-            clinicsData.forEach(clinic => {
+            clinics.forEach(clinic => {
                 const item = document.createElement('div');
                 item.className = 'clinic-item';
                 item.innerHTML = `
@@ -688,7 +716,7 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            renderClinics();
+            loadClinics();
         });
     </script>
 </body>

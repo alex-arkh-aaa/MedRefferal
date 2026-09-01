@@ -1,129 +1,142 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Date
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
 from .database import Base
 
 
-# class UserRole(str, enum.Enum):
-#     USER = "user"
-#     ADMIN = "admin"
-#     PARTNER = "partner"
-
-
-class User(Base):
-    __tablename__ = "users"
+class Doctor(Base):
+    __tablename__ = "doctors"
     
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, nullable=False, index=True)
-    password_hash = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
-    phone = Column(String, nullable=True)
-    deleted_at = Column(DateTime, nullable=True)  # когда запросил удаление
+    email = Column(String(40), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(40), nullable=False)
+    phone = Column(String(20), nullable=True)
+    date_of_birth = Column(Date, nullable=True)
+    experience = Column(String(20), nullable=True)
+    education = Column(String(50), nullable=True)  # 👈 добавить
+    about_myself = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Связи
-    # partner = relationship("Partner", back_populates="user", uselist=False)
-    # favorites = relationship("Favorite", back_populates="user")
+    # Relationships
+    specializations = relationship("DoctorSpecialization", back_populates="doctor", cascade="all, delete-orphan")
+    patients = relationship("Patient", back_populates="doctor")
+    referrals = relationship("Referral", back_populates="doctor")
+    goals = relationship("Goal", back_populates="doctor")
+    history = relationship("History", back_populates="doctor")
 
 
 class EmailVerification(Base):
     __tablename__ = "email_verifications"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_email = Column(String, nullable=False)
+    doctor_email = Column(String(40), nullable=False)
     code = Column(String(6), nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-# class PartnerRequestStatus(str, enum.Enum):
-#     PENDING = "pending"
-#     APPROVED = "approved"
-#     REJECTED = "rejected"
-
-
-# class PartnerRequest(Base):
-#     __tablename__ = "partner_requests"
+class Specialization(Base):
+    __tablename__ = "specializations"
     
-#     id = Column(Integer, primary_key=True, index=True)
-#     user_email = Column(String, nullable=False)
-#     company_name = Column(String, nullable=False)
-#     contact_person = Column(String, nullable=False)
-#     phone = Column(String, nullable=False)
-#     description = Column(String, nullable=True)
-#     status = Column(Enum(PartnerRequestStatus), default=PartnerRequestStatus.PENDING)
-#     admin_comment = Column(String, nullable=True)
-#     created_at = Column(DateTime, default=datetime.utcnow)
-#     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, nullable=False)
     
+    # Relationships
+    doctors = relationship("DoctorSpecialization", back_populates="specialization")
 
 
-# class Partner(Base):
-#     __tablename__ = "partners"
+class DoctorSpecialization(Base):
+    __tablename__ = "doctors_specializations"
     
-#     id = Column(Integer, primary_key=True, index=True)
-#     user_email = Column(String, ForeignKey("users.email", ondelete="CASCADE"), nullable=False, unique=True)
-#     company_name = Column(String, nullable=False)
-#     description = Column(String, nullable=True)
-#     logo_url = Column(String, nullable=True)
-#     is_approved = Column(Boolean, default=True)
-#     ads_limit = Column(Integer, default=5)
-#     created_at = Column(DateTime, default=datetime.utcnow)
-#     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False)
+    specialization_id = Column(Integer, ForeignKey("specializations.id"), nullable=False)
     
-#     user = relationship("User", back_populates="partner")
-#     ads = relationship("Ad", back_populates="partner")
+    # Relationships
+    doctor = relationship("Doctor", back_populates="specializations")
+    specialization = relationship("Specialization", back_populates="doctors")
 
 
-# class Category(Base):
-#     __tablename__ = "categories"
+class Clinic(Base):
+    __tablename__ = "clinics"
     
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String, unique=True, nullable=False, index=True)
-#     is_custom = Column(Boolean, default=False)
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    address = Column(String(100), nullable=False)
+    location_url = Column(String(100), nullable=False)
     
-#     ads = relationship("Ad", secondary="ad_categories", back_populates="categories")
+    # Relationships
+    referrals = relationship("Referral", back_populates="clinic")
 
 
-# class Ad(Base):
-#     __tablename__ = "ads"
+class Patient(Base):
+    __tablename__ = "patients"
     
-#     id = Column(Integer, primary_key=True, index=True)
-#     partner_email = Column(String, ForeignKey("partners.user_email", ondelete="CASCADE"), nullable=False)
-#     title = Column(String, nullable=False)
-#     description = Column(String, nullable=True)
-#     discount_percent = Column(Integer, nullable=False)  # от 1 до 100
-#     url = Column(String, nullable=False)
-#     address = Column(String, nullable=False)
-#     end_date = Column(DateTime, nullable=False)
-#     clicks_count = Column(Integer, default=0)
-#     is_active = Column(Boolean, default=True)
-#     emodzi_id = Column(Integer, nullable=True)  # ID эмоции/иконки
-#     prioritet = Column(Integer, default=0)  # приоритет отображения
-#     created_at = Column(DateTime, default=datetime.utcnow)
-#     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String(40), nullable=False)
+    date_of_birth = Column(Date, nullable=False)
+    phone = Column(String(20), nullable=False)
+    email = Column(String(255), unique=True, nullable=True)
+    gender = Column(String(10), nullable=False)  # 'М' или 'Ж'
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    info = Column(Text, nullable=True)
+    status = Column(String(20), default="active", nullable=False)  # active, inactive
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-#     partner = relationship("Partner", back_populates="ads")
-#     categories = relationship("Category", secondary="ad_categories", back_populates="ads")
-#     favorites = relationship("Favorite", back_populates="ad")
+    # Relationships
+    doctor = relationship("Doctor", back_populates="patients")
+    referrals = relationship("Referral", back_populates="patient")
 
 
-# class AdCategory(Base):
-#     __tablename__ = "ad_categories"
+class Referral(Base):
+    __tablename__ = "referrals"
     
-#     ad_id = Column(Integer, ForeignKey("ads.id", ondelete="CASCADE"), primary_key=True)
-#     category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    clinic_id = Column(Integer, ForeignKey("clinics.id"), nullable=False)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    specialization_id = Column(Integer, ForeignKey("specializations.id"), nullable=False)
+    expected_visit_start = Column(Date, nullable=False)
+    expected_visit_end = Column(Date, nullable=False)
+    med_indications = Column(Text, nullable=False)
+    special_wishes = Column(Text, nullable=False)
+    status = Column(String(255), nullable=False, default="appointed")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    doctor = relationship("Doctor", back_populates="referrals")
+    clinic = relationship("Clinic", back_populates="referrals")
+    patient = relationship("Patient", back_populates="referrals")
+    specialization = relationship("Specialization")
 
 
-# class Favorite(Base):
-#     __tablename__ = "favorites"
+class Goal(Base):
+    __tablename__ = "goals"
     
-#     id = Column(Integer, primary_key=True, index=True)
-#     user_email = Column(String, ForeignKey("users.email", ondelete="CASCADE"), nullable=False)
-#     ad_id = Column(Integer, ForeignKey("ads.id", ondelete="CASCADE"), nullable=False)
-#     created_at = Column(DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    month = Column(Integer, nullable=False)  # 1-12
+    year = Column(Integer, nullable=False)
+    income_money = Column(Integer, nullable=False)
+    referrals = Column(Integer, nullable=False)
     
-#     user = relationship("User", back_populates="favorites")
-#     ad = relationship("Ad", back_populates="favorites")
+    # Relationships
+    doctor = relationship("Doctor", back_populates="goals")
+
+
+class History(Base):
+    __tablename__ = "history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
+    label = Column(String(100), nullable=False)
+    info = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    doctor = relationship("Doctor", back_populates="history")

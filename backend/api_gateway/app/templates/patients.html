@@ -122,6 +122,15 @@
             box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
         }
 
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
         .btn-sm {
             padding: 6px 12px;
             font-size: 0.875rem;
@@ -494,6 +503,7 @@
         .patient-stats {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
 
         .stat-item {
@@ -752,6 +762,19 @@
             max-width: 500px;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--gray-color);
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
         }
 
         /* Modal */
@@ -1019,11 +1042,6 @@
                     </a>
                 </li>
                 <li>
-                    <a href="earnings">
-                        <i class="fas fa-money-bill-wave"></i> Заработок
-                    </a>
-                </li>
-                <li>
                     <a href="profile">
                         <i class="fas fa-user-cog"></i> Настройки
                     </a>
@@ -1045,7 +1063,7 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-value">28</div>
+                        <div class="stat-value" id="totalPatients">0</div>
                         <div class="stat-label">Всего пациентов</div>
                     </div>
                 </div>
@@ -1055,18 +1073,8 @@
                         <i class="fas fa-user-check"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-value">22</div>
+                        <div class="stat-value" id="activePatients">0</div>
                         <div class="stat-label">Активные пациенты</div>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon" style="background-color: #fef3c7; color: var(--warning-color);">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">8</div>
-                        <div class="stat-label">Записей на декабрь</div>
                     </div>
                 </div>
                 
@@ -1075,7 +1083,7 @@
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-value">47</div>
+                        <div class="stat-value" id="totalReferrals">0</div>
                         <div class="stat-label">Всего направлений</div>
                     </div>
                 </div>
@@ -1154,7 +1162,10 @@
 
                 <!-- Grid View -->
                 <div class="patients-grid" id="gridView">
-                    <!-- Patient cards will be populated by JavaScript -->
+                    <div class="loading-spinner">
+                        <div><i class="fas fa-spinner fa-spin"></i></div>
+                        <div>Загрузка пациентов...</div>
+                    </div>
                 </div>
 
                 <!-- Table View -->
@@ -1168,7 +1179,6 @@
                                 <th>Возраст</th>
                                 <th>Пол</th>
                                 <th>Статус</th>
-                                <th>Направлений</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
@@ -1181,15 +1191,15 @@
                 <!-- Table Footer -->
                 <div class="table-footer">
                     <div class="table-info">
-                        Показано <span id="shownCount">10</span> из <span id="totalCount">10</span> пациентов
+                        Показано <span id="shownCount">0</span> из <span id="totalCount">0</span> пациентов
                     </div>
                     
                     <div class="pagination">
-                        <button class="pagination-btn disabled">
+                        <button class="pagination-btn disabled" id="prevPageBtn">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button class="pagination-btn active">1</button>
-                        <button class="pagination-btn disabled">
+                        <span id="pageInfo" style="font-size: 0.9rem; color: var(--gray-color);">Страница 1</span>
+                        <button class="pagination-btn disabled" id="nextPageBtn">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -1333,7 +1343,7 @@
         // ============================================================
         // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
         // ============================================================
-        const API_BASE = '/api/v1/auth';
+        const API_BASE = '/api/v1';
 
         // DOM элементы для авторизации
         const userPanel = document.getElementById('userPanel');
@@ -1383,7 +1393,7 @@
         // Проверить текущего пользователя
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_BASE}/me`, {
+                const response = await fetch(`${API_BASE}/auth/me`, {
                     credentials: 'include'
                 });
                 if (response.ok) {
@@ -1402,7 +1412,7 @@
         // Выход
         logoutBtn.addEventListener('click', async () => {
             try {
-                const response = await fetch(`${API_BASE}/logout`, {
+                const response = await fetch(`${API_BASE}/auth/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -1423,132 +1433,10 @@
         // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
         // ============================================================
 
-        // Моковые данные
-        const patientsData = [
-            {
-                id: 1,
-                fullName: "Петров Алексей Сергеевич",
-                initials: "ПА",
-                phone: "+7 (912) 345-67-89",
-                email: "alexey.petrov@email.com",
-                birthDate: "1979-05-15",
-                age: 45,
-                gender: "male",
-                status: "active",
-                referralsCount: 5
-            },
-            {
-                id: 2,
-                fullName: "Смирнова Ольга Викторовна",
-                initials: "СО",
-                phone: "+7 (923) 456-78-90",
-                email: "olga.smirnova@email.com",
-                birthDate: "1986-08-22",
-                age: 38,
-                gender: "female",
-                status: "active",
-                referralsCount: 3
-            },
-            {
-                id: 3,
-                fullName: "Козлов Дмитрий Иванович",
-                initials: "КД",
-                phone: "+7 (934) 567-89-01",
-                email: "dmitry.kozlov@email.com",
-                birthDate: "1972-03-10",
-                age: 52,
-                gender: "male",
-                status: "active",
-                referralsCount: 7
-            },
-            {
-                id: 4,
-                fullName: "Николаева Анна Петровна",
-                initials: "НА",
-                phone: "+7 (945) 678-90-12",
-                email: "anna.nikolaeva@email.com",
-                birthDate: "1995-11-30",
-                age: 29,
-                gender: "female",
-                status: "active",
-                referralsCount: 2
-            },
-            {
-                id: 5,
-                fullName: "Волков Сергей Михайлович",
-                initials: "ВС",
-                phone: "+7 (956) 789-01-23",
-                email: "sergey.volkov@email.com",
-                birthDate: "1983-07-18",
-                age: 41,
-                gender: "male",
-                status: "inactive",
-                referralsCount: 1
-            },
-            {
-                id: 6,
-                fullName: "Федорова Мария Александровна",
-                initials: "ФМ",
-                phone: "+7 (967) 890-12-34",
-                email: "maria.fedorova@email.com",
-                birthDate: "1990-01-25",
-                age: 34,
-                gender: "female",
-                status: "active",
-                referralsCount: 4
-            },
-            {
-                id: 7,
-                fullName: "Григорьев Павел Олегович",
-                initials: "ГП",
-                phone: "+7 (978) 901-23-45",
-                email: "pavel.grigorev@email.com",
-                birthDate: "1977-12-05",
-                age: 47,
-                gender: "male",
-                status: "active",
-                referralsCount: 2
-            },
-            {
-                id: 8,
-                fullName: "Тихонова Елена Владимировна",
-                initials: "ТЕ",
-                phone: "+7 (989) 012-34-56",
-                email: "elena.tikhonova@email.com",
-                birthDate: "1968-09-14",
-                age: 56,
-                gender: "female",
-                status: "active",
-                referralsCount: 3
-            },
-            {
-                id: 9,
-                fullName: "Белов Андрей Николаевич",
-                initials: "БА",
-                phone: "+7 (990) 123-45-67",
-                email: "andrey.belov@email.com",
-                birthDate: "1991-02-28",
-                age: 33,
-                gender: "male",
-                status: "new",
-                referralsCount: 1
-            },
-            {
-                id: 10,
-                fullName: "Крылов Игорь Сергеевич",
-                initials: "КИ",
-                phone: "+7 (901) 234-56-78",
-                email: "igor.krylov@email.com",
-                birthDate: "1974-06-20",
-                age: 50,
-                gender: "male",
-                status: "inactive",
-                referralsCount: 1
-            }
-        ];
-
         let currentView = 'grid';
         let editingPatientId = null;
+        let allPatients = [];
+        let filteredPatients = [];
 
         // Initialize Select2
         $(document).ready(function() {
@@ -1568,9 +1456,59 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('addBirthDate').max = today;
             
-            populatePatientsGrid(patientsData);
-            populatePatientsTable(patientsData);
+            loadPatients();
         });
+
+        // Загрузка пациентов с сервера
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${API_BASE}/patients`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки пациентов');
+                }
+                
+                allPatients = await response.json();
+                filteredPatients = [...allPatients];
+                updateStats();
+                renderCurrentView();
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                const gridView = document.getElementById('gridView');
+                gridView.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить список пациентов. Попробуйте позже.</p>
+                        <button class="btn btn-primary" onclick="loadPatients()">
+                            <i class="fas fa-redo"></i> Повторить
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Обновить статистику
+        function updateStats() {
+            document.getElementById('totalPatients').textContent = allPatients.length;
+            document.getElementById('activePatients').textContent = allPatients.filter(p => p.status === 'active').length;
+            // TODO: посчитать направления через отдельный эндпоинт
+            document.getElementById('totalReferrals').textContent = '-';
+        }
+
+        // Рендер текущего вида
+        function renderCurrentView() {
+            if (currentView === 'grid') {
+                populatePatientsGrid(filteredPatients);
+            } else {
+                populatePatientsTable(filteredPatients);
+            }
+            document.getElementById('shownCount').textContent = filteredPatients.length;
+            document.getElementById('totalCount').textContent = allPatients.length;
+        }
 
         // Populate grid view
         function populatePatientsGrid(data) {
@@ -1601,24 +1539,25 @@
                 
                 const genderIcon = patient.gender === 'female' ? 'fas fa-venus' : 'fas fa-mars';
                 const genderColor = patient.gender === 'female' ? '#ec4899' : '#3b82f6';
+                const initials = patient.full_name.split(' ').map(w => w[0]).join('');
                 
                 const card = document.createElement('div');
                 card.className = 'patient-card';
                 card.innerHTML = `
                     <div class="patient-header">
                         <div class="patient-avatar" style="background-color: ${getAvatarColor(patient.id)}; color: white;">
-                            ${patient.initials}
+                            ${initials}
                         </div>
                         <div class="patient-info">
-                            <div class="patient-name">${patient.fullName}</div>
-                            <div class="patient-age">${patient.age} лет</div>
+                            <div class="patient-name">${patient.full_name}</div>
+                            <div class="patient-age">${patient.age || '-'} лет</div>
                         </div>
                     </div>
                     
                     <div class="patient-body">
                         <div class="patient-detail">
                             <div class="detail-label"><i class="fas fa-phone"></i> Телефон</div>
-                            <div class="detail-value">${patient.phone}</div>
+                            <div class="detail-value">${patient.phone || 'Не указан'}</div>
                         </div>
                         
                         <div class="patient-detail">
@@ -1633,19 +1572,13 @@
                         
                         <div class="patient-detail">
                             <div class="detail-label"><i class="fas fa-calendar-alt"></i> Дата рождения</div>
-                            <div class="detail-value">${patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('ru-RU') : 'Не указана'}</div>
+                            <div class="detail-value">${patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString('ru-RU') : 'Не указана'}</div>
                         </div>
                     </div>
                     
                     <div class="patient-footer">
                         <div class="patient-stats">
-                            <div class="stat-item">
-                                <div class="stat-number">${patient.referralsCount}</div>
-                                <div class="stat-label">Направлений</div>
-                            </div>
-                            <div class="stat-item">
-                                <span class="status-badge ${statusClass}">${statusText}</span>
-                            </div>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
                         </div>
                         
                         <div class="patient-actions">
@@ -1661,9 +1594,6 @@
                 
                 gridView.appendChild(card);
             });
-            
-            document.getElementById('shownCount').textContent = data.length;
-            document.getElementById('totalCount').textContent = patientsData.length;
         }
 
         // Populate table view
@@ -1674,7 +1604,7 @@
             if (data.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="7">
                             <div style="text-align: center; padding: 40px;">
                                 <i class="fas fa-user-slash" style="font-size: 3rem; color: var(--border-color); margin-bottom: 20px;"></i>
                                 <div style="font-size: 1.2rem; margin-bottom: 10px; color: var(--dark-color);">Пациенты не найдены</div>
@@ -1699,13 +1629,12 @@
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><div style="font-weight: 600;">${patient.fullName}</div></td>
-                    <td>${patient.phone}</td>
+                    <td><div style="font-weight: 600;">${patient.full_name}</div></td>
+                    <td>${patient.phone || '—'}</td>
                     <td>${patient.email || '—'}</td>
-                    <td>${patient.age} лет</td>
+                    <td>${patient.age || '-'} лет</td>
                     <td>${patient.gender === 'female' ? 'Женский' : 'Мужской'}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${patient.referralsCount}</td>
                     <td>
                         <div style="display: flex; gap: 5px;">
                             <button class="action-btn" onclick="editPatient(${patient.id})" title="Редактировать">
@@ -1739,6 +1668,8 @@
                 document.getElementById('gridView').style.display = 'none';
                 document.getElementById('tableView').style.display = 'block';
             }
+            
+            renderCurrentView();
         }
 
         // Scroll to add patient form
@@ -1795,41 +1726,40 @@
             document.getElementById('confirmModal').style.display = 'none';
         }
 
-        function confirmAddPatient() {
-            const fullName = document.getElementById('addFullName').value.trim();
-            const phone = document.getElementById('addPhone').value.trim();
-            const birthDate = document.getElementById('addBirthDate').value;
-            const email = document.getElementById('addEmail').value.trim();
-            const gender = document.getElementById('addGender').value;
-            
-            // В будущем здесь будет POST запрос
-            // const data = { full_name: fullName, phone: phone, birth_date: birthDate, email: email, gender: gender };
-            // fetch('/api/patients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            
-            const newPatient = {
-                id: patientsData.length + 1,
-                fullName: fullName,
-                initials: fullName.split(' ').map(w => w[0]).join(''),
-                phone: phone,
-                email: email || '',
-                birthDate: birthDate,
-                age: birthDate ? Math.floor((new Date() - new Date(birthDate)) / (365.25 * 24 * 60 * 60 * 1000)) : 0,
-                gender: gender,
-                status: 'active',
-                referralsCount: 0
+        // Добавление пациента
+        async function confirmAddPatient() {
+            const data = {
+                full_name: document.getElementById('addFullName').value.trim(),
+                phone: document.getElementById('addPhone').value.trim(),
+                date_of_birth: document.getElementById('addBirthDate').value || null,
+                email: document.getElementById('addEmail').value.trim() || null,
+                gender: document.getElementById('addGender').value
             };
             
-            patientsData.push(newPatient);
-            
-            if (currentView === 'grid') {
-                populatePatientsGrid(patientsData);
-            } else {
-                populatePatientsTable(patientsData);
+            try {
+                const response = await fetch(`${API_BASE}/patients`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const newPatient = await response.json();
+                    allPatients.push(newPatient);
+                    filteredPatients = [...allPatients];
+                    updateStats();
+                    renderCurrentView();
+                    closeConfirmModal();
+                    clearAddPatientForm();
+                    showToast('✅ Пациент успешно добавлен', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка при добавлении'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
             }
-            
-            closeConfirmModal();
-            showToast('✅ Пациент успешно добавлен', 'success');
-            clearAddPatientForm();
         }
 
         function clearAddPatientForm() {
@@ -1840,26 +1770,23 @@
             document.getElementById('addGender').value = '';
         }
 
-        // Edit patient
+        // Редактирование пациента
         function editPatient(patientId) {
-            const patient = patientsData.find(p => p.id === patientId);
+            const patient = allPatients.find(p => p.id === patientId);
             if (!patient) return;
             
             editingPatientId = patientId;
             
-            document.getElementById('editFullName').value = patient.fullName;
-            document.getElementById('editBirthDate').value = patient.birthDate || '';
-            document.getElementById('editPhone').value = patient.phone;
+            document.getElementById('editFullName').value = patient.full_name || '';
+            document.getElementById('editBirthDate').value = patient.date_of_birth || '';
+            document.getElementById('editPhone').value = patient.phone || '';
             document.getElementById('editEmail').value = patient.email || '';
             document.getElementById('editGender').value = patient.gender || '';
             
             document.getElementById('editPatientModal').style.display = 'flex';
         }
 
-        function saveEditPatient() {
-            const patient = patientsData.find(p => p.id === editingPatientId);
-            if (!patient) return;
-            
+        async function saveEditPatient() {
             const fullName = document.getElementById('editFullName').value.trim();
             const phone = document.getElementById('editPhone').value.trim();
             
@@ -1873,23 +1800,40 @@
                 return;
             }
             
-            patient.fullName = fullName;
-            patient.initials = fullName.split(' ').map(w => w[0]).join('');
-            patient.phone = phone;
-            patient.email = document.getElementById('editEmail').value.trim();
-            patient.birthDate = document.getElementById('editBirthDate').value;
-            patient.gender = document.getElementById('editGender').value;
-            patient.age = patient.birthDate ? Math.floor((new Date() - new Date(patient.birthDate)) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
+            const data = {
+                full_name: fullName,
+                phone: phone,
+                date_of_birth: document.getElementById('editBirthDate').value || null,
+                email: document.getElementById('editEmail').value.trim() || null,
+                gender: document.getElementById('editGender').value
+            };
             
-            closeEditModal();
-            
-            if (currentView === 'grid') {
-                populatePatientsGrid(patientsData);
-            } else {
-                populatePatientsTable(patientsData);
+            try {
+                const response = await fetch(`${API_BASE}/patients/${editingPatientId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const updated = await response.json();
+                    const index = allPatients.findIndex(p => p.id === editingPatientId);
+                    if (index !== -1) {
+                        allPatients[index] = updated;
+                    }
+                    filteredPatients = [...allPatients];
+                    updateStats();
+                    renderCurrentView();
+                    closeEditModal();
+                    showToast('✅ Данные пациента обновлены', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка при обновлении'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
             }
-            
-            showToast('✅ Данные пациента обновлены', 'success');
         }
 
         function closeEditModal() {
@@ -1897,21 +1841,27 @@
             editingPatientId = null;
         }
 
-        // Delete patient
-        function deletePatient(patientId) {
-            if (confirm('Вы уверены, что хотите удалить этого пациента?')) {
-                const index = patientsData.findIndex(p => p.id === patientId);
-                if (index !== -1) {
-                    patientsData.splice(index, 1);
-                    
-                    if (currentView === 'grid') {
-                        populatePatientsGrid(patientsData);
-                    } else {
-                        populatePatientsTable(patientsData);
-                    }
-                    
+        // Удаление пациента
+        async function deletePatient(patientId) {
+            if (!confirm('Вы уверены, что хотите удалить этого пациента?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/patients/${patientId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    allPatients = allPatients.filter(p => p.id !== patientId);
+                    filteredPatients = [...allPatients];
+                    updateStats();
+                    renderCurrentView();
                     showToast('Пациент удален', 'success');
+                } else {
+                    showToast('❌ Ошибка при удалении', 'error');
                 }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
             }
         }
 
@@ -1921,35 +1871,36 @@
             const ageFrom = parseInt(document.getElementById('ageFromFilter').value) || 0;
             const ageTo = parseInt(document.getElementById('ageToFilter').value) || 120;
             const genderFilter = document.getElementById('genderFilter').value;
-            const searchTerm = document.getElementById('patientSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('patientSearch').value.toLowerCase().trim();
             
-            let filteredData = [...patientsData];
+            filteredPatients = allPatients.filter(p => {
+                // Статус
+                if (statusFilter && p.status !== statusFilter) return false;
+                
+                // Возраст
+                const age = p.age || 0;
+                if (age < ageFrom || age > ageTo) return false;
+                
+                // Пол
+                if (genderFilter && p.gender !== genderFilter) return false;
+                
+                // Поиск
+                if (searchTerm) {
+                    const fullName = (p.full_name || '').toLowerCase();
+                    const phone = (p.phone || '');
+                    const email = (p.email || '').toLowerCase();
+                    if (!fullName.includes(searchTerm) && 
+                        !phone.includes(searchTerm) && 
+                        !email.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
             
-            if (statusFilter) {
-                filteredData = filteredData.filter(p => p.status === statusFilter);
-            }
-            
-            filteredData = filteredData.filter(p => p.age >= ageFrom && p.age <= ageTo);
-            
-            if (genderFilter) {
-                filteredData = filteredData.filter(p => p.gender === genderFilter);
-            }
-            
-            if (searchTerm) {
-                filteredData = filteredData.filter(p => 
-                    p.fullName.toLowerCase().includes(searchTerm) ||
-                    p.phone.includes(searchTerm) ||
-                    (p.email && p.email.toLowerCase().includes(searchTerm))
-                );
-            }
-            
-            if (currentView === 'grid') {
-                populatePatientsGrid(filteredData);
-            } else {
-                populatePatientsTable(filteredData);
-            }
-            
-            showToast(`Найдено ${filteredData.length} пациентов`, 'success');
+            renderCurrentView();
+            showToast(`Найдено ${filteredPatients.length} пациентов`, 'success');
         }
 
         function resetFilters() {
@@ -1964,12 +1915,8 @@
             
             document.getElementById('patientSearch').value = '';
             
-            if (currentView === 'grid') {
-                populatePatientsGrid(patientsData);
-            } else {
-                populatePatientsTable(patientsData);
-            }
-            
+            filteredPatients = [...allPatients];
+            renderCurrentView();
             showToast('Фильтры сброшены', 'info');
         }
 

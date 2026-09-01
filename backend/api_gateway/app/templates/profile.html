@@ -463,49 +463,17 @@
             position: relative;
         }
 
-        /* Danger Zone */
-        .danger-zone {
-            background-color: #fef2f2;
-            border: 2px solid #fecaca;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-top: 40px;
+        /* Loading */
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray-color);
         }
 
-        .danger-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .danger-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #fee2e2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .loading-spinner i {
             font-size: 1.5rem;
-            color: var(--danger-color);
-        }
-
-        .danger-title {
-            font-weight: 700;
-            color: var(--danger-color);
-            font-size: 1.3rem;
-        }
-
-        .danger-description {
-            color: #991b1b;
-            margin-bottom: 20px;
-        }
-
-        .danger-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            margin-right: 10px;
+            color: var(--primary-color);
         }
 
         /* User Panel */
@@ -629,10 +597,6 @@
             .profile-stats {
                 justify-content: center;
             }
-
-            .danger-actions {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -696,11 +660,6 @@
                     </a>
                 </li>
                 <li>
-                    <a href="earnings">
-                        <i class="fas fa-money-bill-wave"></i> Заработок
-                    </a>
-                </li>
-                <li>
                     <a href="profile" class="active">
                         <i class="fas fa-user-cog"></i> Настройки
                     </a>
@@ -713,9 +672,7 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1><i class="fas fa-user-cog"></i> Настройки профиля</h1>
-                <button class="btn btn-primary" onclick="saveAllSettings()">
-                    <i class="fas fa-save"></i> Сохранить изменения
-                </button>
+                
             </div>
 
             <!-- Settings Container -->
@@ -726,19 +683,19 @@
                     <div class="profile-header">
                         <div class="profile-avatar" id="profileAvatar">И</div>
                         <div class="profile-info">
-                            <h2 id="profileFullName">Иван Иванов</h2>
-                            <p id="profileEmail">ivan.ivanov@example.com</p>
+                            <h2 id="profileFullName">Загрузка...</h2>
+                            <p id="profileEmail">Загрузка...</p>
                             <div class="profile-stats">
                                 <div class="stat-item">
-                                    <div class="stat-value">47</div>
+                                    <div class="stat-value">0</div>
                                     <div class="stat-label">Направлений</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">28</div>
+                                    <div class="stat-value">0</div>
                                     <div class="stat-label">Пациентов</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">4.8</div>
+                                    <div class="stat-value">0</div>
                                     <div class="stat-label">Рейтинг</div>
                                 </div>
                             </div>
@@ -797,7 +754,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Опыт работы (лет)</label>
-                                <input type="number" id="experience" placeholder="0" min="0" max="50" value="0">
+                                <input type="number" id="experience" placeholder="0" min="0" max="50">
                             </div>
                             <div class="form-group">
                                 <label>Образование</label>
@@ -813,30 +770,9 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Danger Zone -->
-                    <div class="danger-zone">
-                        <div class="danger-header">
-                            <div class="danger-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="danger-title">Опасная зона</div>
-                        </div>
-                        <div class="danger-description">
-                            Действия в этом разделе необратимы. Будьте осторожны.
-                        </div>
-                        <div class="danger-actions">
-                            <button class="btn btn-outline" onclick="exportAllData()">
-                                <i class="fas fa-download"></i> Экспортировать все данные
-                            </button>
-                            <button class="btn btn-outline" onclick="deactivateAccount()">
-                                <i class="fas fa-user-slash"></i> Деактивировать аккаунт
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteAccount()">
-                                <i class="fas fa-trash"></i> Удалить аккаунт
-                            </button>
-                        </div>
-                    </div>
+                    <button class="btn btn-primary" onclick="saveProfile()">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
                 </div>
             </div>
         </main>
@@ -846,7 +782,7 @@
         // ============================================================
         // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
         // ============================================================
-        const API_BASE = '/api/v1/auth';
+        const API_BASE = '/api/v1';
 
         // DOM элементы для авторизации
         const userPanel = document.getElementById('userPanel');
@@ -906,14 +842,18 @@
                 document.getElementById('firstName').value = firstName || '';
                 document.getElementById('middleName').value = middleName || '';
                 document.getElementById('email').value = user.email || '';
-                document.getElementById('phone').value = '+7 (999) 123-45-67';
-                document.getElementById('experience').value = '0';
-                document.getElementById('birthDate').value = '';
-                document.getElementById('about').value = '';
+                document.getElementById('phone').value = user.phone || '';
+                document.getElementById('experience').value = user.experience || '0';
+                document.getElementById('birthDate').value = user.date_of_birth || '';
+                document.getElementById('about').value = user.about_myself || '';
                 
-                // Добавляем специализации по умолчанию
-                const defaultSpecs = ['Кардиология', 'Стоматология'];
-                defaultSpecs.forEach(spec => addSpecTag(spec));
+                // Выбор образования
+                if (user.education) {
+                    document.getElementById('education').value = user.education;
+                }
+                
+                // Загружаем специализации доктора
+                loadMySpecializations();
             } else {
                 userPanel.style.display = 'none';
                 window.location.href = '/';
@@ -923,7 +863,7 @@
         // Проверить текущего пользователя
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_BASE}/me`, {
+                const response = await fetch(`${API_BASE}/auth/me`, {
                     credentials: 'include'
                 });
                 if (response.ok) {
@@ -942,7 +882,7 @@
         // Выход
         logoutBtn.addEventListener('click', async () => {
             try {
-                const response = await fetch(`${API_BASE}/logout`, {
+                const response = await fetch(`${API_BASE}/auth/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -963,73 +903,103 @@
         // СПЕЦИАЛИЗАЦИИ - КОМПОНЕНТ
         // ============================================================
 
-        const specOptions = [
-            'Кардиология',
-            'Стоматология',
-            'Диагностика',
-            'Хирургия',
-            'Терапия',
-            'Педиатрия',
-            'Гинекология',
-            'Неврология',
-            'Офтальмология',
-            'Ортопедия'
-        ];
-
+        let allSpecializations = [];
         let selectedSpecs = [];
+        let selectedSpecIds = [];
 
         const specInput = document.getElementById('specInput');
         const specContainer = document.getElementById('specContainer');
         const specTags = document.getElementById('specTags');
         const specDropdown = document.getElementById('specDropdown');
 
+        // Загрузить все специализации
+        async function loadAllSpecializations() {
+            try {
+                const response = await fetch(`${API_BASE}/specializations`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    allSpecializations = await response.json();
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки специализаций:', err);
+            }
+        }
+
+        // Загрузить мои специализации
+        async function loadMySpecializations() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/specializations`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    selectedSpecs = [];
+                    selectedSpecIds = [];
+                    data.forEach(spec => {
+                        selectedSpecs.push(spec.name);
+                        selectedSpecIds.push(spec.id);
+                    });
+                    renderTags();
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки специализаций:', err);
+            }
+        }
+
         function renderDropdown(filter = '') {
-            const filtered = specOptions.filter(s => 
-                s.toLowerCase().includes(filter.toLowerCase()) && 
-                !selectedSpecs.includes(s)
+            const available = allSpecializations.filter(s => 
+                s.name.toLowerCase().includes(filter.toLowerCase()) && 
+                !selectedSpecIds.includes(s.id)
             );
             
-            if (filtered.length === 0) {
+            if (available.length === 0) {
                 specDropdown.classList.remove('show');
                 return;
             }
             
-            specDropdown.innerHTML = filtered.map(s => `
-                <div class="spec-dropdown-item" data-spec="${s}">${s}</div>
+            specDropdown.innerHTML = available.map(s => `
+                <div class="spec-dropdown-item" data-spec-id="${s.id}" data-spec-name="${s.name}">${s.name}</div>
             `).join('');
             specDropdown.classList.add('show');
             
             specDropdown.querySelectorAll('.spec-dropdown-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    addSpecTag(item.dataset.spec);
-                    specInput.value = '';
-                    specDropdown.classList.remove('show');
-                    specInput.focus();
+                item.addEventListener('mousedown', (e) => {
+                    e.preventDefault();  // предотвращаем потерю фокуса
+                    addSpecTag(item.dataset.specName, parseInt(item.dataset.specId));
+                    specInput.value = '';  // очищаем поле ввода
+                    specInput.focus();     // возвращаем фокус
+                    // 👇 НЕ закрываем список — он перерисуется с обновленным фильтром
+                    renderDropdown('');    // перерисовываем список без фильтра
                 });
             });
         }
 
-        function addSpecTag(spec) {
-            if (selectedSpecs.includes(spec)) return;
+        function addSpecTag(spec, id) {
+            if (selectedSpecIds.includes(id)) return;
             selectedSpecs.push(spec);
+            selectedSpecIds.push(id);
             renderTags();
+            specInput.focus();  // 👈 возвращаем фокус в поле
         }
 
-        function removeSpecTag(spec) {
-            selectedSpecs = selectedSpecs.filter(s => s !== spec);
+        function removeSpecTag(index) {
+            selectedSpecs.splice(index, 1);
+            selectedSpecIds.splice(index, 1);
             renderTags();
+            specInput.focus();  // 👈 возвращаем фокус
         }
 
         function renderTags() {
-            specTags.innerHTML = selectedSpecs.map(s => `
+            specTags.innerHTML = selectedSpecs.map((s, i) => `
                 <span class="spec-tag">
                     ${s}
-                    <span class="remove-spec" data-spec="${s}">&times;</span>
+                    <span class="remove-spec" data-index="${i}">&times;</span>
                 </span>
             `).join('');
             
             specTags.querySelectorAll('.remove-spec').forEach(el => {
-                el.addEventListener('click', () => removeSpecTag(el.dataset.spec));
+                el.addEventListener('click', () => removeSpecTag(parseInt(el.dataset.index)));
             });
         }
 
@@ -1046,10 +1016,19 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const value = specInput.value.trim();
-                if (value && !selectedSpecs.includes(value)) {
-                    addSpecTag(value);
-                    specInput.value = '';
-                    specDropdown.classList.remove('show');
+                if (value) {
+                    // Ищем специализацию по названию
+                    const found = allSpecializations.find(s => 
+                        s.name.toLowerCase() === value.toLowerCase() && 
+                        !selectedSpecIds.includes(s.id)
+                    );
+                    if (found) {
+                        addSpecTag(found.name, found.id);
+                        specInput.value = '';
+                        specDropdown.classList.remove('show');
+                    } else {
+                        showToast('Специализация не найдена. Выберите из списка.', 'error');
+                    }
                 }
             }
             if (e.key === 'Escape') {
@@ -1065,52 +1044,51 @@
         });
 
         // ============================================================
-        // ОСНОВНАЯ ЛОГИКА
+        // СОХРАНЕНИЕ ПРОФИЛЯ
         // ============================================================
 
-        // Save settings
-        function saveAllSettings() {
-            const data = {
-                lastName: document.getElementById('lastName').value,
-                firstName: document.getElementById('firstName').value,
-                middleName: document.getElementById('middleName').value,
-                birthDate: document.getElementById('birthDate').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                specialization: selectedSpecs,
-                experience: document.getElementById('experience').value,
-                education: document.getElementById('education').value,
-                about: document.getElementById('about').value
-            };
+        async function saveProfile() {
+            const fullName = document.getElementById('lastName').value.trim() + ' ' + 
+                           document.getElementById('firstName').value.trim() + ' ' + 
+                           document.getElementById('middleName').value.trim();
             
-            console.log('Saving profile data:', data);
-            showToast('Настройки успешно сохранены', 'success');
-        }
+            const data = {
+                full_name: fullName.trim().replace(/\s+/g, ' '),
+                phone: document.getElementById('phone').value.trim(),
+                date_of_birth: document.getElementById('birthDate').value || null,
+                experience: document.getElementById('experience').value || '0',
+                education: document.getElementById('education').value,
+                about_myself: document.getElementById('about').value.trim(),
+                specialization_ids: selectedSpecIds
+            };
 
-        // Danger zone actions
-        function exportAllData() {
-            showToast('Экспорт данных начат. Файл будет отправлен на ваш email.', 'info');
-            setTimeout(() => {
-                showToast('Экспорт данных завершен. Файл отправлен на ваш email.', 'success');
-            }, 3000);
-        }
+            try {
+                const response = await fetch(`${API_BASE}/auth/profile`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
 
-        function deactivateAccount() {
-            if (confirm('Вы уверены, что хотите деактивировать аккаунт? Ваши данные будут сохранены, но вы не сможете войти в систему. Для восстановления обратитесь в поддержку.')) {
-                showToast('Запрос на деактивацию аккаунта отправлен. С вами свяжется поддержка для подтверждения.', 'warning');
-            }
-        }
-
-        function deleteAccount() {
-            if (confirm('ВНИМАНИЕ: Это действие удалит ваш аккаунт и все данные без возможности восстановления. Вы уверены?')) {
-                const confirmation = prompt('Для подтверждения удаления введите слово "УДАЛИТЬ":');
-                if (confirmation === 'УДАЛИТЬ') {
-                    showToast('Запрос на удаление аккаунта отправлен. С вами свяжется поддержка для подтверждения.', 'error');
+                if (response.ok) {
+                    const user = await response.json();
+                    updateUI(user);
+                    showToast('✅ Настройки сохранены', 'success');
                 } else {
-                    showToast('Удаление отменено', 'info');
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка сохранения'), 'error');
                 }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
             }
         }
+
+        // ============================================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================================
+
+        // Загружаем все специализации
+        loadAllSpecializations();
 
         // Add CSS for animations
         const style = document.createElement('style');
