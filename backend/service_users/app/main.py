@@ -422,7 +422,28 @@ async def create_patient(
     current_user: Doctor = Depends(get_current_doctor),
     db: AsyncSession = Depends(get_db)
 ):
-    """Создать нового пациента"""
+    """Создать нового пациента (все поля обязательны)"""
+    existing_patient = await crud.get_patient_by_email(db, data.email, current_user.id)
+    if existing_patient:
+        raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+
+
+    # Проверяем наличие всех обязательных полей
+    if not data.full_name:
+        raise HTTPException(status_code=400, detail="ФИО обязательно для заполнения")
+    
+    if not data.phone:
+        raise HTTPException(status_code=400, detail="Телефон обязателен для заполнения")
+    
+    if not data.date_of_birth:
+        raise HTTPException(status_code=400, detail="Дата рождения обязательна для заполнения")
+    
+    if not data.gender:
+        raise HTTPException(status_code=400, detail="Пол обязателен для заполнения")
+    
+    # Проверка формата пола
+    if data.gender not in ['male', 'female']:
+        raise HTTPException(status_code=400, detail="Пол должен быть 'male' или 'female'")
     
     patient = await crud.create_patient(
         db=db,
@@ -446,9 +467,15 @@ async def update_patient(
     db: AsyncSession = Depends(get_db)
 ):
     """Обновить данные пациента"""
-    
+
+    if data.email:
+        existing_patient = await crud.get_patient_by_email(db, data.email, current_user.id, patient_id)
+        if existing_patient:
+            raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+
+        
     update_data = data.dict(exclude_unset=True)
-    
+
     patient = await crud.update_patient(
         db=db,
         patient_id=patient_id,
@@ -492,3 +519,182 @@ async def get_patient_referrals_count(
     
     count = await crud.get_patient_referrals_count(db, patient_id)
     return {"patient_id": patient_id, "referrals_count": count}
+
+
+
+
+# ==================== Referrals Routes ====================
+
+@app.post("/api/v1/referrals", response_model=ReferralResponse)
+async def create_referral(
+    data: ReferralCreate,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Создать новое направление"""
+    
+    # Проверяем, что клиника существует
+    clinic = await db.get(Clinic, data.clinic_id)
+    if not clinic:
+        raise HTTPException(status_code=404, detail="Клиника не найдена")
+    
+    # Проверяем, что пациент существует и принадлежит доктору
+    patient = await crud.get_patient_by_id(db, data.patient_id, current_user.id)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Пациент не найден")
+    
+    # Проверяем, что специализация существует
+    specialization = await db.get(Specialization, data.specialization_id)
+    if not specialization:
+        raise HTTPException(status_code=404, detail="Специализация не найдена")
+    
+    # Проверяем даты
+    if data.expected_visit_start > data.expected_visit_end:
+        raise HTTPException(status_code=400, detail="Дата начала не может быть позже даты окончания")
+    
+    # Проверяем, что период не больше 30 дней
+    delta = data.expected_visit_end - data.expected_visit_start
+    if delta.days > 30:
+        raise HTTPException(status_code=400, detail="Период не должен превышать 30 дней")
+    
+    referral = await crud.create_referral(
+        db=db,
+        doctor_id=current_user.id,
+        clinic_id=data.clinic_id,
+        patient_id=data.patient_id,
+        specialization_id=data.specialization_id,
+        expected_visit_start=data.expected_visit_start,
+        expected_visit_end=data.expected_visit_end,
+        med_indications=data.med_indications,
+        special_wishes=data.special_wishes
+    )
+    
+    return referral
+
+
+@app.get("/api/v1/referrals", response_model=List[ReferralDetailResponse])
+async def get_referrals(
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    clinic_id: Optional[int] = None,
+    page: int = 1,
+    limit: int = 20,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить все направления текущего доктора с фильтрами"""
+    
+    skip = (page - 1) * limit
+    
+    referrals, total = await crud.get_referrals_by_doctor(
+        db=db,
+        doctor_id=current_user.id,
+        search=search,
+        status=status,
+        clinic_id=clinic_id,
+        skip=skip,
+        limit=limit
+    )
+    
+    # Формируем ответ с дополнительными данными
+    result = []
+    for referral in referrals:
+        result.append(ReferralDetailResponse(
+            id=referral.id,
+            doctor_id=referral.doctor_id,
+            clinic_id=referral.clinic_id,
+            patient_id=referral.patient_id,
+            specialization_id=referral.specialization_id,
+            expected_visit_start=referral.expected_visit_start,
+            expected_visit_end=referral.expected_visit_end,
+            med_indications=referral.med_indications,
+            special_wishes=referral.special_wishes,
+            status=referral.status,
+            created_at=referral.created_at,
+            patient_full_name=referral.patient.full_name,
+            patient_phone=referral.patient.phone,
+            clinic_name=referral.clinic.name,
+            clinic_address=referral.clinic.address,
+            specialization_name=referral.specialization.name
+        ))
+    
+    return result
+
+
+
+# ==================== Referrals Routes (update & delete) ====================
+
+@app.put("/api/v1/referrals/{referral_id}", response_model=ReferralDetailResponse)
+async def update_referral(
+    referral_id: int,
+    data: ReferralUpdate,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Обновить направление"""
+    
+    # Проверяем даты
+    if data.expected_visit_start and data.expected_visit_end:
+        if data.expected_visit_start > data.expected_visit_end:
+            raise HTTPException(status_code=400, detail="Дата начала не может быть позже даты окончания")
+        
+        delta = data.expected_visit_end - data.expected_visit_start
+        if delta.days > 30:
+            raise HTTPException(status_code=400, detail="Период не должен превышать 30 дней")
+    
+    update_data = data.dict(exclude_unset=True)
+    
+    referral = await crud.update_referral(
+        db=db,
+        referral_id=referral_id,
+        doctor_id=current_user.id,
+        **update_data
+    )
+    
+    if not referral:
+        raise HTTPException(status_code=404, detail="Направление не найдено")
+    
+    # Подгружаем связанные данные для ответа
+    result = await db.execute(
+        select(Referral)
+        .options(
+            selectinload(Referral.patient),
+            selectinload(Referral.clinic),
+            selectinload(Referral.specialization)
+        )
+        .where(Referral.id == referral_id)
+    )
+    referral = result.scalar_one()
+    
+    return ReferralDetailResponse(
+        id=referral.id,
+        doctor_id=referral.doctor_id,
+        clinic_id=referral.clinic_id,
+        patient_id=referral.patient_id,
+        specialization_id=referral.specialization_id,
+        expected_visit_start=referral.expected_visit_start,
+        expected_visit_end=referral.expected_visit_end,
+        med_indications=referral.med_indications,
+        special_wishes=referral.special_wishes,
+        status=referral.status,
+        created_at=referral.created_at,
+        patient_full_name=referral.patient.full_name,
+        patient_phone=referral.patient.phone,
+        clinic_name=referral.clinic.name,
+        clinic_address=referral.clinic.address,
+        specialization_name=referral.specialization.name
+    )
+
+@app.delete("/api/v1/referrals/{referral_id}", response_model=MessageResponse)
+async def delete_referral(
+    referral_id: int,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Удалить направление"""
+    
+    deleted = await crud.delete_referral(db, referral_id, current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Направление не найдено")
+    
+    return MessageResponse(message="Направление удалено")

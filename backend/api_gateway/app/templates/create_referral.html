@@ -360,6 +360,48 @@
             color: var(--gray-color);
         }
 
+        /* Specialization Selection */
+        .specialization-select-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--border-color);
+        }
+
+        .specialization-select-container label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .specialization-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .specialization-option {
+            padding: 15px 20px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .specialization-option:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .specialization-option.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
         /* Patient Search */
         .patient-search-container {
             background-color: #f8fafc;
@@ -432,6 +474,18 @@
             gap: 15px;
             font-size: 0.9rem;
             color: var(--gray-color);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray-color);
+        }
+
+        .loading-spinner i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--primary-color);
         }
 
         /* Form Actions */
@@ -654,6 +708,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .specialization-options {
+                grid-template-columns: 1fr 1fr;
+            }
+
             .confirm-grid {
                 grid-template-columns: 1fr;
             }
@@ -719,11 +777,6 @@
                         <i class="fas fa-chart-bar"></i> Отчеты
                     </a>
                 </li>
-                <!-- <li>
-                    <a href="earnings">
-                        <i class="fas fa-money-bill-wave"></i> Заработок
-                    </a>
-                </li> -->
                 <li>
                     <a href="profile">
                         <i class="fas fa-user-cog"></i> Настройки
@@ -750,7 +803,21 @@
                     <div class="clinic-select-container">
                         <label>Выберите клинику для направления <span class="required">*</span></label>
                         <div class="clinic-options" id="clinicOptions">
-                            <!-- Клиники будут подгружаться сюда -->
+                            <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Загрузка клиник...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Specialization Selection -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-stethoscope"></i> Выбор специализации
+                    </h2>
+                    
+                    <div class="specialization-select-container">
+                        <label>Выберите специализацию <span class="required">*</span></label>
+                        <div class="specialization-options" id="specializationOptions">
+                            <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Загрузка специализаций...</div>
                         </div>
                     </div>
                 </div>
@@ -779,41 +846,7 @@
                             </div>
                             
                             <div class="patients-list" id="patientsList">
-                                <div class="patient-item" data-patient-id="1">
-                                    <div class="patient-name">Петров Алексей Сергеевич</div>
-                                    <div class="patient-details">
-                                        <span><i class="fas fa-phone"></i> +7 (912) 345-67-89</span>
-                                        <span><i class="fas fa-birthday-cake"></i> 45 лет</span>
-                                        <span><i class="fas fa-file-medical"></i> 3 обращения</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="patient-item" data-patient-id="2">
-                                    <div class="patient-name">Смирнова Ольга Викторовна</div>
-                                    <div class="patient-details">
-                                        <span><i class="fas fa-phone"></i> +7 (923) 456-78-90</span>
-                                        <span><i class="fas fa-birthday-cake"></i> 38 лет</span>
-                                        <span><i class="fas fa-file-medical"></i> 1 обращение</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="patient-item" data-patient-id="3">
-                                    <div class="patient-name">Козлов Дмитрий Иванович</div>
-                                    <div class="patient-details">
-                                        <span><i class="fas fa-phone"></i> +7 (934) 567-89-01</span>
-                                        <span><i class="fas fa-birthday-cake"></i> 52 года</span>
-                                        <span><i class="fas fa-file-medical"></i> 5 обращений</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="patient-item" data-patient-id="4">
-                                    <div class="patient-name">Николаева Анна Петровна</div>
-                                    <div class="patient-details">
-                                        <span><i class="fas fa-phone"></i> +7 (945) 678-90-12</span>
-                                        <span><i class="fas fa-birthday-cake"></i> 29 лет</span>
-                                        <span><i class="fas fa-file-medical"></i> 2 обращения</span>
-                                    </div>
-                                </div>
+                                <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Загрузка пациентов...</div>
                             </div>
                             
                             <div class="form-hint" style="margin-top: 10px;">
@@ -831,8 +864,9 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label>Дата рождения</label>
+                                    <label>Дата рождения <span class="required">*</span></label>
                                     <input type="date" id="patientBirthDate">
+                                    <div class="error-message" id="birthDateError">Поле обязательно для заполнения</div>
                                 </div>
                                 
                                 <div class="form-group">
@@ -842,17 +876,19 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label>Email</label>
+                                    <label>Email <span class="required">*</span></label>
                                     <input type="email" id="patientEmail" placeholder="patient@example.com">
+                                    <div class="error-message" id="emailError">Поле обязательно для заполнения</div>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label>Пол</label>
+                                    <label>Пол <span class="required">*</span></label>
                                     <select id="patientGender">
                                         <option value="">Выберите пол</option>
                                         <option value="male">Мужской</option>
                                         <option value="female">Женский</option>
                                     </select>
+                                    <div class="error-message" id="genderError">Поле обязательно для заполнения</div>
                                 </div>
 
                                 <div class="form-group full-width">
@@ -891,8 +927,9 @@
                         </div>
 
                         <div class="form-group full-width">
-                            <label>Медицинские показания / жалобы</label>
+                            <label>Медицинские показания / жалобы <span class="required">*</span></label>
                             <textarea id="medicalIndications" rows="4" placeholder="Опишите симптомы, диагноз или причину обращения..."></textarea>
+                            <div class="error-message" id="indicationsError">Поле обязательно для заполнения</div>
                             <div class="form-hint">
                                 Эта информация поможет врачу подготовиться к приему
                             </div>
@@ -907,8 +944,8 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-success">
-                        Создать направление <i class="fas fa-arrow-right"></i>
+                    <button type="submit" class="btn btn-success" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i> Создать направление
                     </button>
                 </div>
             </form>
@@ -971,7 +1008,7 @@
         // ============================================================
         // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
         // ============================================================
-        const API_BASE = '/api/v1/auth';
+        const API_BASE = '/api/v1';
 
         // DOM элементы для авторизации
         const userPanel = document.getElementById('userPanel');
@@ -1021,7 +1058,7 @@
         // Проверить текущего пользователя
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_BASE}/me`, {
+                const response = await fetch(`${API_BASE}/auth/me`, {
                     credentials: 'include'
                 });
                 if (response.ok) {
@@ -1040,7 +1077,7 @@
         // Выход
         logoutBtn.addEventListener('click', async () => {
             try {
-                const response = await fetch(`${API_BASE}/logout`, {
+                const response = await fetch(`${API_BASE}/auth/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
@@ -1061,28 +1098,19 @@
         // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
         // ============================================================
 
-        // Моковые данные клиник
-        const clinicsData = [
-            {
-                id: 1,
-                name: "Медицинский центр 'Элита'",
-                address: "Москва, ул. Лечебная, 15"
-            },
-            {
-                id: 2,
-                name: "Клиника 'Здоровье+'",
-                address: "Москва, пр. Мира, 45"
-            }
-        ];
-
         let selectedClinicId = null;
         let selectedPatientId = null;
+        let selectedSpecializationId = null;
+        let allPatients = [];
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            renderClinics();
+            loadClinics();
+            loadSpecializations();
+            loadPatients();
             setupPatientToggle();
             setupDateValidation();
+            setDefaultDates();
             
             // Set minimum dates
             const today = new Date().toISOString().split('T')[0];
@@ -1094,41 +1122,195 @@
             document.getElementById('patientBirthDate').max = today;
         });
 
-        // Рендер клиник
-        function renderClinics() {
+        // ============================================================
+        // ЗАГРУЗКА КЛИНИК
+        // ============================================================
+
+        async function loadClinics() {
             const container = document.getElementById('clinicOptions');
-            container.innerHTML = '';
             
-            clinicsData.forEach(clinic => {
-                const div = document.createElement('div');
-                div.className = 'clinic-option';
-                div.dataset.clinicId = clinic.id;
-                div.innerHTML = `
-                    <div class="clinic-option-name">${clinic.name}</div>
-                    <div class="clinic-option-address"><i class="fas fa-map-marker-alt"></i> ${clinic.address}</div>
+            try {
+                const response = await fetch(`${API_BASE}/clinics`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки клиник');
+                
+                const clinics = await response.json();
+                container.innerHTML = '';
+                
+                clinics.forEach(clinic => {
+                    const div = document.createElement('div');
+                    div.className = 'clinic-option';
+                    div.dataset.clinicId = clinic.id;
+                    div.innerHTML = `
+                        <div class="clinic-option-name">${clinic.name}</div>
+                        <div class="clinic-option-address"><i class="fas fa-map-marker-alt"></i> ${clinic.address}</div>
+                    `;
+                    div.addEventListener('click', () => selectClinic(clinic.id));
+                    container.appendChild(div);
+                });
+                
+                // Автовыбор первой клиники
+                if (clinics.length > 0) {
+                    selectClinic(clinics[0].id);
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <p>Ошибка загрузки клиник</p>
+                        <button class="btn btn-primary btn-sm" onclick="loadClinics()">Повторить</button>
+                    </div>
                 `;
-                div.addEventListener('click', () => selectClinic(clinic.id));
-                container.appendChild(div);
-            });
+            }
         }
 
-        // Выбор клиники
         function selectClinic(clinicId) {
             selectedClinicId = clinicId;
-            
             document.querySelectorAll('.clinic-option').forEach(el => {
                 el.classList.toggle('selected', parseInt(el.dataset.clinicId) === clinicId);
             });
         }
 
-        // Patient toggle
+        // ============================================================
+        // ЗАГРУЗКА СПЕЦИАЛИЗАЦИЙ
+        // ============================================================
+
+        async function loadSpecializations() {
+            const container = document.getElementById('specializationOptions');
+            
+            try {
+                const response = await fetch(`${API_BASE}/specializations`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки специализаций');
+                
+                const specializations = await response.json();
+                container.innerHTML = '';
+                
+                specializations.forEach(spec => {
+                    const div = document.createElement('div');
+                    div.className = 'specialization-option';
+                    div.dataset.specId = spec.id;
+                    div.textContent = spec.name;
+                    div.addEventListener('click', () => selectSpecialization(spec.id));
+                    container.appendChild(div);
+                });
+                
+                // Автовыбор первой специализации
+                if (specializations.length > 0) {
+                    selectSpecialization(specializations[0].id);
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <p>Ошибка загрузки специализаций</p>
+                        <button class="btn btn-primary btn-sm" onclick="loadSpecializations()">Повторить</button>
+                    </div>
+                `;
+            }
+        }
+
+        function selectSpecialization(specId) {
+            selectedSpecializationId = specId;
+            document.querySelectorAll('.specialization-option').forEach(el => {
+                el.classList.toggle('selected', parseInt(el.dataset.specId) === specId);
+            });
+        }
+
+        // ============================================================
+        // ЗАГРУЗКА ПАЦИЕНТОВ
+        // ============================================================
+
+        async function loadPatients() {
+            const container = document.getElementById('patientsList');
+            
+            try {
+                const response = await fetch(`${API_BASE}/patients?limit=100`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки пациентов');
+                
+                allPatients = await response.json();
+                container.innerHTML = '';
+                
+                if (allPatients.length === 0) {
+                    container.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: var(--gray-color);">
+                            <i class="fas fa-user-slash"></i>
+                            <p>У вас пока нет пациентов</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allPatients.forEach(patient => {
+                    const div = document.createElement('div');
+                    div.className = 'patient-item';
+                    div.dataset.patientId = patient.id;
+                    div.innerHTML = `
+                        <div class="patient-name">${patient.full_name}</div>
+                        <div class="patient-details">
+                            <span><i class="fas fa-phone"></i> ${patient.phone || '—'}</span>
+                            <span><i class="fas fa-envelope"></i> ${patient.email || '—'}</span>
+                            <span><i class="fas fa-birthday-cake"></i> ${patient.age || '—'} лет</span>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => selectPatient(patient.id));
+                    container.appendChild(div);
+                });
+                
+                // Добавляем поиск
+                const searchInput = document.getElementById('patientSearch');
+                searchInput.addEventListener('input', filterPatients);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <p>Ошибка загрузки пациентов</p>
+                        <button class="btn btn-primary btn-sm" onclick="loadPatients()">Повторить</button>
+                    </div>
+                `;
+            }
+        }
+
+        function filterPatients() {
+            const searchTerm = document.getElementById('patientSearch').value.toLowerCase().trim();
+            const items = document.querySelectorAll('#patientsList .patient-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        function selectPatient(patientId) {
+            selectedPatientId = patientId;
+            document.querySelectorAll('#patientsList .patient-item').forEach(el => {
+                el.classList.toggle('selected', parseInt(el.dataset.patientId) === patientId);
+            });
+            showToast('Пациент выбран', 'success');
+        }
+
+        // ============================================================
+        // ПАЦИЕНТ - TOGGLE
+        // ============================================================
+
         function setupPatientToggle() {
             const existingToggle = document.getElementById('existingPatientToggle');
             const newToggle = document.getElementById('newPatientToggle');
             const existingSection = document.getElementById('existingPatientsSection');
             const newSection = document.getElementById('newPatientSection');
-            const patientsList = document.getElementById('patientsList');
-            const patientSearch = document.getElementById('patientSearch');
 
             existingToggle.addEventListener('click', () => {
                 existingToggle.classList.add('active');
@@ -1143,31 +1325,150 @@
                 newSection.style.display = 'block';
                 existingSection.style.display = 'none';
             });
-
-            // Patient selection
-            patientsList.querySelectorAll('.patient-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    patientsList.querySelectorAll('.patient-item').forEach(i => {
-                        i.classList.remove('selected');
-                    });
-                    item.classList.add('selected');
-                    selectedPatientId = item.getAttribute('data-patient-id');
-                    showToast(`Выбран пациент: ${item.querySelector('.patient-name').textContent}`);
-                });
-            });
-
-            // Patient search
-            patientSearch.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                patientsList.querySelectorAll('.patient-item').forEach(item => {
-                    const name = item.querySelector('.patient-name').textContent.toLowerCase();
-                    const details = item.querySelector('.patient-details').textContent.toLowerCase();
-                    item.style.display = (name.includes(searchTerm) || details.includes(searchTerm)) ? 'block' : 'none';
-                });
-            });
         }
 
-        // Date validation
+        // ============================================================
+        // ДОБАВЛЕНИЕ НОВОГО ПАЦИЕНТА
+        // ============================================================
+
+        function openAddPatientModal() {
+            const fullName = document.getElementById('patientFullName').value.trim();
+            const phone = document.getElementById('patientPhone').value.trim();
+            const birthDate = document.getElementById('patientBirthDate').value;
+            const email = document.getElementById('patientEmail').value.trim();
+            const gender = document.getElementById('patientGender').value;
+            
+            // Очистка ошибок
+            document.querySelectorAll('#newPatientSection .error-message').forEach(el => el.classList.remove('show'));
+            
+            let hasError = false;
+            
+            if (!fullName) {
+                document.getElementById('nameError').classList.add('show');
+                hasError = true;
+            }
+            
+            if (!birthDate) {
+                document.getElementById('birthDateError').classList.add('show');
+                hasError = true;
+            }
+            
+            if (!phone || phone.length < 10) {
+                document.getElementById('phoneError').classList.add('show');
+                hasError = true;
+            }
+            
+            if (!email) {
+                document.getElementById('emailError').classList.add('show');
+                hasError = true;
+            }
+            
+            if (!gender) {
+                document.getElementById('genderError').classList.add('show');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                showToast('Пожалуйста, заполните все поля', 'error');
+                return;
+            }
+            
+            // Заполняем данные для подтверждения
+            const grid = document.getElementById('confirmGrid');
+            grid.innerHTML = `
+                <div class="confirm-item">
+                    <span class="confirm-label">ФИО</span>
+                    <span class="confirm-value">${fullName}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Телефон</span>
+                    <span class="confirm-value">${phone}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Дата рождения</span>
+                    <span class="confirm-value">${birthDate}</span>
+                </div>
+                <div class="confirm-item">
+                    <span class="confirm-label">Email</span>
+                    <span class="confirm-value">${email}</span>
+                </div>
+                <div class="confirm-item" style="grid-column: 1 / -1;">
+                    <span class="confirm-label">Пол</span>
+                    <span class="confirm-value">${gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                </div>
+            `;
+            
+            document.getElementById('confirmPatientModal').style.display = 'flex';
+        }
+
+        function closeConfirmPatientModal() {
+            document.getElementById('confirmPatientModal').style.display = 'none';
+        }
+
+        async function confirmAddPatient() {
+            const data = {
+                full_name: document.getElementById('patientFullName').value.trim(),
+                phone: document.getElementById('patientPhone').value.trim(),
+                date_of_birth: document.getElementById('patientBirthDate').value,
+                email: document.getElementById('patientEmail').value.trim(),
+                gender: document.getElementById('patientGender').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/patients`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const newPatient = await response.json();
+                    showToast('✅ Пациент успешно добавлен', 'success');
+                    closeConfirmPatientModal();
+                    
+                    // Добавляем в список
+                    allPatients.push(newPatient);
+                    // Переключаемся на вкладку "Выбрать из моих пациентов"
+                    document.getElementById('existingPatientToggle').click();
+                    // Обновляем список
+                    const container = document.getElementById('patientsList');
+                    const div = document.createElement('div');
+                    div.className = 'patient-item selected';
+                    div.dataset.patientId = newPatient.id;
+                    div.innerHTML = `
+                        <div class="patient-name">${newPatient.full_name}</div>
+                        <div class="patient-details">
+                            <span><i class="fas fa-phone"></i> ${newPatient.phone || '—'}</span>
+                            <span><i class="fas fa-envelope"></i> ${newPatient.email || '—'}</span>
+                            <span><i class="fas fa-birthday-cake"></i> ${newPatient.age || '—'} лет</span>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => selectPatient(newPatient.id));
+                    container.prepend(div);
+                    
+                    selectedPatientId = newPatient.id;
+                    
+                    // Очищаем форму
+                    document.getElementById('patientFullName').value = '';
+                    document.getElementById('patientBirthDate').value = '';
+                    document.getElementById('patientPhone').value = '';
+                    document.getElementById('patientEmail').value = '';
+                    document.getElementById('patientGender').value = '';
+                    
+                } else {
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка при добавлении'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            }
+        }
+
+        // ============================================================
+        // ДАТА ВАЛИДАЦИЯ
+        // ============================================================
+
         function setupDateValidation() {
             const startDateInput = document.getElementById('visitStartDate');
             const endDateInput = document.getElementById('visitEndDate');
@@ -1200,153 +1501,133 @@
             endDateInput.addEventListener('change', validateDateRange);
         }
 
-        // Confirm Patient Modal
-        function openAddPatientModal() {
-            const fullName = document.getElementById('patientFullName').value.trim();
-            const phone = document.getElementById('patientPhone').value.trim();
-            const birthDate = document.getElementById('patientBirthDate').value;
-            const email = document.getElementById('patientEmail').value.trim();
-            const gender = document.getElementById('patientGender').value;
-            
-            if (!fullName) {
-                showToast('Пожалуйста, укажите ФИО пациента', 'error');
-                return;
-            }
-            
-            if (!phone || phone.length < 10) {
-                showToast('Пожалуйста, укажите корректный номер телефона', 'error');
-                return;
-            }
-            
-            // Заполняем данные для подтверждения
-            const grid = document.getElementById('confirmGrid');
-            grid.innerHTML = `
-                <div class="confirm-item">
-                    <span class="confirm-label">ФИО</span>
-                    <span class="confirm-value">${fullName}</span>
-                </div>
-                <div class="confirm-item">
-                    <span class="confirm-label">Телефон</span>
-                    <span class="confirm-value">${phone}</span>
-                </div>
-                <div class="confirm-item">
-                    <span class="confirm-label">Дата рождения</span>
-                    <span class="confirm-value">${birthDate || 'Не указана'}</span>
-                </div>
-                <div class="confirm-item">
-                    <span class="confirm-label">Email</span>
-                    <span class="confirm-value">${email || 'Не указан'}</span>
-                </div>
-                <div class="confirm-item" style="grid-column: 1 / -1;">
-                    <span class="confirm-label">Пол</span>
-                    <span class="confirm-value">${gender === 'male' ? 'Мужской' : gender === 'female' ? 'Женский' : 'Не указан'}</span>
-                </div>
-            `;
-            
-            document.getElementById('confirmPatientModal').style.display = 'flex';
-        }
+        // ============================================================
+        // ФОРМА СОЗДАНИЯ НАПРАВЛЕНИЯ
+        // ============================================================
 
-        function closeConfirmPatientModal() {
-            document.getElementById('confirmPatientModal').style.display = 'none';
-        }
-
-        function confirmAddPatient() {
-            // В будущем здесь будет POST запрос
-            // const data = {
-            //     full_name: document.getElementById('patientFullName').value.trim(),
-            //     phone: document.getElementById('patientPhone').value.trim(),
-            //     birth_date: document.getElementById('patientBirthDate').value,
-            //     email: document.getElementById('patientEmail').value.trim(),
-            //     gender: document.getElementById('patientGender').value
-            // };
-            // 
-            // fetch('/api/patients', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(data)
-            // })
+        document.getElementById('referralForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            showToast('✅ Пациент успешно добавлен', 'success');
-            closeConfirmPatientModal();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
             
-            // Переключаемся на вкладку "Выбрать из моих пациентов"
-            document.getElementById('existingPatientToggle').click();
-            
-            // Очищаем форму
-            document.getElementById('patientFullName').value = '';
-            document.getElementById('patientBirthDate').value = '';
-            document.getElementById('patientPhone').value = '';
-            document.getElementById('patientEmail').value = '';
-            document.getElementById('patientGender').value = '';
-        }
-
-        // Form validation
-        function validateForm() {
-            let isValid = true;
-            
+            // Проверка клиники
             if (!selectedClinicId) {
                 showToast('Пожалуйста, выберите клинику', 'error');
-                return false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                return;
             }
             
+            // Проверка специализации
+            if (!selectedSpecializationId) {
+                showToast('Пожалуйста, выберите специализацию', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                return;
+            }
+            
+            // Проверка пациента
             const isNewPatient = document.getElementById('newPatientToggle').classList.contains('active');
             
             if (isNewPatient) {
-                const fullName = document.getElementById('patientFullName').value.trim();
-                const phone = document.getElementById('patientPhone').value.trim();
-                
-                if (!fullName) {
-                    document.getElementById('nameError').classList.add('show');
-                    document.getElementById('patientFullName').classList.add('error');
-                    isValid = false;
-                }
-                
-                if (!phone || phone.length < 10) {
-                    document.getElementById('phoneError').classList.add('show');
-                    document.getElementById('patientPhone').classList.add('error');
-                    isValid = false;
+                // Проверяем, что пациент был создан и выбран
+                if (!selectedPatientId) {
+                    showToast('Пожалуйста, добавьте пациента', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                    return;
                 }
             } else {
                 if (!selectedPatientId) {
                     showToast('Пожалуйста, выберите пациента из списка', 'error');
-                    isValid = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                    return;
                 }
             }
             
+            // Проверка дат
             const startDate = document.getElementById('visitStartDate').value;
             const endDate = document.getElementById('visitEndDate').value;
             
             if (!startDate || !endDate) {
                 document.getElementById('dateError').textContent = 'Пожалуйста, укажите период визита';
                 document.getElementById('dateError').classList.add('show');
-                isValid = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                return;
             }
             
-            return isValid;
-        }
-
-        // Form submission
-        document.getElementById('referralForm').addEventListener('submit', (e) => {
-            e.preventDefault();
+            // Проверка жалоб
+            const medIndications = document.getElementById('medicalIndications').value.trim();
+            if (!medIndications) {
+                document.getElementById('indicationsError').classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
+                return;
+            }
             
-            if (validateForm()) {
-                document.getElementById('successModal').style.display = 'flex';
+            // Собираем данные
+            const data = {
+                clinic_id: selectedClinicId,
+                patient_id: selectedPatientId,
+                specialization_id: selectedSpecializationId,
+                expected_visit_start: startDate,
+                expected_visit_end: endDate,
+                med_indications: medIndications,
+                special_wishes: document.getElementById('specialRequests').value.trim() || null
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/referrals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('successModal').style.display = 'flex';
+                    showToast('✅ Направление создано', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка при создании'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Создать направление';
             }
         });
 
-        // Helper functions
+        // ============================================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================================
+
         function closeSuccessModal() {
             document.getElementById('successModal').style.display = 'none';
             document.getElementById('referralForm').reset();
             document.querySelectorAll('.clinic-option').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('.patient-item').forEach(i => i.classList.remove('selected'));
+            document.querySelectorAll('.specialization-option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.patient-item').forEach(el => el.classList.remove('selected'));
             selectedClinicId = null;
+            selectedSpecializationId = null;
             selectedPatientId = null;
             document.getElementById('newPatientToggle').click();
+            // Автовыбор первой клиники и специализации
+            setTimeout(() => {
+                const firstClinic = document.querySelector('.clinic-option');
+                if (firstClinic) selectClinic(parseInt(firstClinic.dataset.clinicId));
+                const firstSpec = document.querySelector('.specialization-option');
+                if (firstSpec) selectSpecialization(parseInt(firstSpec.dataset.specId));
+            }, 100);
         }
 
         function viewReferral() {
-            window.location.href = 'referral-detail?id=REF-202412-00045';
+            window.location.href = 'referrals';
         }
 
         // Закрытие модальных окон по клику на фон
@@ -1358,19 +1639,32 @@
             });
         });
 
-        // Автовыбор первой клиники
-        setTimeout(() => {
-            if (clinicsData.length > 0) {
-                selectClinic(clinicsData[0].id);
-            }
-        }, 100);
-
         // Маска телефона
         document.getElementById('patientPhone').addEventListener('input', function(e) {
             let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
             if (!x) return;
             e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
         });
+
+        function setDefaultDates() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            const oneMonthLater = new Date(tomorrow);
+            oneMonthLater.setMonth(tomorrow.getMonth() + 1);
+            
+            // Форматируем как YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            document.getElementById('visitStartDate').value = formatDate(tomorrow);
+            document.getElementById('visitEndDate').value = formatDate(oneMonthLater);
+        }
     </script>
 </body>
 </html>

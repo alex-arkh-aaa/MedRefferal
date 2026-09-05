@@ -66,7 +66,7 @@ class Clinic(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     address = Column(String(100), nullable=False)
-    location_url = Column(String(100), nullable=False)
+    coordinates = Column(String(100), nullable=False)
     
     # Relationships
     referrals = relationship("Referral", back_populates="clinic")
@@ -79,7 +79,7 @@ class Patient(Base):
     full_name = Column(String(40), nullable=False)
     date_of_birth = Column(Date, nullable=False)
     phone = Column(String(20), nullable=False)
-    email = Column(String(255), unique=True, nullable=True)
+    email = Column(String(255), nullable=True)
     gender = Column(String(10), nullable=False)  # 'М' или 'Ж'
     doctor_id = Column(Integer, ForeignKey("doctors.id"), nullable=False)
     info = Column(Text, nullable=True)

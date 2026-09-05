@@ -259,6 +259,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            margin-bottom: 40px;
         }
 
         .clinic-item {
@@ -271,6 +272,7 @@
             align-items: center;
             transition: var(--transition);
             border: 2px solid transparent;
+            cursor: pointer;
         }
 
         .clinic-item:hover {
@@ -301,6 +303,14 @@
             color: var(--primary-color);
         }
 
+        .clinic-coords {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
         .loading-spinner {
             text-align: center;
             padding: 40px;
@@ -312,6 +322,47 @@
             font-size: 2rem;
             margin-bottom: 10px;
             color: var(--primary-color);
+        }
+
+        /* ===== MAP SECTION ===== */
+        .map-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .map-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-header h2 {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .map-header h2 i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background: #e8ecf1;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
         }
 
         /* User Panel */
@@ -454,6 +505,22 @@
                 align-items: flex-start;
                 gap: 15px;
             }
+
+            .map-container {
+                height: 350px;
+            }
+
+            .map-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .map-container {
+                height: 280px;
+            }
         }
     </style>
 </head>
@@ -549,6 +616,21 @@
                 <div class="loading-spinner">
                     <div><i class="fas fa-spinner fa-spin"></i></div>
                     <div>Загрузка клиник...</div>
+                </div>
+            </div>
+
+            <!-- ===== MAP SECTION with iframe widget ===== -->
+            <div class="map-section">
+                <div class="map-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Расположение клиник на карте</h2>
+                </div>
+                <div class="map-container">
+                    <iframe 
+                        src="https://yandex.ru/map-widget/v1/?ll=37.6173,55.7558&z=14"
+                        frameborder="0"
+                        allowfullscreen="true"
+                        loading="lazy">
+                    </iframe>
                 </div>
             </div>
         </main>
@@ -648,6 +730,73 @@
         // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
         // ============================================================
 
+        // Функция для парсинга координат из строки "55.893210, 37.394650"
+
+
+        function parseCoordinates(coords) {
+            if (!coords) return null;
+            
+            if (typeof coords === 'string') {
+                // Убираем лишние пробелы и разбиваем по запятой или пробелу
+                const parts = coords.split(/[, ]+/).filter(s => s.trim() !== '');
+                if (parts.length === 2) {
+                    const lat = parseFloat(parts[0].replace(',', '.').trim());
+                    const lon = parseFloat(parts[1].replace(',', '.').trim());
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        return { lat, lon };
+                    }
+                }
+                return null;
+            }
+            
+            if (typeof coords === 'object' && coords !== null) {
+                const lat = parseFloat(coords.lat ?? coords.latitude);
+                const lon = parseFloat(coords.lon ?? coords.longitude);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    return { lat, lon };
+                }
+                return null;
+            }
+            
+            if (Array.isArray(coords) && coords.length === 2) {
+                const lat = parseFloat(coords[0]);
+                const lon = parseFloat(coords[1]);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    return { lat, lon };
+                }
+                return null;
+            }
+            
+            return null;
+        }   
+
+        function updateMap(clinics) {
+            const iframe = document.querySelector('.map-container iframe');
+            if (!iframe) return;
+            
+            // Собираем точки
+            const points = [];
+            clinics.forEach(clinic => {
+                const coords = parseCoordinates(clinic.coordinates);
+                if (!coords) return;
+                
+                // Для pt= нужен порядок: ДОЛГОТА, ШИРОТА, метка
+                points.push(`${coords.lon},${coords.lat},pmrdl`);
+            });
+            
+            if (points.length === 0) {
+                iframe.src = 'https://yandex.ru/map-widget/v1/?ll=37.6173,55.7558&z=11';
+                return;
+            }
+            
+            // Центр карты: ДОЛГОТА, ШИРОТА
+            const center = '37.6173,55.7558';
+            const ptString = points.join('~');
+            
+            iframe.src = `https://yandex.ru/map-widget/v1/?ll=${center}&z=9&pt=${ptString}`;
+        }
+
+
         // Загрузка клиников с сервера
         async function loadClinics() {
             const container = document.getElementById('clinicsList');
@@ -694,24 +843,35 @@
                         <p>В базе данных пока нет клиник.</p>
                     </div>
                 `;
+                // Очищаем карту, если клиник нет
+                updateMap([]);
                 return;
             }
             
             container.innerHTML = '';
             
-            clinics.forEach(clinic => {
+            clinics.forEach((clinic, index) => {
                 const item = document.createElement('div');
                 item.className = 'clinic-item';
+                
+                const coords = parseCoordinates(clinic.coordinates);
+                const coordsDisplay = coords ? `${coords.lat}, ${coords.lon}` : '❌ Нет координат';
+                
                 item.innerHTML = `
                     <div class="clinic-info">
                         <div class="clinic-name">${clinic.name}</div>
                         <div class="clinic-address">
-                            <i class="fas fa-map-marker-alt"></i> ${clinic.address}
+                            <i class="fas fa-map-marker-alt"></i> ${clinic.address || 'Адрес не указан'}
                         </div>
                     </div>
+                    <div class="clinic-coords">${coordsDisplay}</div>
                 `;
+                
                 container.appendChild(item);
             });
+            
+            // ===== ОБНОВЛЯЕМ КАРТУ =====
+            updateMap(clinics);
         }
 
         // Инициализация

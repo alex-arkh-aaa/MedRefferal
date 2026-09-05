@@ -299,6 +299,14 @@ async def get_patient_by_id(db: AsyncSession, patient_id: int, doctor_id: int) -
     return patient
 
 
+
+async def get_patient_by_email(db: AsyncSession, email: str, doctor_id: int, patient_id: str) -> Optional[Patient]:
+    result = await db.execute(
+        select(Patient).where(Patient.email == email, Patient.doctor_id == doctor_id, Patient.id != patient_id)
+    )
+    return result.scalar_one_or_none()
+
+
 async def create_patient(
     db: AsyncSession,
     doctor_id: int,
@@ -388,3 +396,171 @@ async def get_patient_referrals_count(db: AsyncSession, patient_id: int) -> int:
         select(func.count()).where(Referral.patient_id == patient_id)
     )
     return result.scalar()
+
+
+
+
+# ==================== Referrals ====================
+
+async def create_referral(
+    db: AsyncSession,
+    doctor_id: int,
+    clinic_id: int,
+    patient_id: int,
+    specialization_id: int,
+    expected_visit_start: date,
+    expected_visit_end: date,
+    med_indications: str,
+    special_wishes: Optional[str] = None
+) -> Referral:
+    """Создать новое направление"""
+    
+    referral = Referral(
+        doctor_id=doctor_id,
+        clinic_id=clinic_id,
+        patient_id=patient_id,
+        specialization_id=specialization_id,
+        expected_visit_start=expected_visit_start,
+        expected_visit_end=expected_visit_end,
+        med_indications=med_indications,
+        special_wishes=special_wishes or "",
+        status="appointed"
+    )
+    db.add(referral)
+    await db.commit()
+    await db.refresh(referral)
+    return referral
+
+
+async def get_referrals_by_doctor(
+    db: AsyncSession,
+    doctor_id: int,
+    skip: int = 0,
+    limit: int = 100
+) -> Tuple[List[Referral], int]:
+    """Получить все направления доктора"""
+    
+    query = select(Referral).where(Referral.doctor_id == doctor_id)
+    
+    count_query = select(func.count()).select_from(query.subquery())
+    total = await db.execute(count_query)
+    total = total.scalar()
+    
+    query = query.offset(skip).limit(limit).order_by(Referral.created_at.desc())
+    result = await db.execute(query)
+    referrals = result.scalars().all()
+    
+    return referrals, total
+
+
+
+# ==================== Referrals (update & delete) ====================
+
+async def update_referral(
+    db: AsyncSession,
+    referral_id: int,
+    doctor_id: int,
+    **kwargs
+) -> Optional[Referral]:
+    """Обновить направление"""
+    
+    result = await db.execute(
+        select(Referral).where(
+            Referral.id == referral_id,
+            Referral.doctor_id == doctor_id
+        )
+    )
+    referral = result.scalar_one_or_none()
+    
+    if not referral:
+        return None
+    
+    for key, value in kwargs.items():
+        if value is not None and hasattr(referral, key):
+            setattr(referral, key, value)
+
+    referral.updated_at = datetime.utcnow()  # 👈 добавь, если есть поле updated_at
+
+    await db.commit()
+    await db.refresh(referral)
+    return referral
+
+
+async def delete_referral(
+    db: AsyncSession,
+    referral_id: int,
+    doctor_id: int
+) -> bool:
+    """Удалить направление"""
+    
+    result = await db.execute(
+        delete(Referral).where(
+            Referral.id == referral_id,
+            Referral.doctor_id == doctor_id
+        )
+    )
+    await db.commit()
+    return result.rowcount > 0
+
+
+async def get_referral_by_id(
+    db: AsyncSession,
+    referral_id: int,
+    doctor_id: int
+) -> Optional[Referral]:
+    """Получить направление по id"""
+    
+    result = await db.execute(
+        select(Referral).where(
+            Referral.id == referral_id,
+            Referral.doctor_id == doctor_id
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+# ==================== Referrals (with search) ====================
+
+async def get_referrals_by_doctor(
+    db: AsyncSession,
+    doctor_id: int,
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    clinic_id: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 100
+) -> Tuple[List[Referral], int]:
+    """Получить направления доктора с фильтрами"""
+    
+    query = select(Referral).where(Referral.doctor_id == doctor_id)
+    
+    # Поиск по пациенту
+    if search:
+        query = query.join(Patient).where(
+            Patient.full_name.ilike(f"%{search}%")
+        )
+    
+    # Фильтр по статусу
+    if status:
+        query = query.where(Referral.status == status)
+    
+    # Фильтр по клинике
+    if clinic_id:
+        query = query.where(Referral.clinic_id == clinic_id)
+    
+    # Подсчет общего количества
+    count_query = select(func.count()).select_from(query.subquery())
+    total = await db.execute(count_query)
+    total = total.scalar()
+    
+    # Пагинация и сортировка
+    query = query.offset(skip).limit(limit).order_by(Referral.created_at.desc())
+    query = query.options(
+        selectinload(Referral.patient),
+        selectinload(Referral.clinic),
+        selectinload(Referral.specialization)
+    )
+    result = await db.execute(query)
+    referrals = result.scalars().all()
+    
+    return referrals, total

@@ -69,10 +69,10 @@ class UserResponse(BaseModel):
     full_name: str
     phone: str
     created_at: datetime
-    experience: str
-    date_of_birth: date
-    about_myself: str
-    education: str
+    experience: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    about_myself: Optional[str] = None
+    education: Optional[str] = None
 
 
     class Config:
@@ -109,7 +109,7 @@ class ClinicResponse(BaseModel):
     id: int
     name: str
     address: str
-    location_url: str
+    coordinates: str
 
     class Config:
         from_attributes = True
@@ -117,11 +117,11 @@ class ClinicResponse(BaseModel):
 # ==================== Patient Schemas ====================
 
 class PatientCreate(BaseModel):
-    full_name: str = Field(..., min_length=1)
-    phone: str = Field(..., min_length=1)
-    date_of_birth: Optional[date] = None
+    full_name: str = Field(..., min_length=1, description="ФИО обязательно")
+    phone: str = Field(..., min_length=1, description="Телефон обязателен")
+    date_of_birth: date = Field(..., description="Дата рождения обязательна")
     email: Optional[EmailStr] = None
-    gender: Optional[str] = Field(None, pattern="^(male|female)$")
+    gender: str = Field(..., pattern="^(male|female)$", description="Пол обязателен (male/female)")
     info: Optional[str] = None
 
 
@@ -159,3 +159,71 @@ class PatientListResponse(BaseModel):
     page: int
     limit: int
     pages: int
+
+
+
+    # ==================== Referral Schemas ====================
+
+class ReferralCreate(BaseModel):
+    clinic_id: int = Field(..., description="ID клиники")
+    patient_id: int = Field(..., description="ID пациента")
+    specialization_id: int = Field(..., description="ID специализации")
+    expected_visit_start: date = Field(..., description="Начало ожидаемого периода визита")
+    expected_visit_end: date = Field(..., description="Конец ожидаемого периода визита")
+    med_indications: str = Field(..., min_length=1, description="Медицинские показания/жалобы")
+    special_wishes: Optional[str] = Field(None, description="Особые пожелания")
+
+
+class ReferralResponse(BaseModel):
+    id: int
+    doctor_id: int
+    clinic_id: int
+    patient_id: int
+    specialization_id: int
+    expected_visit_start: date
+    expected_visit_end: date
+    med_indications: str
+    special_wishes: Optional[str]
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+
+        # ==================== Referral Update Schemas ====================
+
+class ReferralUpdate(BaseModel):
+    status: Optional[str] = Field(None, pattern="^(appointed|confirmed|scheduled|completed|no-show|cancelled)$")
+    expected_visit_start: Optional[date] = None
+    expected_visit_end: Optional[date] = None
+    med_indications: Optional[str] = None
+    special_wishes: Optional[str] = None
+
+
+
+    # ==================== Referral Response (расширенный) ====================
+
+class ReferralDetailResponse(BaseModel):
+    id: int
+    doctor_id: int
+    clinic_id: int
+    patient_id: int
+    specialization_id: int
+    expected_visit_start: date
+    expected_visit_end: date
+    med_indications: str
+    special_wishes: Optional[str]
+    status: str
+    created_at: datetime
+    
+    # Дополнительные поля для отображения
+    patient_full_name: Optional[str] = None
+    patient_phone: Optional[str] = None
+    clinic_name: Optional[str] = None
+    clinic_address: Optional[str] = None
+    specialization_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True

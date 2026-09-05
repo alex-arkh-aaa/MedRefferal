@@ -1216,7 +1216,7 @@
                     
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>ФИО <span class="required">*</span></label>
+                            <label>ФИО <span class="required"></span></label>
                             <input type="text" id="addFullName" placeholder="Иванов Иван Иванович">
                         </div>
                         
@@ -1226,7 +1226,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Телефон <span class="required">*</span></label>
+                            <label>Телефон <span class="required"></span></label>
                             <input type="tel" id="addPhone" placeholder="+7 (999) 123-45-67">
                         </div>
                         
@@ -1297,7 +1297,7 @@
             
             <div class="form-grid">
                 <div class="form-group">
-                    <label>ФИО <span class="required">*</span></label>
+                    <label>ФИО <span class="required"></span></label>
                     <input type="text" id="editFullName" placeholder="Иванов Иван Иванович">
                 </div>
                 
@@ -1307,7 +1307,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Телефон <span class="required">*</span></label>
+                    <label>Телефон <span class="required"></span></label>
                     <input type="tel" id="editPhone" placeholder="+7 (999) 123-45-67">
                 </div>
                 
@@ -1685,6 +1685,7 @@
             const email = document.getElementById('addEmail').value.trim();
             const gender = document.getElementById('addGender').value;
             
+            // Проверка всех полей
             if (!fullName) {
                 showToast('Пожалуйста, укажите ФИО пациента', 'error');
                 return;
@@ -1695,6 +1696,22 @@
                 return;
             }
             
+            if (!birthDate) {
+                showToast('Пожалуйста, укажите дату рождения', 'error');
+                return;
+            }
+            
+            if (!gender) {
+                showToast('Пожалуйста, укажите пол пациента', 'error');
+                return;
+            }
+
+            if (!email) {
+                showToast('Пожалуйста, укажите почту пациента', 'error');
+                return;
+            }
+            
+            // Если все заполнено — показываем модалку
             const grid = document.getElementById('confirmGrid');
             grid.innerHTML = `
                 <div class="confirm-item">
@@ -1707,7 +1724,7 @@
                 </div>
                 <div class="confirm-item">
                     <span class="confirm-label">Дата рождения</span>
-                    <span class="confirm-value">${birthDate || 'Не указана'}</span>
+                    <span class="confirm-value">${birthDate}</span>
                 </div>
                 <div class="confirm-item">
                     <span class="confirm-label">Email</span>
@@ -1715,7 +1732,7 @@
                 </div>
                 <div class="confirm-item" style="grid-column: 1 / -1;">
                     <span class="confirm-label">Пол</span>
-                    <span class="confirm-value">${gender === 'male' ? 'Мужской' : gender === 'female' ? 'Женский' : 'Не указан'}</span>
+                    <span class="confirm-value">${gender === 'male' ? 'Мужской' : 'Женский'}</span>
                 </div>
             `;
             
