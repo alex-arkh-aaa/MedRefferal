@@ -557,25 +557,6 @@ async def update_referral(
     return referral
 
 
-async def delete_referral(
-    db: AsyncSession,
-    referral_id: int,
-    doctor_id: int
-) -> bool:
-    """Удалить направление"""
-    
-    result = await db.execute(
-        delete(Referral).where(
-            Referral.id == referral_id,
-            Referral.doctor_id == doctor_id
-        )
-    )
-    await db.commit()
-    await add_history(db, doctor_id, "Удалено направление", f"Направление #{referral_id}")
-
-    return result.rowcount > 0
-
-
 async def get_referral_by_id(
     db: AsyncSession,
     referral_id: int,
@@ -590,6 +571,29 @@ async def get_referral_by_id(
         )
     )
     return result.scalar_one_or_none()
+
+async def delete_referral(
+    db: AsyncSession,
+    referral_id: int,
+    doctor_id: int
+) -> bool:
+    """Удалить направление"""
+
+    referral = await get_referral_by_id(db, referral_id, doctor_id)
+    patient = await get_patient_by_id(db, referral.patient_id, doctor_id)
+    
+    
+    result = await db.execute(
+        delete(Referral).where(
+            Referral.id == referral_id,
+            Referral.doctor_id == doctor_id
+        )
+    )
+    await db.commit()
+    await add_history(db, doctor_id, "Удалено направление", f"Направление #{referral_id} для пациента {patient.full_name}")
+
+    return result.rowcount > 0
+
 
 
 # ==================== Referrals (with search) ====================
