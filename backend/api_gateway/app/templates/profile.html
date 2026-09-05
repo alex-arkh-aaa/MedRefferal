@@ -695,7 +695,7 @@
                                     <div class="stat-label">Пациентов</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">0</div>
+                                    <div class="stat-value">100</div>
                                     <div class="stat-label">Рейтинг</div>
                                 </div>
                             </div>
@@ -854,6 +854,8 @@
                 
                 // Загружаем специализации доктора
                 loadMySpecializations();
+                loadDoctorStats();
+
             } else {
                 userPanel.style.display = 'none';
                 window.location.href = '/';
@@ -944,6 +946,21 @@
                 }
             } catch (err) {
                 console.error('Ошибка загрузки специализаций:', err);
+            }
+        }
+
+        async function loadDoctorStats() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/stats`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.querySelector('.profile-stats .stat-item:first-child .stat-value').textContent = stats.total_referrals || 0;
+                    document.querySelector('.profile-stats .stat-item:nth-child(2) .stat-value').textContent = stats.total_patients || 0;
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки статистики:', err);
             }
         }
 

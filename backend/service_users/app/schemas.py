@@ -161,7 +161,11 @@ class PatientListResponse(BaseModel):
     pages: int
 
 
-
+class PatientsStatsResponse(BaseModel):
+    total: int
+    active: int
+    new_patients: int
+    activity: float
     # ==================== Referral Schemas ====================
 
 class ReferralCreate(BaseModel):
@@ -224,6 +228,50 @@ class ReferralDetailResponse(BaseModel):
     clinic_name: Optional[str] = None
     clinic_address: Optional[str] = None
     specialization_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+
+
+class DashboardStatsResponse(BaseModel):
+    total_referrals: int
+    active_patients: int
+    today_referrals: int
+    upcoming_visits: int
+
+
+
+
+
+class RecentActivityResponse(BaseModel):
+    id: int
+    label: str
+    info: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UpcomingAppointmentResponse(BaseModel):
+    id: int
+    patient_name: str
+    clinic_name: str
+    clinic_address: str
+    expected_visit_start: date
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
+class TopClinicResponse(BaseModel):
+    id: int
+    name: str
+    address: str
+    referrals_count: int
 
     class Config:
         from_attributes = True

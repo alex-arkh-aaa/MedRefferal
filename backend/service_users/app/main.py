@@ -356,8 +356,18 @@ async def get_all_specializations(
 
 
 
-# ==================== Clinics Routes ====================
 
+
+
+@app.get("/api/v1/auth/stats")
+async def get_doctor_stats(
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить статистику доктора (направления и пациенты)"""
+    return await crud.get_doctor_stats(db, current_user.id)
+
+# ==================== Clinics Routes ====================
 @app.get("/api/v1/clinics", response_model=List[ClinicResponse])
 async def get_clinics(
     db: AsyncSession = Depends(get_db)
@@ -366,10 +376,7 @@ async def get_clinics(
     clinics = await crud.get_all_clinics(db)
     return clinics
 
-
-
 # ==================== Patients Routes ====================
-
 @app.get("/api/v1/patients", response_model=List[PatientResponse])
 async def get_patients(
     search: Optional[str] = None,
@@ -397,8 +404,16 @@ async def get_patients(
         skip=skip,
         limit=limit
     )
-    
     return patients
+
+
+@app.get("/api/v1/patients/stats", response_model=PatientsStatsResponse)
+async def get_patients_stats(
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить статистику пациентов"""
+    return await crud.get_patients_stats(db, current_user.id)
 
 
 @app.get("/api/v1/patients/{patient_id}", response_model=PatientResponse)
@@ -415,7 +430,6 @@ async def get_patient(
     
     return patient
 
-
 @app.post("/api/v1/patients", response_model=PatientResponse)
 async def create_patient(
     data: PatientCreate,
@@ -423,7 +437,7 @@ async def create_patient(
     db: AsyncSession = Depends(get_db)
 ):
     """Создать нового пациента (все поля обязательны)"""
-    existing_patient = await crud.get_patient_by_email(db, data.email, current_user.id)
+    existing_patient = await crud.get_patient_by_email(db, data.email)
     if existing_patient:
         raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
 
@@ -458,7 +472,6 @@ async def create_patient(
     
     return patient
 
-
 @app.put("/api/v1/patients/{patient_id}", response_model=PatientResponse)
 async def update_patient(
     patient_id: int,
@@ -469,7 +482,7 @@ async def update_patient(
     """Обновить данные пациента"""
 
     if data.email:
-        existing_patient = await crud.get_patient_by_email(db, data.email, current_user.id, patient_id)
+        existing_patient = await crud.get_patient_by_email(db, data.email, patient_id)
         if existing_patient:
             raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
 
@@ -489,6 +502,10 @@ async def update_patient(
     return patient
 
 
+
+
+
+
 @app.delete("/api/v1/patients/{patient_id}", response_model=MessageResponse)
 async def delete_patient(
     patient_id: int,
@@ -496,13 +513,11 @@ async def delete_patient(
     db: AsyncSession = Depends(get_db)
 ):
     """Удалить пациента"""
-    
     deleted = await crud.delete_patient(db, patient_id, current_user.id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Пациент не найден")
     
     return MessageResponse(message="Пациент удален")
-
 
 @app.get("/api/v1/patients/{patient_id}/referrals-count", response_model=dict)
 async def get_patient_referrals_count(
@@ -523,8 +538,10 @@ async def get_patient_referrals_count(
 
 
 
-# ==================== Referrals Routes ====================
 
+
+
+# ==================== Referrals Routes ====================
 @app.post("/api/v1/referrals", response_model=ReferralResponse)
 async def create_referral(
     data: ReferralCreate,
@@ -570,7 +587,6 @@ async def create_referral(
     )
     
     return referral
-
 
 @app.get("/api/v1/referrals", response_model=List[ReferralDetailResponse])
 async def get_referrals(
@@ -621,9 +637,7 @@ async def get_referrals(
     return result
 
 
-
 # ==================== Referrals Routes (update & delete) ====================
-
 @app.put("/api/v1/referrals/{referral_id}", response_model=ReferralDetailResponse)
 async def update_referral(
     referral_id: int,
@@ -698,3 +712,48 @@ async def delete_referral(
         raise HTTPException(status_code=404, detail="Направление не найдено")
     
     return MessageResponse(message="Направление удалено")
+
+
+# ==================== Dashboard Routes ====================
+@app.get("/api/v1/dashboard/stats", response_model=DashboardStatsResponse)
+async def get_dashboard_stats(
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить статистику для дашборда"""
+    return await crud.get_dashboard_stats(db, current_user.id)
+
+@app.get("/api/v1/dashboard/activity", response_model=List[RecentActivityResponse])
+async def get_recent_activity(
+    limit: int = 5,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить последние действия"""
+    activity = await crud.get_recent_activity(db, current_user.id, limit)
+    return activity
+
+@app.get("/api/v1/dashboard/appointments", response_model=List[UpcomingAppointmentResponse])
+async def get_upcoming_appointments(
+    limit: int = 4,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить ближайшие визиты"""
+    appointments = await crud.get_upcoming_appointments(db, current_user.id, limit)
+    return [{
+        "id": a.id,
+        "patient_name": a.patient.full_name,
+        "clinic_name": a.clinic.name,
+        "clinic_address": a.clinic.address,
+        "expected_visit_start": a.expected_visit_start,
+        "status": a.status
+    } for a in appointments]
+
+@app.get("/api/v1/dashboard/top-clinics", response_model=List[TopClinicResponse])
+async def get_top_clinics(
+    limit: int = 4,
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить топ клиник по направлениям"""
+    return await crud.get_top_clinics(db, limit)

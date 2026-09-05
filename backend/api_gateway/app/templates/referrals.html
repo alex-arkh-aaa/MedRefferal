@@ -973,7 +973,7 @@
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-icon" style="background-color: #f0fdf4; color: var(--success-color);">
+                    <div class="stat-icon" style="background-color: #d1fae5; color: var(--success-color);">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-content">
@@ -991,7 +991,17 @@
                         <div class="stat-label">Ожидают визита</div>
                     </div>
                 </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="conversionRate">0%</div>
+                    <div class="stat-label">Конверсия</div>
+                </div>
             </div>
+        </div>
 
             <!-- Filters -->
             <div class="filters-container">
@@ -1322,10 +1332,16 @@
 
         // Обновить статистику
         function updateStats() {
-            document.getElementById('totalReferrals').textContent = allReferrals.length;
-            document.getElementById('completedReferrals').textContent = allReferrals.filter(r => r.status === 'completed').length;
-            document.getElementById('pendingReferrals').textContent = allReferrals.filter(r => r.status === 'appointed' || r.status === 'confirmed' || r.status === 'scheduled').length;
-        }
+            const total = allReferrals.length;
+            const completed = allReferrals.filter(r => r.status === 'completed').length;
+            const pending = allReferrals.filter(r => r.status === 'appointed' || r.status === 'confirmed' || r.status === 'scheduled').length;
+            const conversion = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('totalReferrals').textContent = total;
+            document.getElementById('completedReferrals').textContent = completed;
+            document.getElementById('pendingReferrals').textContent = pending;
+            document.getElementById('conversionRate').textContent = conversion + '%';
+        }        
 
         // Рендер текущей страницы
         function renderCurrentPage() {

@@ -195,7 +195,25 @@ async def delete_email_verification(db: AsyncSession, email: str):
 
 
 
-
+async def get_doctor_stats(db: AsyncSession, doctor_id: int) -> dict:
+    """Получить статистику доктора для профиля"""
+    
+    # Всего направлений
+    referrals_result = await db.execute(
+        select(func.count()).where(Referral.doctor_id == doctor_id)
+    )
+    total_referrals = referrals_result.scalar() or 0
+    
+    # Всего пациентов
+    patients_result = await db.execute(
+        select(func.count()).where(Patient.doctor_id == doctor_id)
+    )
+    total_patients = patients_result.scalar() or 0
+    
+    return {
+        "total_referrals": total_referrals,
+        "total_patients": total_patients
+    }
 # ==================== Clinics ====================
 
 async def get_all_clinics(db: AsyncSession) -> List[Clinic]:
@@ -300,9 +318,9 @@ async def get_patient_by_id(db: AsyncSession, patient_id: int, doctor_id: int) -
 
 
 
-async def get_patient_by_email(db: AsyncSession, email: str, doctor_id: int, patient_id: str) -> Optional[Patient]:
+async def get_patient_by_email(db: AsyncSession, email: str, patient_id: Optional[int] = None) -> Optional[Patient]:
     result = await db.execute(
-        select(Patient).where(Patient.email == email, Patient.doctor_id == doctor_id, Patient.id != patient_id)
+        select(Patient).where(Patient.email == email, Patient.id != patient_id)
     )
     return result.scalar_one_or_none()
 
@@ -338,7 +356,8 @@ async def create_patient(
         if (datetime.utcnow().month, datetime.utcnow().day) < (patient.date_of_birth.month, patient.date_of_birth.day):
             age -= 1
         patient.age = age
-    
+    await add_history(db, doctor_id, "Добавлен пациент", f"{full_name}")
+
     return patient
 
 
@@ -374,12 +393,16 @@ async def update_patient(
         if (datetime.utcnow().month, datetime.utcnow().day) < (patient.date_of_birth.month, patient.date_of_birth.day):
             age -= 1
         patient.age = age
-    
+    await add_history(db, doctor_id, "Обновлен пациент", f"{patient.full_name}")
+
     return patient
 
 
 async def delete_patient(db: AsyncSession, patient_id: int, doctor_id: int) -> bool:
     """Удалить пациента"""
+    patient = await get_patient_by_id(db, patient_id, doctor_id)
+    print(patient, '----------------------------------')
+    patient_name = patient.full_name
     result = await db.execute(
         delete(Patient).where(
             Patient.id == patient_id,
@@ -387,6 +410,9 @@ async def delete_patient(db: AsyncSession, patient_id: int, doctor_id: int) -> b
         )
     )
     await db.commit()
+
+    await add_history(db, doctor_id, "Удален пациент", f"{patient_name}")
+
     return result.rowcount > 0
 
 
@@ -399,6 +425,46 @@ async def get_patient_referrals_count(db: AsyncSession, patient_id: int) -> int:
 
 
 
+async def get_patients_stats(db: AsyncSession, doctor_id: int) -> dict:
+    """Получить статистику пациентов для дашборда"""
+    
+    from datetime import date, datetime
+    
+    # Всего пациентов
+    total_result = await db.execute(
+        select(func.count()).where(Patient.doctor_id == doctor_id)
+    )
+    total = total_result.scalar() or 0
+    
+    # Активные пациенты (status = 'active')
+    active_result = await db.execute(
+        select(func.count()).where(
+            Patient.doctor_id == doctor_id,
+            Patient.status == 'active'
+        )
+    )
+    active = active_result.scalar() or 0
+    
+    # Новых за месяц (created_at >= начало месяца)
+    today = datetime.utcnow().date()
+    first_day = date(today.year, today.month, 1)
+    new_result = await db.execute(
+        select(func.count()).where(
+            Patient.doctor_id == doctor_id,
+            func.date(Patient.created_at) >= first_day
+        )
+    )
+    new_patients = new_result.scalar() or 0
+    
+    # Активность (% активных от всех)
+    activity = round((active / total * 100), 1) if total > 0 else 0
+    
+    return {
+        "total": total,
+        "active": active,
+        "new_patients": new_patients,
+        "activity": activity
+    }
 
 # ==================== Referrals ====================
 
@@ -429,6 +495,11 @@ async def create_referral(
     db.add(referral)
     await db.commit()
     await db.refresh(referral)
+
+    patient = await get_patient_by_id(db, patient_id, doctor_id)
+    clinic = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
+    await add_history(db, doctor_id, "Создано направление", f"Для {patient.full_name} в {clinic.scalar_one().name}")
+
     return referral
 
 
@@ -500,6 +571,8 @@ async def delete_referral(
         )
     )
     await db.commit()
+    await add_history(db, doctor_id, "Удалено направление", f"Направление #{referral_id}")
+
     return result.rowcount > 0
 
 
@@ -564,3 +637,133 @@ async def get_referrals_by_doctor(
     referrals = result.scalars().all()
     
     return referrals, total
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def get_dashboard_stats(db: AsyncSession, doctor_id: int) -> dict:
+    """Получить статистику для дашборда"""
+    
+    # Всего направлений
+    total_result = await db.execute(
+        select(func.count()).where(Referral.doctor_id == doctor_id)
+    )
+    total_referrals = total_result.scalar() or 0
+    
+    # Активные пациенты (status = 'active')
+    patients_result = await db.execute(
+        select(func.count()).where(
+            Patient.doctor_id == doctor_id,
+            Patient.status == 'active'
+        )
+    )
+    active_patients = patients_result.scalar() or 0
+    
+    # Новых направлений сегодня
+    today = datetime.utcnow().date()
+    today_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            func.date(Referral.created_at) == today
+        )
+    )
+    today_referrals = today_result.scalar() or 0
+    
+    # Предстоящие визиты (status = 'scheduled' и дата >= сегодня)
+    upcoming_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'scheduled',
+            Referral.expected_visit_start >= today
+        )
+    )
+    upcoming_visits = upcoming_result.scalar() or 0
+    
+    return {
+        "total_referrals": total_referrals,
+        "active_patients": active_patients,
+        "today_referrals": today_referrals,
+        "upcoming_visits": upcoming_visits
+    }
+
+
+
+
+async def get_recent_activity(db: AsyncSession, doctor_id: int, limit: int = 5) -> List[History]:
+    """Получить последние действия доктора"""
+    result = await db.execute(
+        select(History)
+        .where(History.doctor_id == doctor_id)
+        .order_by(History.created_at.desc())
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
+async def get_upcoming_appointments(db: AsyncSession, doctor_id: int, limit: int = 4) -> List[Referral]:
+    """Получить ближайшие визиты (статус scheduled)"""
+    result = await db.execute(
+        select(Referral)
+        .options(
+            selectinload(Referral.patient),
+            selectinload(Referral.clinic)
+        )
+        .where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'scheduled',
+            Referral.expected_visit_start >= datetime.utcnow().date()
+        )
+        .order_by(Referral.expected_visit_start.asc())
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
+async def get_top_clinics(db: AsyncSession, limit: int) -> List[dict]:
+    """Получить топ клиник по количеству направлений (все доктора)"""
+    result = await db.execute(
+        select(
+            Clinic.id,
+            Clinic.name,
+            Clinic.address,
+            func.count(Referral.id).label('referrals_count')
+        )
+        .join(Referral, Referral.clinic_id == Clinic.id)
+        .group_by(Clinic.id)
+        .order_by(func.count(Referral.id).desc())
+    )
+    return [{"id": r[0], "name": r[1], "address": r[2], "referrals_count": r[3]} for r in result.all()]
+
+
+
+async def add_history(
+    db: AsyncSession,
+    doctor_id: int,
+    label: str,
+    info: str
+) -> History:
+    """Добавить запись в историю"""
+    history = History(
+        doctor_id=doctor_id,
+        label=label,
+        info=info
+    )
+    db.add(history)
+    await db.commit()
+    await db.refresh(history)
+    return history

@@ -1069,7 +1069,7 @@
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-icon" style="background-color: #f0fdf4; color: var(--success-color);">
+                    <div class="stat-icon" style="background-color: #d1fae5; color: var(--success-color);">
                         <i class="fas fa-user-check"></i>
                     </div>
                     <div class="stat-content">
@@ -1079,12 +1079,22 @@
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
-                        <i class="fas fa-chart-line"></i>
+                    <div class="stat-icon" style="background-color: #fef3c7; color: var(--warning-color);">
+                        <i class="fas fa-user-plus"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-value" id="totalReferrals">0</div>
-                        <div class="stat-label">Всего направлений</div>
+                        <div class="stat-value" id="newPatients">0</div>
+                        <div class="stat-label">Новых за месяц</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="patientActivity">0%</div>
+                        <div class="stat-label">Активность</div>
                     </div>
                 </div>
             </div>
@@ -1457,6 +1467,8 @@
             document.getElementById('addBirthDate').max = today;
             
             loadPatients();
+            loadPatientsStats();  // 👈 ДОБАВЬ ЭТО
+
         });
 
         // Загрузка пациентов с сервера
@@ -1472,8 +1484,9 @@
                 
                 allPatients = await response.json();
                 filteredPatients = [...allPatients];
-                updateStats();
                 renderCurrentView();
+                loadPatientsStats();  // 👈 добавь
+
                 
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -1492,11 +1505,21 @@
         }
 
         // Обновить статистику
-        function updateStats() {
-            document.getElementById('totalPatients').textContent = allPatients.length;
-            document.getElementById('activePatients').textContent = allPatients.filter(p => p.status === 'active').length;
-            // TODO: посчитать направления через отдельный эндпоинт
-            document.getElementById('totalReferrals').textContent = '-';
+        async function loadPatientsStats() {
+            try {
+                const response = await fetch(`${API_BASE}/patients/stats`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('totalPatients').textContent = stats.total || 0;
+                    document.getElementById('activePatients').textContent = stats.active || 0;
+                    document.getElementById('newPatients').textContent = stats.new_patients || 0;
+                    document.getElementById('patientActivity').textContent = stats.activity + '%';
+                }
+            } catch (err) {
+                console.error('Ошибка загрузки статистики:', err);
+            }
         }
 
         // Рендер текущего вида
@@ -1670,6 +1693,8 @@
             }
             
             renderCurrentView();
+            loadPatientsStats();  // 👈 добавь
+
         }
 
         // Scroll to add patient form
@@ -1765,8 +1790,9 @@
                     const newPatient = await response.json();
                     allPatients.push(newPatient);
                     filteredPatients = [...allPatients];
-                    updateStats();
                     renderCurrentView();
+                    loadPatientsStats();  // 👈 добавь
+
                     closeConfirmModal();
                     clearAddPatientForm();
                     showToast('✅ Пациент успешно добавлен', 'success');
@@ -1840,8 +1866,9 @@
                         allPatients[index] = updated;
                     }
                     filteredPatients = [...allPatients];
-                    updateStats();
                     renderCurrentView();
+                    loadPatientsStats();  // 👈 добавь
+
                     closeEditModal();
                     showToast('✅ Данные пациента обновлены', 'success');
                 } else {
@@ -1871,8 +1898,9 @@
                 if (response.ok) {
                     allPatients = allPatients.filter(p => p.id !== patientId);
                     filteredPatients = [...allPatients];
-                    updateStats();
                     renderCurrentView();
+                    loadPatientsStats();  // 👈 добавь
+
                     showToast('Пациент удален', 'success');
                 } else {
                     showToast('❌ Ошибка при удалении', 'error');
@@ -1968,6 +1996,8 @@
             if (!x) return;
             e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
         });
+
+
     </script>
 </body>
 </html>
