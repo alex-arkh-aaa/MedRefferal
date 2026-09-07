@@ -149,7 +149,23 @@ async def get_doctor_specializations(db: AsyncSession, doctor_id: int) -> List[S
     )
     return result.scalars().all()
 
+# ==================== Change Email ====================
 
+async def update_doctor_email(db: AsyncSession, doctor_id: int, new_email: str) -> Optional[Doctor]:
+    """Обновить email доктора (отдельная функция для безопасности)"""
+    result = await db.execute(
+        select(Doctor).where(Doctor.id == doctor_id)
+    )
+    doctor = result.scalar_one_or_none()
+    
+    if not doctor:
+        return None
+    
+    doctor.email = new_email
+    doctor.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(doctor)
+    return doctor
 # ==================== Email Verification ====================
 
 async def create_email_verification(
@@ -498,7 +514,7 @@ async def create_referral(
 
     patient = await get_patient_by_id(db, patient_id, doctor_id)
     clinic = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
-    await add_history(db, doctor_id, "Создано направление", f"Для {patient.full_name} в {clinic.scalar_one().name}")
+    await add_history(db, doctor_id, "Создано направление", f"Для пациента {patient.full_name} в {clinic.scalar_one().name}")
 
     return referral
 
@@ -693,7 +709,7 @@ async def get_dashboard_stats(db: AsyncSession, doctor_id: int) -> dict:
         select(func.count()).where(
             Referral.doctor_id == doctor_id,
             Referral.status == 'scheduled',
-            Referral.expected_visit_start >= today
+            Referral.expected_visit_end >= today
         )
     )
     upcoming_visits = upcoming_result.scalar() or 0
@@ -730,7 +746,7 @@ async def get_upcoming_appointments(db: AsyncSession, doctor_id: int, limit: int
         .where(
             Referral.doctor_id == doctor_id,
             Referral.status == 'scheduled',
-            Referral.expected_visit_start >= datetime.utcnow().date()
+            Referral.expected_visit_end >= datetime.utcnow().date()
         )
         .order_by(Referral.expected_visit_start.asc())
         .limit(limit)

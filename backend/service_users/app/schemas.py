@@ -41,6 +41,8 @@ class UserRegisterPartner(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    remember_me: Optional[bool] = False
+
 
 
 class EmailVerify(BaseModel):
@@ -87,7 +89,7 @@ class UserUpdate(BaseModel):
 
 class DoctorUpdate(BaseModel):
     full_name: Optional[str] = None
-    #phone: Optional[str] = None
+    phone: Optional[str] = None
     date_of_birth: Optional[date] = None
     experience: Optional[str] = None
     about_myself: Optional[str] = None
@@ -102,6 +104,19 @@ class DoctorSpecializationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ==================== Change Email & Password Schemas ====================
+
+class ChangeEmail(BaseModel):
+    new_email: EmailStr
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+    confirm_password: str = Field(..., min_length=8)
 
 # ==================== Clinic Schemas ====================
 

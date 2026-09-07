@@ -31,6 +31,9 @@ app.add_middleware(
 async def add_rate_limiting(request: Request, call_next):
     return await rate_limit_middleware(request, call_next)
 
+
+
+
 # ================== MIDDLEWARE ==================
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next): 
@@ -79,6 +82,12 @@ async def auth_middleware(request: Request, call_next):
     return response
 
 # ================== HTML РОУТЫ ==================
+@app.exception_handler(404)
+async def not_found_exception_handler(request: Request, exc: HTTPException):
+    html_content = render_template("404.html")
+    return HTMLResponse(content=html_content, status_code=404)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def root_page(request: Request):
     html_content = render_template("index.html")
@@ -119,6 +128,10 @@ async def reports(request: Request):
     html_content = render_template("reports.html")
     return HTMLResponse(content=html_content)
 
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    html_content = render_template("profile.html")
+    return HTMLResponse(content=html_content)
 
 # @app.get("/terms_and_privacy", response_class=HTMLResponse)
 # async def root_page(request: Request):
@@ -135,15 +148,11 @@ async def reports(request: Request):
 #     html_content = render_template("register.html")
 #     return HTMLResponse(content=html_content)
 
-@app.get("/profile", response_class=HTMLResponse)
-async def profile_page(request: Request):
-    html_content = render_template("profile.html")
-    return HTMLResponse(content=html_content)
 
-@app.get("/orders", response_class=HTMLResponse)
-async def orders_page(request: Request):
-    html_content = render_template("orders.html")
-    return HTMLResponse(content=html_content)
+# @app.get("/orders", response_class=HTMLResponse)
+# async def orders_page(request: Request):
+#     html_content = render_template("orders.html")
+#     return HTMLResponse(content=html_content)
 
 # ================== ПРОКСИРОВАНИЕ ==================
 @app.api_route("/api/v1/users/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])

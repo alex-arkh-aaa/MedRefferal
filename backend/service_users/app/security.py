@@ -22,19 +22,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(data: dict, expires_delta: int = None) -> str:
+def create_access_token(data: dict, expires_delta: int) -> str:
     """
     Создание access токена.
-    expires_delta — время жизни в минутах. Если не передан, берётся из .env
-    """
+    expires_delta — время жизни в минутах."""
     to_encode = data.copy()
-    
-    if expires_delta is None:
-        expires_delta = int(os.getenv('ACC_TOKEN_EXP_MIN', 60))
     
     expire = datetime.now(timezone.utc) + timedelta(minutes=expires_delta)
     to_encode.update({"exp": expire})
-    
     encoded_jwt = jwt.encode(
         to_encode, 
         os.getenv('JWT_SECRET_KEY'), 

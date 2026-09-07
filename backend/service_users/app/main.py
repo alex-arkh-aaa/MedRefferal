@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
 from typing import Optional
 import sys
-
+import os
 from app.models import *
 
 from .database import get_db
@@ -138,8 +138,6 @@ async def send_code(
     # Сохраняем код в email_verifications
     await crud.create_email_verification(db, email, code)
     
-    print(f"📧 Код подтверждения для {email}: {code}")
-
     email_data = {
         "email": email,
         "subject": "Добро пожаловать в MedRefferal!",
@@ -205,7 +203,6 @@ async def login(
     db: AsyncSession = Depends(get_db)
 ):
     user = await crud.get_user_by_email(db, data.email)
-    print(user, '-----------------------------------', file=sys.stderr)
     if not user:
         raise HTTPException(status_code=401, detail="Такого пользователя не существует")
 
@@ -218,15 +215,22 @@ async def login(
         "user_id": user.id,
         "full_name": user.full_name
     }
-    access_token = create_access_token(data=token_data)
-    
+
+    expires_minutes = int(os.getenv('ACC_TOKEN_EXP_MIN'))
+    if data.remember_me:
+        expires_minutes = 60 * 24 * 30
+
+
+
+    access_token = create_access_token(data=token_data, expires_delta=expires_minutes)
+
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=60 * int(os.getenv('ACC_TOKEN_EXP_MIN', 60)),
+        max_age=60 * expires_minutes,
         path="/"
     )
     
@@ -757,3 +761,90 @@ async def get_top_clinics(
 ):
     """Получить топ клиник по направлениям"""
     return await crud.get_top_clinics(db, limit)
+
+
+
+# ==================== Change Email & Password Routes ====================
+
+@app.post("/api/v1/auth/change_email_send_code", response_model=MessageResponse)
+async def change_email_send_code(
+    new_email: str = Body(..., embed=True),
+    db: AsyncSession = Depends(get_db)
+):
+    """Отправить код на новый email для смены почты"""
+    
+    # Проверяем, не занят ли email
+    existing = await crud.get_user_by_email(db, new_email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Этот email уже используется")
+    
+    # Генерируем код
+    import random
+    code = f"{random.randint(100000, 999999)}"
+    
+    # Сохраняем код
+    await crud.create_email_verification(db, new_email, code)
+    
+    print(f"📧 Код для смены email на {new_email}: {code}")
+    
+    email_data = {
+        "email": new_email,
+        "subject": "Подтверждение смены email в MedReferral",
+        "message": f"{code} - Ваш код для подтверждения смены email",
+    }
+    
+    await broker.publish(email_data, queue="email_queue")
+    
+    return MessageResponse(message="Код отправлен на новый email")
+
+
+@app.post("/api/v1/auth/confirm_change_email", response_model=MessageResponse)
+async def confirm_change_email(
+    data: ChangeEmail,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Подтвердить смену email"""
+    
+    # Проверяем код
+    verification = await crud.get_email_verification(db, data.new_email, data.code)
+    if not verification:
+        raise HTTPException(status_code=400, detail="Неверный или истёкший код")
+    
+    # Проверяем, не занят ли email
+    existing = await crud.get_user_by_email(db, data.new_email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email уже используется")
+    
+    # 👇 Используем существующую функцию update_doctor
+    await crud.update_doctor(db, current_user.id, email=data.new_email)
+    
+    # Удаляем код
+    await crud.delete_email_verification(db, data.new_email)
+    
+    return MessageResponse(message="Email успешно изменен")
+
+
+@app.post("/api/v1/auth/change_password", response_model=MessageResponse)
+async def change_password(
+    data: ChangePassword,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Сменить пароль"""
+    
+    # Проверяем старый пароль
+    if not verify_password(data.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="Неверный текущий пароль")
+    
+    # Проверяем, что новый и подтверждение совпадают
+    if data.new_password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Пароли не совпадают")
+    
+    # Хешируем новый пароль
+    new_hash = get_password_hash(data.new_password)
+    
+    # Обновляем
+    await crud.update_doctor(db, current_user.id, password_hash=new_hash)
+    
+    return MessageResponse(message="Пароль успешно изменен")

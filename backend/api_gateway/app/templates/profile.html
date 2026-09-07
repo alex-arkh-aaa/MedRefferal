@@ -361,13 +361,15 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
+            gap: 10px;
+            padding: 15px 18px;
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
-            min-height: 50px;
+            min-height: 70px;
             background-color: white;
             transition: var(--transition);
+            width: 100%;
+            max-width: 100%;
         }
 
         .specialization-container:focus-within {
@@ -380,6 +382,7 @@
             flex-wrap: wrap;
             gap: 8px;
             align-items: center;
+            max-width: 100%;
         }
 
         .spec-tag {
@@ -388,13 +391,16 @@
             gap: 6px;
             background-color: #eff6ff;
             color: var(--primary-color);
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 500;
             border: 1px solid var(--primary-color);
             white-space: nowrap;
-            margin: 2px 0;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
         }
 
         .spec-tag .remove-spec {
@@ -404,6 +410,7 @@
             transition: var(--transition);
             line-height: 1;
             padding: 0 2px;
+            flex-shrink: 0;
         }
 
         .spec-tag .remove-spec:hover {
@@ -412,11 +419,11 @@
 
         .spec-input {
             flex: 1;
-            min-width: 150px;
+            min-width: 180px;
             border: none;
             outline: none;
             font-size: 1rem;
-            padding: 6px 0;
+            padding: 8px 0;
             background: transparent;
         }
 
@@ -434,7 +441,7 @@
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             z-index: 100;
         }
@@ -444,9 +451,11 @@
         }
 
         .spec-dropdown-item {
-            padding: 10px 15px;
+            padding: 12px 18px;
             cursor: pointer;
             transition: var(--transition);
+            word-break: break-word;
+            font-size: 0.95rem;
         }
 
         .spec-dropdown-item:hover {
@@ -459,8 +468,13 @@
             font-weight: 500;
         }
 
+        .form-group:has(.spec-wrapper) {
+            grid-column: 1 / -1;
+        }
+
         .spec-wrapper {
             position: relative;
+            width: 100%;
         }
 
         /* Loading */
@@ -549,6 +563,98 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            padding: 30px;
+            position: relative;
+            animation: modalFade 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .close-modal:hover {
+            color: var(--dark-color);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .main-layout {
@@ -608,7 +714,7 @@
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="index" class="logo">
+                <a href="/dashboard" class="logo">
                     <i class="fas fa-hospital-alt"></i>
                     MedReferral
                 </a>
@@ -672,7 +778,6 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1><i class="fas fa-user-cog"></i> Настройки профиля</h1>
-                
             </div>
 
             <!-- Settings Container -->
@@ -687,11 +792,11 @@
                             <p id="profileEmail">Загрузка...</p>
                             <div class="profile-stats">
                                 <div class="stat-item">
-                                    <div class="stat-value">0</div>
+                                    <div class="stat-value" id="statReferrals">0</div>
                                     <div class="stat-label">Направлений</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">0</div>
+                                    <div class="stat-value" id="statPatients">0</div>
                                     <div class="stat-label">Пациентов</div>
                                 </div>
                                 <div class="stat-item">
@@ -706,11 +811,11 @@
                         <h3 class="section-title">Личная информация</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Фамилия <span class="required"></span></label>
+                                <label>Фамилия</label>
                                 <input type="text" id="lastName" required>
                             </div>
                             <div class="form-group">
-                                <label>Имя <span class="required"></span></label>
+                                <label>Имя</label>
                                 <input type="text" id="firstName" required>
                             </div>
                             <div class="form-group">
@@ -728,12 +833,20 @@
                         <h3 class="section-title">Контактная информация</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label>Телефон <span class="required"></span></label>
+                                <label>Телефон</label>
                                 <input type="tel" id="phone" placeholder="+7 (999) 123-45-67" required>
                             </div>
                             <div class="form-group">
-                                <label>Email <span class="required"></span></label>
+                                <label>Email</label>
                                 <input type="email" id="email" required>
+                                <div style="margin-top: 8px;">
+                                    <button class="btn btn-outline btn-sm" onclick="openChangeEmailModal()">
+                                        <i class="fas fa-envelope"></i> Сменить email
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" onclick="openChangePasswordModal()" style="margin-left: 10px;">
+                                        <i class="fas fa-key"></i> Сменить пароль
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -741,7 +854,7 @@
                     <div class="form-section">
                         <h3 class="section-title">Профессиональная информация</h3>
                         <div class="form-grid">
-                            <div class="form-group">
+                            <div class="form-group" style="grid-column: 1 / -1;">
                                 <label>Специализация</label>
                                 <div class="spec-wrapper">
                                     <div class="specialization-container" id="specContainer">
@@ -776,6 +889,81 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Change Email Modal -->
+    <div class="modal" id="changeEmailModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <button class="close-modal" onclick="closeChangeEmailModal()">&times;</button>
+            
+            <div class="modal-header">
+                <h2><i class="fas fa-envelope"></i> Смена email</h2>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Новый email <span class="required">*</span></label>
+                    <input type="email" id="newEmail" placeholder="Введите новый email">
+                </div>
+                
+                <div id="emailCodeSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Код подтверждения <span class="required">*</span></label>
+                        <input type="text" id="emailCode" placeholder="Введите 6-значный код" maxlength="6">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="sendEmailCodeBtn" onclick="sendEmailCode()" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Отправить код
+                </button>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeChangeEmailModal()">
+                    Отмена
+                </button>
+                <button type="button" class="btn btn-success" id="confirmEmailBtn" onclick="confirmChangeEmail()" style="display: none;">
+                    <i class="fas fa-check"></i> Подтвердить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <button class="close-modal" onclick="closeChangePasswordModal()">&times;</button>
+            
+            <div class="modal-header">
+                <h2><i class="fas fa-lock"></i> Смена пароля</h2>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Текущий пароль <span class="required">*</span></label>
+                    <input type="password" id="currentPassword" placeholder="Введите текущий пароль">
+                </div>
+                
+                <div class="form-group">
+                    <label>Новый пароль <span class="required">*</span></label>
+                    <input type="password" id="newPassword" placeholder="Не менее 8 символов">
+                </div>
+                
+                <div class="form-group">
+                    <label>Подтвердите пароль <span class="required">*</span></label>
+                    <input type="password" id="confirmPassword" placeholder="Повторите пароль">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeChangePasswordModal()">
+                    Отмена
+                </button>
+                <button type="button" class="btn btn-success" onclick="changePassword()">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -847,12 +1035,10 @@
                 document.getElementById('birthDate').value = user.date_of_birth || '';
                 document.getElementById('about').value = user.about_myself || '';
                 
-                // Выбор образования
                 if (user.education) {
                     document.getElementById('education').value = user.education;
                 }
                 
-                // Загружаем специализации доктора
                 loadMySpecializations();
                 loadDoctorStats();
 
@@ -914,7 +1100,6 @@
         const specTags = document.getElementById('specTags');
         const specDropdown = document.getElementById('specDropdown');
 
-        // Загрузить все специализации
         async function loadAllSpecializations() {
             try {
                 const response = await fetch(`${API_BASE}/specializations`, {
@@ -928,7 +1113,6 @@
             }
         }
 
-        // Загрузить мои специализации
         async function loadMySpecializations() {
             try {
                 const response = await fetch(`${API_BASE}/auth/specializations`, {
@@ -956,8 +1140,8 @@
                 });
                 if (response.ok) {
                     const stats = await response.json();
-                    document.querySelector('.profile-stats .stat-item:first-child .stat-value').textContent = stats.total_referrals || 0;
-                    document.querySelector('.profile-stats .stat-item:nth-child(2) .stat-value').textContent = stats.total_patients || 0;
+                    document.getElementById('statReferrals').textContent = stats.total_referrals || 0;
+                    document.getElementById('statPatients').textContent = stats.total_patients || 0;
                 }
             } catch (err) {
                 console.error('Ошибка загрузки статистики:', err);
@@ -982,12 +1166,11 @@
             
             specDropdown.querySelectorAll('.spec-dropdown-item').forEach(item => {
                 item.addEventListener('mousedown', (e) => {
-                    e.preventDefault();  // предотвращаем потерю фокуса
+                    e.preventDefault();
                     addSpecTag(item.dataset.specName, parseInt(item.dataset.specId));
-                    specInput.value = '';  // очищаем поле ввода
-                    specInput.focus();     // возвращаем фокус
-                    // 👇 НЕ закрываем список — он перерисуется с обновленным фильтром
-                    renderDropdown('');    // перерисовываем список без фильтра
+                    specInput.value = '';
+                    specInput.focus();
+                    renderDropdown('');
                 });
             });
         }
@@ -997,19 +1180,24 @@
             selectedSpecs.push(spec);
             selectedSpecIds.push(id);
             renderTags();
-            specInput.focus();  // 👈 возвращаем фокус в поле
+            specInput.focus();
         }
 
         function removeSpecTag(index) {
             selectedSpecs.splice(index, 1);
             selectedSpecIds.splice(index, 1);
             renderTags();
-            specInput.focus();  // 👈 возвращаем фокус
+            specInput.focus();
         }
 
         function renderTags() {
+            if (selectedSpecs.length === 0) {
+                specTags.innerHTML = '';
+                return;
+            }
+            
             specTags.innerHTML = selectedSpecs.map((s, i) => `
-                <span class="spec-tag">
+                <span class="spec-tag" title="${s}">
                     ${s}
                     <span class="remove-spec" data-index="${i}">&times;</span>
                 </span>
@@ -1020,7 +1208,6 @@
             });
         }
 
-        // Обработчики для ввода специализаций
         specInput.addEventListener('focus', () => {
             renderDropdown(specInput.value);
         });
@@ -1034,7 +1221,6 @@
                 e.preventDefault();
                 const value = specInput.value.trim();
                 if (value) {
-                    // Ищем специализацию по названию
                     const found = allSpecializations.find(s => 
                         s.name.toLowerCase() === value.toLowerCase() && 
                         !selectedSpecIds.includes(s.id)
@@ -1101,8 +1287,205 @@
         }
 
         // ============================================================
-        // ИНИЦИАЛИЗАЦИЯ
+        // СМЕНА EMAIL
         // ============================================================
+
+        let emailChangeCodeSent = false;
+
+        function openChangeEmailModal() {
+            document.getElementById('changeEmailModal').classList.add('active');
+            document.getElementById('newEmail').value = '';
+            document.getElementById('emailCode').value = '';
+            document.getElementById('emailCodeSection').style.display = 'none';
+            document.getElementById('confirmEmailBtn').style.display = 'none';
+            document.getElementById('sendEmailCodeBtn').style.display = 'block';
+            emailChangeCodeSent = false;
+        }
+
+        function closeChangeEmailModal() {
+            document.getElementById('changeEmailModal').classList.remove('active');
+        }
+
+        async function sendEmailCode() {
+            const newEmail = document.getElementById('newEmail').value.trim();
+            
+            if (!newEmail) {
+                showToast('Введите новый email', 'error');
+                return;
+            }
+            
+            if (!newEmail.includes('@') || !newEmail.includes('.')) {
+                showToast('Введите корректный email', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('sendEmailCodeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/change_email_send_code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ new_email: newEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToast('✅ Код отправлен на новый email', 'success');
+                    document.getElementById('emailCodeSection').style.display = 'block';
+                    document.getElementById('confirmEmailBtn').style.display = 'block';
+                    document.getElementById('sendEmailCodeBtn').style.display = 'none';
+                    emailChangeCodeSent = true;
+                } else {
+                    showToast('❌ ' + (data.detail || 'Ошибка'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить код';
+            }
+        }
+
+        async function confirmChangeEmail() {
+            if (!emailChangeCodeSent) {
+                showToast('Сначала отправьте код', 'error');
+                return;
+            }
+            
+            const newEmail = document.getElementById('newEmail').value.trim();
+            const code = document.getElementById('emailCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                showToast('Введите 6-значный код', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('confirmEmailBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Подтверждение...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/confirm_change_email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ new_email: newEmail, code: code })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToast('✅ Email успешно изменен. Войдите заново.', 'success');
+                    closeChangeEmailModal();
+                    await logoutUser();
+                } else {
+                    showToast('❌ ' + (data.detail || 'Ошибка'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Подтвердить';
+            }
+        }
+
+        // ============================================================
+        // СМЕНА ПАРОЛЯ
+        // ============================================================
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+        }
+
+        async function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Заполните все поля', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showToast('Пароль должен быть не менее 8 символов', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Пароли не совпадают', 'error');
+                return;
+            }
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/change_password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToast('✅ Пароль успешно изменен. Войдите заново.', 'success');
+                    closeChangePasswordModal();
+                    await logoutUser();
+                } else {
+                    showToast('❌ ' + (data.detail || 'Ошибка'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Сохранить';
+            }
+        }
+
+        async function logoutUser() {
+            try {
+                await fetch(`${API_BASE}/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                updateUI(null);
+                window.location.href = '/';
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
+
+        // Закрытие модальных окон по клику на фон
+        document.getElementById('changeEmailModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('changeEmailModal')) {
+                closeChangeEmailModal();
+            }
+        });
+
+        document.getElementById('changePasswordModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('changePasswordModal')) {
+                closeChangePasswordModal();
+            }
+        });
 
         // Загружаем все специализации
         loadAllSpecializations();

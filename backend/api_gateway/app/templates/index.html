@@ -867,7 +867,7 @@
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox"> Запомнить меня
+                        <input type="checkbox" id="rememberMeCheckbox"> Запомнить меня
                     </label>
                     <a href="#" style="color: var(--primary-color); text-decoration: none;">Забыли пароль?</a>
                 </div>
@@ -1126,13 +1126,17 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
 
             try {
+                const rememberMe = document.getElementById('rememberMeCheckbox').checked;
                 const response = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ 
+                        email: email, 
+                        password: password,
+                        remember_me: rememberMe
+                    })
                 });
-
                 const data = await response.json();
 
                 if (response.ok) {
