@@ -254,7 +254,8 @@ async def get_me(current_user: Doctor = Depends(get_current_doctor)):
         experience=current_user.experience,
         date_of_birth=current_user.date_of_birth,
         about_myself=current_user.about_myself,
-        education=current_user.education
+        education=current_user.education,
+        column_order=current_user.column_order
     )
 
 
@@ -598,11 +599,17 @@ async def get_referrals(
     status: Optional[str] = None,
     clinic_id: Optional[int] = None,
     page: int = 1,
-    limit: int = 20,
+    limit: int = 10,
     current_user: Doctor = Depends(get_current_doctor),
     db: AsyncSession = Depends(get_db)
 ):
     """Получить все направления текущего доктора с фильтрами"""
+    
+    # Валидация
+    if page < 1:
+        page = 1
+    if limit < 1 or limit > 100:
+        limit = 10
     
     skip = (page - 1) * limit
     
@@ -630,6 +637,9 @@ async def get_referrals(
             med_indications=referral.med_indications,
             special_wishes=referral.special_wishes,
             status=referral.status,
+            status_changed_at=referral.status_changed_at,
+            commission_amount=referral.commission_amount,
+            is_paid=referral.is_paid,
             created_at=referral.created_at,
             patient_full_name=referral.patient.full_name,
             patient_phone=referral.patient.phone,
@@ -848,3 +858,97 @@ async def change_password(
     await crud.update_doctor(db, current_user.id, password_hash=new_hash)
     
     return MessageResponse(message="Пароль успешно изменен")
+
+
+@app.put("/api/v1/auth/column_order", response_model=UserResponse)
+async def update_column_order(
+
+    data: ColumnOrderUpdate,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Сохранить порядок столбцов таблицы направлений"""
+    
+    doctor = await crud.update_doctor(db, current_user.id, column_order=data.column_order)
+    
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Доктор не найден")
+    
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        phone=current_user.phone,
+        created_at=current_user.created_at,
+        experience=current_user.experience,
+        date_of_birth=current_user.date_of_birth,
+        about_myself=current_user.about_myself,
+        education=current_user.education,
+        column_order=doctor.column_order
+    )
+
+
+
+
+from datetime import date as date_type
+
+# ==================== Reports Routes ====================
+
+@app.get("/api/v1/reports/stats", response_model=ReportsStatsResponse)
+async def get_reports_stats(
+    date_from: date_type,
+    date_to: date_type,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить статистику для отчётов"""
+    if date_from > date_to:
+        raise HTTPException(status_code=400, detail="Дата 'с' не может быть позже 'по'")
+    
+    return await crud.get_reports_stats(db, current_user.id, date_from, date_to)
+
+
+@app.get("/api/v1/goals/current", response_model=Optional[GoalResponse])
+async def get_current_goal(
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить цель на текущий месяц"""
+    return await crud.get_current_goal(db, current_user.id)
+
+
+@app.put("/api/v1/goals", response_model=GoalResponse)
+async def update_goal(
+    data: GoalCreate,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Обновить или создать цель на указанный месяц"""
+    return await crud.upsert_goal(
+        db=db,
+        doctor_id=current_user.id,
+        income_money=data.income_money,
+        referrals=data.referrals,
+        month=data.month,
+        year=data.year
+    )
+
+
+
+
+@app.get("/api/v1/goals/facts")
+async def get_goal_facts(
+    month: int,
+    year: int,
+    current_user: Doctor = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db)
+):
+    """Получить факты за конкретный месяц (для целей)"""
+    return await crud.get_goal_facts(db, current_user.id, month, year)
+
+
+
+
+
+
+

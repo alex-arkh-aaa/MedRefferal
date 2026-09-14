@@ -75,6 +75,8 @@ class UserResponse(BaseModel):
     date_of_birth: Optional[date] = None
     about_myself: Optional[str] = None
     education: Optional[str] = None
+    column_order: Optional[List[str]] = None
+
 
 
     class Config:
@@ -204,7 +206,11 @@ class ReferralResponse(BaseModel):
     med_indications: str
     special_wishes: Optional[str]
     status: str
+    status_changed_at: Optional[datetime] = None
+    commission_amount: int = 0                  
+    is_paid: bool = False                       
     created_at: datetime
+
 
     class Config:
         from_attributes = True
@@ -235,6 +241,9 @@ class ReferralDetailResponse(BaseModel):
     med_indications: str
     special_wishes: Optional[str]
     status: str
+    status_changed_at: Optional[datetime] = None   
+    commission_amount: int = 0                   
+    is_paid: bool = False                        
     created_at: datetime
     
     # Дополнительные поля для отображения
@@ -247,6 +256,8 @@ class ReferralDetailResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class ColumnOrderUpdate(BaseModel):
+    column_order: List[str]
 
 
 
@@ -290,3 +301,34 @@ class TopClinicResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+
+# ==================== Reports Schemas ====================
+
+class ReportsStatsResponse(BaseModel):
+    total_revenue: int
+    total_referrals: int
+    completed_referrals: int
+    conversion: float
+    days_in_period: int
+    growth_text: str          # 👈 "15%" или "N завершено"
+    growth_positive: bool     # 👈 для цвета (зелёный/красный)
+
+class GoalResponse(BaseModel):
+    id: Optional[int] = None
+    income_money: int
+    referrals: int
+    month: int
+    year: int
+
+    class Config:
+        from_attributes = True
+
+
+class GoalCreate(BaseModel):
+    income_money: int = Field(..., ge=0)
+    referrals: int = Field(..., ge=0)
+    month: int = Field(..., ge=1, le=12)  # 👈
+    year: int = Field(..., ge=2020)       # 👈

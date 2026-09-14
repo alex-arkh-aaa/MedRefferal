@@ -506,12 +506,18 @@ async def create_referral(
         expected_visit_end=expected_visit_end,
         med_indications=med_indications,
         special_wishes=special_wishes or "",
-        status="appointed"
+        status="appointed",
+        commission_amount=0,       # 👈
+        is_paid=False               # 👈
     )
     db.add(referral)
     await db.commit()
     await db.refresh(referral)
-
+    
+    referral.status_changed_at = referral.created_at
+    await db.commit()
+    await db.refresh(referral)
+    
     patient = await get_patient_by_id(db, patient_id, doctor_id)
     clinic = await db.execute(select(Clinic).where(Clinic.id == clinic_id))
     await add_history(db, doctor_id, "Создано направление", f"Для пациента {patient.full_name} в {clinic.scalar_one().name}")
@@ -562,12 +568,17 @@ async def update_referral(
     if not referral:
         return None
     
+    # 👇 Проверяем меняется ли статус
+    old_status = referral.status
+    
     for key, value in kwargs.items():
         if value is not None and hasattr(referral, key):
             setattr(referral, key, value)
-
-    referral.updated_at = datetime.utcnow()  # 👈 добавь, если есть поле updated_at
-
+    
+    # 👇 Если статус изменился — обновляем status_changed_at
+    if 'status' in kwargs and kwargs['status'] != old_status:
+        referral.status_changed_at = datetime.utcnow()
+    
     await db.commit()
     await db.refresh(referral)
     return referral
@@ -787,3 +798,201 @@ async def add_history(
     await db.commit()
     await db.refresh(history)
     return history
+
+
+
+
+
+
+
+# ==================== Reports ====================
+
+async def get_reports_stats(
+    db: AsyncSession,
+    doctor_id: int,
+    date_from: date,
+    date_to: date
+) -> dict:
+    """Получить статистику для отчётов за период + рост к прошлому"""
+    
+    # Длина периода в днях
+    period_days = (date_to - date_from).days + 1
+    
+    # Прошлый период (сдвиг назад на длину периода)
+    prev_date_to = date_from - timedelta(days=1)
+    prev_date_from = prev_date_to - timedelta(days=period_days - 1)
+    
+    # ============ ТЕКУЩИЙ ПЕРИОД ============
+    
+    # Всего направлений
+    total_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            func.date(Referral.created_at) >= date_from,
+            func.date(Referral.created_at) <= date_to
+        )
+    )
+    total_referrals = total_result.scalar() or 0
+    
+    # Завершённые
+    completed_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'completed',
+            func.date(Referral.created_at) >= date_from,
+            func.date(Referral.created_at) <= date_to
+        )
+    )
+    completed = completed_result.scalar() or 0
+    
+    # Доход
+    revenue_result = await db.execute(
+        select(func.coalesce(func.sum(Referral.commission_amount), 0)).where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'completed',
+            Referral.is_paid == True,
+            func.date(Referral.created_at) >= date_from,
+            func.date(Referral.created_at) <= date_to
+        )
+    )
+    total_revenue = revenue_result.scalar() or 0
+    
+    # ============ ПРОШЛЫЙ ПЕРИОД ============
+    
+    prev_completed_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'completed',
+            func.date(Referral.created_at) >= prev_date_from,
+            func.date(Referral.created_at) <= prev_date_to
+        )
+    )
+    prev_completed = prev_completed_result.scalar() or 0
+    
+    # ============ РОСТ ============
+    
+    growth_text = "0%"
+    growth_positive = True
+    
+    if completed == 0 and prev_completed == 0:
+        # Оба нуля — нет роста
+        growth_text = "0%"
+        growth_positive = True
+    elif prev_completed == 0:
+        # Прошлый 0, текущий > 0 — абсолютный рост
+        growth_text = f"+{completed} завершено"
+        growth_positive = True
+    else:
+        # Процентный рост
+        percent = round(((completed - prev_completed) / prev_completed) * 100, 1)
+        if percent > 0:
+            growth_text = f"+{percent}%"
+            growth_positive = True
+        elif percent < 0:
+            growth_text = f"{percent}%"
+            growth_positive = False
+        else:
+            growth_text = "0%"
+            growth_positive = True
+    
+    # Конверсия
+    conversion = round((completed / total_referrals * 100), 1) if total_referrals > 0 else 0
+    
+    return {
+        "total_revenue": int(total_revenue),
+        "total_referrals": total_referrals,
+        "completed_referrals": completed,
+        "conversion": conversion,
+        "days_in_period": period_days,
+        "growth_text": growth_text,
+        "growth_positive": growth_positive
+    }
+
+
+async def get_current_goal(db: AsyncSession, doctor_id: int) -> Optional[Goal]:
+    """Получить цель на текущий месяц"""
+    today = datetime.utcnow()
+    result = await db.execute(
+        select(Goal).where(
+            Goal.doctor_id == doctor_id,
+            Goal.month == today.month,
+            Goal.year == today.year
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+async def upsert_goal(
+    db: AsyncSession,
+    doctor_id: int,
+    income_money: int,
+    referrals: int,
+    month: int,      # 👈
+    year: int        # 👈
+) -> Goal:
+    """Создать или обновить цель на указанный месяц"""
+    
+    result = await db.execute(
+        select(Goal).where(
+            Goal.doctor_id == doctor_id,
+            Goal.month == month,
+            Goal.year == year
+        )
+    )
+    existing = result.scalar_one_or_none()
+    
+    if existing:
+        existing.income_money = income_money
+        existing.referrals = referrals
+        await db.commit()
+        await db.refresh(existing)
+        return existing
+    
+    goal = Goal(
+        doctor_id=doctor_id,
+        month=month,
+        year=year,
+        income_money=income_money,
+        referrals=referrals
+    )
+    db.add(goal)
+    await db.commit()
+    await db.refresh(goal)
+    return goal
+
+
+async def get_goal_facts(db: AsyncSession, doctor_id: int, month: int, year: int) -> dict:
+    """Получить фактические показатели за конкретный месяц (для целей)"""
+    from calendar import monthrange
+    
+    first_day = date(year, month, 1)
+    last_day = date(year, month, monthrange(year, month)[1])
+    
+    # Доход за месяц
+    revenue_result = await db.execute(
+        select(func.coalesce(func.sum(Referral.commission_amount), 0)).where(
+            Referral.doctor_id == doctor_id,
+            Referral.status == 'completed',
+            Referral.is_paid == True,
+            func.date(Referral.created_at) >= first_day,
+            func.date(Referral.created_at) <= last_day
+        )
+    )
+    total_revenue = revenue_result.scalar() or 0
+    
+    # Направления за месяц
+    referrals_result = await db.execute(
+        select(func.count()).where(
+            Referral.doctor_id == doctor_id,
+            func.date(Referral.created_at) >= first_day,
+            func.date(Referral.created_at) <= last_day
+        )
+    )
+    total_referrals = referrals_result.scalar() or 0
+    
+    return {
+        "total_revenue": int(total_revenue),
+        "total_referrals": total_referrals
+    }
+
+

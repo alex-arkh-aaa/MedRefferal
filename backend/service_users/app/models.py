@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
 from .database import Base
+from sqlalchemy import JSON
 
 
 class Doctor(Base):
@@ -17,6 +18,13 @@ class Doctor(Base):
     experience = Column(String(20), nullable=True)
     education = Column(String(50), nullable=True)  # 👈 добавить
     about_myself = Column(Text, nullable=True)
+    column_order = Column(JSON, nullable=True, default=lambda: [
+    "patient", "clinic", "specialization",
+    "created_at", "visit_period", "status",
+    "status_changed_at", "commission_amount",
+    "is_paid", "actions"
+    ])
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -106,6 +114,9 @@ class Referral(Base):
     med_indications = Column(Text, nullable=False)
     special_wishes = Column(Text, nullable=False)
     status = Column(String(255), nullable=False, default="appointed")
+    status_changed_at = Column(DateTime, nullable=True)
+    commission_amount = Column(Integer, nullable=False, default=0)
+    is_paid = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

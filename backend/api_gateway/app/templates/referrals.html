@@ -203,6 +203,8 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid var(--border-color);
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .page-header h1 {
@@ -213,6 +215,12 @@
         .page-header h1 i {
             color: var(--primary-color);
             margin-right: 10px;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         /* Stats Cards */
@@ -288,8 +296,9 @@
 
         .filters-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
             gap: 15px;
+            align-items: end;
         }
 
         .form-group {
@@ -322,11 +331,7 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
+        
 
         /* Search Box */
         .search-box {
@@ -440,6 +445,27 @@
             color: var(--gray-color);
         }
 
+        /* Paid Badge */
+        .paid-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .paid-yes {
+            background-color: #d1fae5;
+            color: var(--success-color);
+        }
+
+        .paid-no {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
         /* Patient Info */
         .patient-info {
             display: flex;
@@ -458,6 +484,7 @@
             font-weight: 600;
             font-size: 0.9rem;
             color: var(--gray-color);
+            flex-shrink: 0;
         }
 
         .patient-details {
@@ -505,6 +532,13 @@
         .date-secondary {
             font-size: 0.8rem;
             color: var(--gray-color);
+        }
+
+        /* Money Info */
+        .money-info {
+            font-weight: 700;
+            color: var(--success-color);
+            font-size: 1rem;
         }
 
         /* Table Footer */
@@ -716,11 +750,15 @@
             align-items: center;
         }
 
+        .modal.active {
+            display: flex;
+        }
+
         .modal-content {
             background-color: white;
             border-radius: var(--border-radius);
             width: 90%;
-            max-width: 700px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
             padding: 30px;
@@ -767,47 +805,55 @@
             border-top: 1px solid var(--border-color);
         }
 
-        .modal .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        /* Column Settings Modal */
+        .columns-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .modal .form-group {
-            margin-bottom: 0;
-        }
-
-        .modal .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .modal .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark-color);
-        }
-
-        .modal .form-group input,
-        .modal .form-group select,
-        .modal .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
+        .column-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background-color: #f8fafc;
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
-            font-size: 1rem;
+            cursor: grab;
+            transition: var(--transition);
+            user-select: none;
         }
 
-        .modal .form-group input:focus,
-        .modal .form-group select:focus,
-        .modal .form-group textarea:focus {
-            outline: none;
+        .column-item:hover {
+            background-color: #eff6ff;
             border-color: var(--primary-color);
         }
 
-        .modal .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
+        .column-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .column-item.drag-over-top {
+            border-top: 3px solid var(--primary-color);
+            background-color: #dbeafe;
+        }
+
+        .column-item.drag-over-bottom {
+            border-bottom: 3px solid var(--primary-color);
+            background-color: #dbeafe;
+        }
+
+        .column-item .drag-handle {
+            color: var(--gray-color);
+            cursor: grab;
+            font-size: 1.1rem;
+        }
+
+        .column-item .column-name {
+            flex: 1;
+            font-weight: 500;
         }
 
         /* Responsive */
@@ -847,10 +893,6 @@
             .filters-grid {
                 grid-template-columns: 1fr 1fr;
             }
-
-            .modal .form-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 768px) {
@@ -877,8 +919,9 @@
                 padding: 10px;
             }
 
-            .modal .form-grid {
-                grid-template-columns: 1fr;
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -955,9 +998,11 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1><i class="fas fa-list"></i> Мои направления</h1>
-                <a href="create_referral" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Новое направление
-                </a>
+                <div class="page-header-actions">
+                    <a href="create_referral" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Новое направление
+                    </a>
+                </div>
             </div>
 
             <!-- Stats Cards -->
@@ -992,24 +1037,29 @@
                     </div>
                 </div>
             
-            <div class="stat-card">
-                <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value" id="conversionRate">0%</div>
-                    <div class="stat-label">Конверсия</div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background-color: #ddd6fe; color: var(--accent-color);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="conversionRate">0%</div>
+                        <div class="stat-label">Конверсия</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
             <!-- Filters -->
             <div class="filters-container">
                 <div class="filters-header">
                     <div class="filters-title">Фильтры и поиск</div>
-                    <button class="btn btn-outline btn-sm" onclick="resetFilters()">
-                        <i class="fas fa-redo"></i> Сбросить фильтры
-                    </button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-outline btn-sm" onclick="openColumnSettings()">
+                            <i class="fas fa-columns"></i> Настройка таблицы
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Сбросить фильтры
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="filters-grid">
@@ -1041,8 +1091,8 @@
                         </select>
                     </div>
                     
-                    <div class="filter-actions">
-                        <button class="btn btn-primary" onclick="applyFilters()">
+                    <div>
+                        <button class="btn btn-primary" onclick="applyFilters()" style="width: 100%;">
                             <i class="fas fa-filter"></i> Применить
                         </button>
                     </div>
@@ -1053,21 +1103,12 @@
             <div class="referrals-container">
                 <div class="table-responsive">
                     <table class="referrals-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Пациент</th>
-                                <th>Клиника</th>
-                                <th>Специализация</th>
-                                <th>Дата создания</th>
-                                <th>Период визита</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
-                            </tr>
+                        <thead id="referralsTableHead">
+                            <!-- Заполняется динамически -->
                         </thead>
                         <tbody id="referralsTableBody">
                             <tr>
-                                <td colspan="8">
+                                <td colspan="10">
                                     <div class="loading-spinner">
                                         <div><i class="fas fa-spinner fa-spin"></i></div>
                                         <div>Загрузка направлений...</div>
@@ -1097,58 +1138,29 @@
         </main>
     </div>
 
-    <!-- Edit Referral Modal -->
-    <div class="modal" id="editReferralModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeEditModal()">&times;</button>
+    <!-- Column Settings Modal -->
+    <div class="modal" id="columnSettingsModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="close-modal" onclick="closeColumnSettings()">&times;</button>
             
             <div class="modal-header">
-                <h2>Редактирование направления</h2>
+                <h2><i class="fas fa-columns"></i> Настройка таблицы</h2>
+                <p style="color: var(--gray-color); font-size: 0.9rem; margin-top: 8px;">
+                    Перетащите столбцы, чтобы изменить их порядок
+                </p>
             </div>
             
             <div class="modal-body">
-                <form id="editReferralForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Статус</label>
-                            <select id="editStatus">
-                                <option value="appointed">Создано</option>
-                                <option value="confirmed">Подтверждено клиникой</option>
-                                <option value="scheduled">Назначен визит</option>
-                                <option value="completed">Завершено</option>
-                                <option value="no-show">Пациент не пришел</option>
-                                <option value="cancelled">Отменено</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Период визита</label>
-                            <input type="date" id="editVisitStart">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Дата окончания</label>
-                            <input type="date" id="editVisitEnd">
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label>Медицинские показания / жалобы</label>
-                            <textarea id="editMedIndications" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label>Особые пожелания</label>
-                            <textarea id="editSpecialWishes" rows="2"></textarea>
-                        </div>
-                    </div>
-                </form>
+                <div class="columns-list" id="columnsList">
+                    <!-- Заполняется динамически -->
+                </div>
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline" onclick="closeEditModal()">
-                    Отмена
+                <button type="button" class="btn btn-outline" onclick="resetColumnOrder()">
+                    <i class="fas fa-undo"></i> По умолчанию
                 </button>
-                <button type="button" class="btn btn-success" onclick="saveEditReferral()">
+                <button type="button" class="btn btn-success" onclick="saveColumnOrder()">
                     <i class="fas fa-save"></i> Сохранить
                 </button>
             </div>
@@ -1202,6 +1214,11 @@
                 
                 userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
                 userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
+                
+                // Загружаем порядок столбцов пользователя
+                if (user.column_order) {
+                    currentColumnOrder = user.column_order;
+                }
             } else {
                 userPanel.style.display = 'none';
                 window.location.href = '/';
@@ -1251,11 +1268,34 @@
         // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
         // ============================================================
 
+        // Определение столбцов
+        const COLUMNS_DEFINITION = {
+            id: { label: '#', alwaysFirst: true },
+            patient: { label: 'Пациент' },
+            clinic: { label: 'Клиника' },
+            specialization: { label: 'Специализация' },
+            created_at: { label: 'Дата создания' },
+            visit_period: { label: 'Период визита' },
+            status: { label: 'Статус' },
+            status_changed_at: { label: 'Изменение статуса' },
+            commission_amount: { label: 'Сумма' },
+            is_paid: { label: 'Выплачено' },
+            actions: { label: 'Действия' }
+        };
+
+        const DEFAULT_ORDER = [
+            "patient", "clinic", "specialization",
+            "created_at", "visit_period", "status",
+            "status_changed_at", "commission_amount",
+            "is_paid", "actions"
+        ];
+
+        let currentColumnOrder = [...DEFAULT_ORDER];
+
         let allReferrals = [];
         let filteredReferrals = [];
         let currentPage = 1;
         const limit = 10;
-        let editingReferralId = null;
 
         // Initialize Select2
         $(document).ready(function() {
@@ -1275,7 +1315,7 @@
             loadReferrals();
         });
 
-        // Загрузка клиников для фильтра
+        // Загрузка клиник для фильтра
         async function loadClinics() {
             try {
                 const response = await fetch(`${API_BASE}/clinics`, {
@@ -1292,7 +1332,7 @@
                     });
                 }
             } catch (err) {
-                console.error('Ошибка загрузки клиников:', err);
+                console.error('Ошибка загрузки клиник:', err);
             }
         }
 
@@ -1308,6 +1348,7 @@
                 allReferrals = await response.json();
                 filteredReferrals = [...allReferrals];
                 updateStats();
+                renderTableHeader();
                 renderCurrentPage();
                 
             } catch (error) {
@@ -1315,7 +1356,7 @@
                 const tableBody = document.getElementById('referralsTableBody');
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="10">
                             <div class="empty-state">
                                 <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
                                 <h3>Ошибка загрузки</h3>
@@ -1341,7 +1382,109 @@
             document.getElementById('completedReferrals').textContent = completed;
             document.getElementById('pendingReferrals').textContent = pending;
             document.getElementById('conversionRate').textContent = conversion + '%';
-        }        
+        }
+
+        // Рендер заголовка таблицы на основе порядка столбцов
+        function renderTableHeader() {
+            const thead = document.getElementById('referralsTableHead');
+            const columns = ['id', ...currentColumnOrder];
+            
+            thead.innerHTML = `
+                <tr>
+                    ${columns.map(col => `<th>${COLUMNS_DEFINITION[col].label}</th>`).join('')}
+                </tr>
+            `;
+        }
+
+        // Рендер ячейки
+        function renderCell(col, referral) {
+            switch(col) {
+                case 'id':
+                    return `<div style="font-weight: 600; color: var(--primary-color); font-size: 0.85rem;">#${referral.id}</div>`;
+                
+                case 'patient': {
+                    const initials = (referral.patient_full_name || 'П').split(' ').map(w => w[0]).join('');
+                    return `
+                        <div class="patient-info">
+                            <div class="patient-avatar">${initials}</div>
+                            <div class="patient-details">
+                                <div class="patient-name">${referral.patient_full_name || '—'}</div>
+                                <div class="patient-phone">${referral.patient_phone || '—'}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                case 'clinic':
+                    return `
+                        <div class="clinic-info">
+                            <div class="clinic-name">${referral.clinic_name || '—'}</div>
+                        </div>
+                    `;
+                
+                case 'specialization':
+                    return `<div class="clinic-service">${referral.specialization_name || '—'}</div>`;
+                
+                case 'created_at': {
+                    const createdDate = referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—';
+                    return `<div class="date-info"><div class="date-main">${createdDate}</div></div>`;
+                }
+                
+                case 'visit_period': {
+                    const visitDate = referral.expected_visit_start ? new Date(referral.expected_visit_start).toLocaleDateString('ru-RU') : '—';
+                    const visitEnd = referral.expected_visit_end ? new Date(referral.expected_visit_end).toLocaleDateString('ru-RU') : '—';
+                    return `
+                        <div class="date-info">
+                            <div class="date-main">${visitDate}</div>
+                            <div class="date-secondary">до ${visitEnd}</div>
+                        </div>
+                    `;
+                }
+                
+                case 'status': {
+                    let statusClass = 'status-appointed';
+                    let statusText = 'Создано';
+                    switch(referral.status) {
+                        case 'confirmed': statusClass = 'status-confirmed'; statusText = 'Подтверждено'; break;
+                        case 'scheduled': statusClass = 'status-scheduled'; statusText = 'Назначен визит'; break;
+                        case 'completed': statusClass = 'status-completed'; statusText = 'Завершено'; break;
+                        case 'no-show': statusClass = 'status-no-show'; statusText = 'Не пришел'; break;
+                        case 'cancelled': statusClass = 'status-cancelled'; statusText = 'Отменено'; break;
+                    }
+                    return `<div class="status-badge ${statusClass}">${statusText}</div>`;
+                }
+                
+                case 'status_changed_at': {
+                    const changedDate = referral.status_changed_at 
+                        ? new Date(referral.status_changed_at).toLocaleString('ru-RU', { 
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                          }) 
+                        : '—';
+                    return `<div class="date-info"><div class="date-main" style="font-size: 0.9rem;">${changedDate}</div></div>`;
+                }
+                
+                case 'commission_amount':
+                    return `<div class="money-info">${(referral.commission_amount || 0).toLocaleString('ru-RU')} ₽</div>`;
+                
+                case 'is_paid':
+                    return referral.is_paid 
+                        ? `<div class="paid-badge paid-yes">Да</div>` 
+                        : `<div class="paid-badge paid-no">Нет</div>`;
+                
+                case 'actions':
+                    return `
+                        <div class="action-buttons">
+                            <button class="action-btn danger" onclick="deleteReferral(${referral.id})" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                
+                default:
+                    return '—';
+            }
+        }
 
         // Рендер текущей страницы
         function renderCurrentPage() {
@@ -1373,9 +1516,10 @@
             tableBody.innerHTML = '';
             
             if (data.length === 0) {
+                const totalColumns = currentColumnOrder.length + 1;
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="${totalColumns}">
                             <div class="empty-state">
                                 <i class="fas fa-inbox"></i>
                                 <h3>Направления не найдены</h3>
@@ -1392,73 +1536,8 @@
             
             data.forEach((referral) => {
                 const row = document.createElement('tr');
-                
-                let statusClass = 'status-appointed';
-                let statusText = 'Создано';
-                switch(referral.status) {
-                    case 'confirmed': statusClass = 'status-confirmed'; statusText = 'Подтверждено'; break;
-                    case 'scheduled': statusClass = 'status-scheduled'; statusText = 'Назначен визит'; break;
-                    case 'completed': statusClass = 'status-completed'; statusText = 'Завершено'; break;
-                    case 'no-show': statusClass = 'status-no-show'; statusText = 'Не пришел'; break;
-                    case 'cancelled': statusClass = 'status-cancelled'; statusText = 'Отменено'; break;
-                }
-                
-                const initials = (referral.patient_full_name || 'П').split(' ').map(w => w[0]).join('');
-                const visitDate = referral.expected_visit_start ? new Date(referral.expected_visit_start).toLocaleDateString('ru-RU') : '—';
-                const visitEnd = referral.expected_visit_end ? new Date(referral.expected_visit_end).toLocaleDateString('ru-RU') : '—';
-                const createdDate = referral.created_at ? new Date(referral.created_at).toLocaleDateString('ru-RU') : '—';
-                
-                row.innerHTML = `
-                    <td>
-                        <div style="font-weight: 600; color: var(--primary-color); font-size: 0.85rem;">
-                            #${referral.id}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="patient-info">
-                            <div class="patient-avatar">${initials}</div>
-                            <div class="patient-details">
-                                <div class="patient-name">${referral.patient_full_name || '—'}</div>
-                                <div class="patient-phone">${referral.patient_phone || '—'}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="clinic-info">
-                            <div class="clinic-name">${referral.clinic_name || '—'}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="clinic-info">
-                            <div class="clinic-service">${referral.specialization_name || '—'}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-info">
-                            <div class="date-main">${createdDate}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="date-info">
-                            <div class="date-main">${visitDate}</div>
-                            <div class="date-secondary">до ${visitEnd}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="status-badge ${statusClass}">${statusText}</div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="openEditModal(${referral.id})" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn danger" onclick="deleteReferral(${referral.id})" title="Удалить">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
+                const columns = ['id', ...currentColumnOrder];
+                row.innerHTML = columns.map(col => `<td>${renderCell(col, referral)}</td>`).join('');
                 tableBody.appendChild(row);
             });
         }
@@ -1502,66 +1581,6 @@
         }
 
         // ============================================================
-        // РЕДАКТИРОВАНИЕ
-        // ============================================================
-
-        function openEditModal(referralId) {
-            const referral = allReferrals.find(r => r.id === referralId);
-            if (!referral) return;
-            
-            editingReferralId = referralId;
-            
-            document.getElementById('editStatus').value = referral.status || 'appointed';
-            document.getElementById('editVisitStart').value = referral.expected_visit_start || '';
-            document.getElementById('editVisitEnd').value = referral.expected_visit_end || '';
-            document.getElementById('editMedIndications').value = referral.med_indications || '';
-            document.getElementById('editSpecialWishes').value = referral.special_wishes || '';
-            
-            document.getElementById('editReferralModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editReferralModal').style.display = 'none';
-            editingReferralId = null;
-        }
-
-        async function saveEditReferral() {
-            const data = {
-                status: document.getElementById('editStatus').value,
-                expected_visit_start: document.getElementById('editVisitStart').value || null,
-                expected_visit_end: document.getElementById('editVisitEnd').value || null,
-                med_indications: document.getElementById('editMedIndications').value.trim(),
-                special_wishes: document.getElementById('editSpecialWishes').value.trim() || null
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/referrals/${editingReferralId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    const updated = await response.json();
-                    const index = allReferrals.findIndex(r => r.id === editingReferralId);
-                    if (index !== -1) {
-                        allReferrals[index] = updated;
-                    }
-                    filteredReferrals = [...allReferrals];
-                    applyFilters();
-                    closeEditModal();
-                    showToast('✅ Направление обновлено', 'success');
-                } else {
-                    const error = await response.json();
-                    showToast('❌ ' + (error.detail || 'Ошибка при обновлении'), 'error');
-                }
-            } catch (err) {
-                showToast('⚠️ Ошибка соединения', 'error');
-            }
-        }
-
-        // ============================================================
         // УДАЛЕНИЕ
         // ============================================================
 
@@ -1588,10 +1607,164 @@
             }
         }
 
+        // ============================================================
+        // НАСТРОЙКА ТАБЛИЦЫ (ПОРЯДОК СТОЛБЦОВ)
+        // ============================================================
+
+        function openColumnSettings() {
+            const modal = document.getElementById('columnSettingsModal');
+            const list = document.getElementById('columnsList');
+            
+            // Формируем список: id всегда первый, потом остальные по порядку
+            const allColumns = ['id', ...currentColumnOrder];
+            
+            list.innerHTML = allColumns.map(col => {
+                const isId = col === 'id';
+                return `
+                    <div class="column-item" 
+                         data-column="${col}" 
+                         draggable="${!isId}"
+                         ${isId ? 'style="cursor: not-allowed; opacity: 0.7;"' : ''}>
+                        <i class="fas fa-grip-vertical drag-handle"></i>
+                        <span class="column-name">${COLUMNS_DEFINITION[col].label}</span>
+                        ${isId ? '<i class="fas fa-lock" style="color: var(--gray-color);"></i>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Добавляем drag-n-drop
+            setupDragAndDrop(list);
+            
+            modal.classList.add('active');
+        }
+
+        function closeColumnSettings() {
+            document.getElementById('columnSettingsModal').classList.remove('active');
+        }
+
+        function setupDragAndDrop(list) {
+            let draggedItem = null;
+            
+            list.querySelectorAll('.column-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    if (item.dataset.column === 'id') {
+                        e.preventDefault();
+                        return;
+                    }
+                    draggedItem = item;
+                    setTimeout(() => item.classList.add('dragging'), 0);
+                });
+                
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    list.querySelectorAll('.column-item').forEach(i => {
+                        i.classList.remove('drag-over-top', 'drag-over-bottom');
+                    });
+                });
+                
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (item === draggedItem) return;
+                    if (item.dataset.column === 'id') return;
+                    
+                    // Определяем, куда тащим — выше или ниже середины элемента
+                    const rect = item.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    
+                    list.querySelectorAll('.column-item').forEach(i => {
+                        i.classList.remove('drag-over-top', 'drag-over-bottom');
+                    });
+                    
+                    if (e.clientY < midY) {
+                        item.classList.add('drag-over-top');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                    }
+                });
+                
+                item.addEventListener('dragleave', () => {
+                    item.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+                
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    
+                    const isTop = item.classList.contains('drag-over-top');
+                    
+                    item.classList.remove('drag-over-top', 'drag-over-bottom');
+                    
+                    if (item === draggedItem) return;
+                    if (item.dataset.column === 'id') return;
+                    
+                    // Вставляем до или после
+                    if (isTop) {
+                        item.before(draggedItem);
+                    } else {
+                        item.after(draggedItem);
+                    }
+                });
+            });
+        }
+
+        async function saveColumnOrder() {
+            const list = document.getElementById('columnsList');
+            const items = [...list.querySelectorAll('.column-item')];
+            
+            // Собираем порядок, исключая id (он всегда первый)
+            const newOrder = items
+                .map(item => item.dataset.column)
+                .filter(col => col !== 'id');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/column_order`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ column_order: newOrder })
+                });
+                
+                if (response.ok) {
+                    currentColumnOrder = newOrder;
+                    renderTableHeader();
+                    renderCurrentPage();
+                    closeColumnSettings();
+                    showToast('✅ Порядок столбцов сохранен', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast('❌ ' + (error.detail || 'Ошибка сохранения'), 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            }
+        }
+
+        function resetColumnOrder() {
+            // Восстанавливаем порядок по умолчанию в модалке
+            const list = document.getElementById('columnsList');
+            const allColumns = ['id', ...DEFAULT_ORDER];
+            
+            list.innerHTML = allColumns.map(col => {
+                const isId = col === 'id';
+                return `
+                    <div class="column-item" 
+                         data-column="${col}" 
+                         draggable="${!isId}"
+                         ${isId ? 'style="cursor: not-allowed; opacity: 0.7;"' : ''}>
+                        <i class="fas fa-grip-vertical drag-handle"></i>
+                        <span class="column-name">${COLUMNS_DEFINITION[col].label}</span>
+                        ${isId ? '<i class="fas fa-lock" style="color: var(--gray-color);"></i>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            setupDragAndDrop(list);
+            showToast('Порядок сброшен. Не забудьте сохранить.', 'info');
+        }
+
         // Закрытие модальных окон по клику на фон
-        document.getElementById('editReferralModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('editReferralModal')) {
-                closeEditModal();
+        document.getElementById('columnSettingsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('columnSettingsModal')) {
+                closeColumnSettings();
             }
         });
     </script>
