@@ -493,7 +493,7 @@ function rateModeForm(agentId,specialty){
   const mode=agentRateMode(agentId,specialty),custom=agentCustomRate(agentId,specialty);
   const spName=specialtyName(specialty);
   const clinicsList=(a.clinicIds||[]).map(cid=>{const cs=clinicSpecialty(cid,specialty);return `<div><dt>${esc(clinicById(cid)?.name||'')}</dt><dd>${cs?.active?percent(cs.defaultRate):'Не задана'}</dd></div>`}).join('');
-  const customOpen=mode==='custom';
+  const customActive=mode==='custom';
   open('Вознаграждение: '+spName,
     `<dl class="details">${clinicsList||'<div><dt>Клиники</dt><dd>Не выбраны</dd></div>'}</dl>
      <form id="rateModeForm" data-id="${agentId}" data-specialty="${specialty}">
@@ -502,12 +502,12 @@ function rateModeForm(agentId,specialty){
          <strong style="display:block;color:#146a70;font-size:15px">По клиникам</strong>
          <small style="display:block;color:#71888c;margin-top:4px">Процент берётся из клиники, куда направлен пациент</small>
        </button>
-       <div class="rate-choice ${mode==='custom'?'active':''}" data-mode-choice="custom" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${mode==='custom'?'#146a70':'#d8e5e5'};border-radius:12px;background:${mode==='custom'?'#eff7f6':'white'};cursor:pointer;font:inherit">
+       <div class="rate-choice ${customActive?'active':''}" data-mode-choice="custom" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${customActive?'#146a70':'#d8e5e5'};border-radius:12px;background:${customActive?'#eff7f6':'white'};cursor:pointer;font:inherit">
          <strong style="display:block;color:#146a70;font-size:15px">Личная ставка (для всех клиник)</strong>
          <small style="display:block;color:#71888c;margin-top:4px">Один процент на все клиники агента</small>
-         <div class="field" id="customRateField" style="margin:12px 0 0;${customOpen?'':'display:none'}">
+         <div class="field" id="customRateField" style="margin:12px 0 0">
            <label>Процент</label>
-           <input type="number" name="customRate" min="0" max="100" step="0.01" value="${custom??''}" onclick="event.stopPropagation()">
+           <input type="number" name="customRate" min="0" max="100" step="0.01" value="${custom??''}" ${customActive?'':'disabled'} onclick="event.stopPropagation()" style="cursor:${customActive?'text':'not-allowed'}">
          </div>
        </div>
        <div class="actions">
@@ -576,8 +576,12 @@ function onRateChoice(e){
     el.style.borderColor=active?'#146a70':'#d8e5e5';
     el.style.background=active?'#eff7f6':'white';
   });
-  const f=form.querySelector('#customRateField');
-  if(f)f.style.display=mode==='custom'?'':'none';
+  const input=form.querySelector('#customRateField input[name="customRate"]');
+  if(input){
+    const custom=mode==='custom';
+    input.disabled=!custom;
+    input.style.cursor=custom?'text':'not-allowed';
+  }
 }
 function onChange(e){const el=e.target;
   try{
