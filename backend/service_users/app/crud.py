@@ -891,7 +891,7 @@ async def get_reports_stats(
         elif percent < 0:
             growth_text = f"{percent}%"
             growth_positive = False
-        else:
+        else: 
             growth_text = "0%"
             growth_positive = True
     
