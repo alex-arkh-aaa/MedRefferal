@@ -83,33 +83,31 @@ app.add_middleware(
 async def get_current_doctor(
     request: Request,
     db: AsyncSession = Depends(get_db)
-) -> Optional[Doctor]:
-    """Извлекает текущего пользователя из токена в cookie или Authorization header"""
-    
-    # Пробуем взять токен из cookie
+) -> Doctor:
     token = request.cookies.get("access_token")
-    
-    # Если нет в cookie, пробуем из Authorization header
     if not token:
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header[7:]
-    
+
     if not token:
         raise HTTPException(status_code=401, detail="Не предоставлен токен")
-    
+
     payload = decode_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Невалидный или истёкший токен")
-    
+
     user_email = payload.get("sub")
     if not user_email:
         raise HTTPException(status_code=401, detail="Неверный формат токена")
-    
+
     doctor = await crud.get_user_by_email(db, user_email)
     if not doctor:
-        raise HTTPException(status_code=401, detail="Пользователь не найден или удалён")
-    
+        raise HTTPException(status_code=401, detail="Пользователь не найден")
+
+    if not doctor.is_active:
+        raise HTTPException(status_code=403, detail="Аккаунт удалён или отключён")
+
     return doctor
 
 
@@ -281,15 +279,17 @@ async def recover_account(
     db: AsyncSession = Depends(get_db)
 ):
     user = await crud.get_user_by_email(db, data.email)
-    if user.is_active == True: 
-        return MessageResponse(message='На данный момент аккаунт не является удаленным!')
-    
-    if not user or not verify_password(data.password, user.password_hash):
+    if not user:
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
-    
-    
+
+    if not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+
+    if user.is_active:
+        return MessageResponse(message="Аккаунт не удалён, восстановление не требуется")
+
     await crud.recover_account(db, user.id)
-    return MessageResponse(message='Аккаунт восстановлен!')
+    return MessageResponse(message="Аккаунт восстановлен")
 
 
 
@@ -659,30 +659,24 @@ async def update_referral(
     current_user: Doctor = Depends(get_current_doctor),
     db: AsyncSession = Depends(get_db)
 ):
-    """Обновить направление"""
-    
-    # Проверяем даты
     if data.expected_visit_start and data.expected_visit_end:
         if data.expected_visit_start > data.expected_visit_end:
             raise HTTPException(status_code=400, detail="Дата начала не может быть позже даты окончания")
-        
         delta = data.expected_visit_end - data.expected_visit_start
         if delta.days > 30:
             raise HTTPException(status_code=400, detail="Период не должен превышать 30 дней")
-    
+
     update_data = data.dict(exclude_unset=True)
-    
+
     referral = await crud.update_referral(
         db=db,
         referral_id=referral_id,
         doctor_id=current_user.id,
         **update_data
     )
-    
     if not referral:
         raise HTTPException(status_code=404, detail="Направление не найдено")
-    
-    # Подгружаем связанные данные для ответа
+
     result = await db.execute(
         select(Referral)
         .options(
@@ -693,7 +687,7 @@ async def update_referral(
         .where(Referral.id == referral_id)
     )
     referral = result.scalar_one()
-    
+
     return ReferralDetailResponse(
         id=referral.id,
         doctor_id=referral.doctor_id,
@@ -705,6 +699,9 @@ async def update_referral(
         med_indications=referral.med_indications,
         special_wishes=referral.special_wishes,
         status=referral.status,
+        status_changed_at=referral.status_changed_at,      # 👈 добавлено
+        commission_amount=referral.commission_amount,      # 👈 добавлено
+        is_paid=referral.is_paid,                          # 👈 добавлено
         created_at=referral.created_at,
         patient_full_name=referral.patient.full_name,
         patient_phone=referral.patient.phone,

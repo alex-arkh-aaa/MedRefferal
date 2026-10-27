@@ -133,26 +133,15 @@ async def profile_page(request: Request):
     html_content = render_template("profile.html")
     return HTMLResponse(content=html_content)
 
-# @app.get("/terms_and_privacy", response_class=HTMLResponse)
-# async def root_page(request: Request):
-#     html_content = render_template("terms_and_privacy.html")
-#     return HTMLResponse(content=html_content)
+@app.get("/clinic-admin", response_class=HTMLResponse)
+async def clinic_admin_page():
+    print('------------------------------------------')
+    return HTMLResponse(render_template("Medpoint_Clinic_Admin.html"))
 
-# @app.get("/login", response_class=HTMLResponse)
-# async def login_page(request: Request):
-#     html_content = render_template("login.html")
-#     return HTMLResponse(content=html_content)
-
-# @app.get("/register", response_class=HTMLResponse)  
-# async def register_page(request: Request):
-#     html_content = render_template("register.html")
-#     return HTMLResponse(content=html_content)
-
-
-# @app.get("/orders", response_class=HTMLResponse)
-# async def orders_page(request: Request):
-#     html_content = render_template("orders.html")
-#     return HTMLResponse(content=html_content)
+@app.get("/portal-admin", response_class=HTMLResponse)
+async def portal_admin_page():
+    print('------------------------------------------')
+    return HTMLResponse(render_template("Medpoint_Portal_Admin.html"))
 
 # ================== ПРОКСИРОВАНИЕ ==================
 @app.api_route("/api/v1/users/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])

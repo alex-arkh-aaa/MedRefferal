@@ -25,6 +25,10 @@ class Doctor(Base):
     "is_paid", "actions"
     ])
 
+    is_active = Column(Boolean, nullable=False, default=True)          # 👈 новое
+    deleted_at = Column(DateTime(timezone=True), nullable=True)         # 👈 новое (soft delete)
+
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

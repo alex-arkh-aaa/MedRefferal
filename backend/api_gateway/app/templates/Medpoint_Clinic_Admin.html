@@ -257,6 +257,24 @@ function setAgentRateMode(agentId,specialty,mode,customRate){
   save();
 }
 function updateAgentProfileClinic(id,values){const existing=agentById(id);if(!existing||!isOwnAgent(id))throw Error('Агент не найден.');const name=String(values.name||'').trim();if(!name)throw Error('Укажите ФИО.');Object.assign(existing,{name,phone:String(values.phone||'').trim(),active:values.active==='true'});data.rateHistory.unshift({id:crypto.randomUUID(),agentId:existing.id,specialty:'__profile__',specialtyName:'Профиль',action:'profile_update',old:null,new:null,date:now(),actor:actorName(),comment:'Обновлён профиль агента'});save();return existing}
+function saveAgentProfileClinic(id,values){
+  const existing=agentById(id);
+  const ownClinicIds=currentAdmin()?.clinicIds||[];
+  const clinicIds=(values.clinicIds||[]).map(Number).filter(cid=>ownClinicIds.includes(cid));
+  if(!clinicIds.length)throw Error('Выберите хотя бы одну свою клинику.');
+  const email=normalizeEmail(values.email);
+  const next={name:String(values.name||'').trim(),email,phone:String(values.phone||'').trim(),specialty:String(values.specialty||'').trim(),clinicIds,adminId:currentAdminId,active:values.active==='true'};
+  if(id&&!existing)throw Error('Агент не найден.');
+  if(!next.name||!next.specialty)throw Error('Укажите ФИО и специальность.');
+  validateEmail(email,false);
+  if(email&&data.doctors.some(a=>a.id!==Number(id)&&normalizeEmail(a.email)===email))throw Error('Агент с такой почтой уже существует.');
+  const result=existing||{id:Math.max(0,...data.doctors.map(a=>a.id))+1,rates:{}};
+  for(const [sp] of SPECIALTIES)result.rates[sp] ||= {mode:'clinic',customRate:null};
+  Object.assign(result,next);
+  if(!existing)data.doctors.push(result);
+  data.rateHistory.unshift({id:crypto.randomUUID(),agentId:result.id,specialty:'__profile__',specialtyName:'Профиль',action:'profile_update',old:null,new:null,date:now(),actor:actorName(),comment:existing?'Обновлён профиль агента':'Создан агент'});
+  save();return result;
+}
 function decideRegistration(id,decision,assignedAdminId,reason){if(!canReviewRegistrations())throw Error('Рассмотрение регистраций для вас отключено.');const r=visibleRegistrations().find(x=>x.id===Number(id));if(!r)throw Error('Заявка на регистрацию недоступна.');if(r.status!=='pending')throw Error('Решение по заявке уже принято.');if(!['approved','rejected'].includes(decision))throw Error('Выберите одобрение или отклонение.');const note=String(reason||'').trim();if(decision==='rejected'&&!note)throw Error('Укажите причину отклонения.');let newAgent=null;if(decision==='approved'){const adminId=currentAdminId,admin=adminById(adminId);if(!admin?.active||!admin.clinicIds.includes(r.clinicId))throw Error('Нет доступа.');if(data.doctors.some(a=>normalizeEmail(a.email)===normalizeEmail(r.email)))throw Error('Агент с такой почтой уже зарегистрирован.');validateEmail(normalizeEmail(r.email));newAgent={id:Math.max(0,...data.doctors.map(a=>a.id))+1,name:r.name,email:normalizeEmail(r.email),phone:r.phone||'',specialty:r.specialty,clinicIds:[r.clinicId],adminId,active:true,rates:{},registrationId:r.id};for(const [sp] of SPECIALTIES)newAgent.rates[sp]={mode:'clinic',customRate:null};data.doctors.push(newAgent);r.agentId=newAgent.id;r.adminId=adminId}r.status=decision;r.reviewedAt=now();r.reviewedBy=actorName();r.decisionReason=note;r.history.unshift({date:r.reviewedAt,actor:r.reviewedBy,status:decision,comment:note});save();return newAgent}
 const normalizeEmail=v=>String(v||'').trim().toLowerCase();
 function validateEmail(email,required=true){if(!email&&!required)return;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Укажите корректную электронную почту.')}
@@ -391,6 +409,34 @@ function showAgentClinicsRates(agentId,specialty){
      <div class="actions"><button class="btn" type="button" data-action="close">Закрыть</button></div>`
   );
 }
+function agentForm(id){
+  const x=agentById(id),isNew=!x;
+  if(!isNew&&!isOwnAgent(id))throw Error('Агент не найден.');
+  const ownClinicIds=currentAdmin()?.clinicIds||[];
+  const ownClinics=data.clinics.filter(c=>ownClinicIds.includes(c.id));
+  const initialClinicIds=x?.clinicIds?.filter(cid=>ownClinicIds.includes(cid))||(ownClinicIds.length?[ownClinicIds[0]]:[]);
+  open(isNew?'Новый агент':'Редактировать агента',
+    `<form id="agentForm" data-id="${id||''}">
+       <div class="field"><label>ФИО</label><input name="name" required value="${esc(x?.name||'')}"></div>
+       <div class="field"><label>Электронная почта</label><input type="email" name="email" value="${esc(x?.email||'')}"></div>
+       <div class="field"><label>Телефон</label><input type="tel" name="phone" value="${esc(x?.phone||'')}"></div>
+       <div class="field"><label>Специальность</label><input name="specialty" required value="${esc(x?.specialty||'Агент')}"></div>
+       <div class="field"><label>Клиники</label>
+         <div class="multi-select" data-name="clinicIds" id="agentClinicsSelect">
+           ${initialClinicIds.map(cid=>`<span class="multi-select-tag" data-id="${cid}">${esc(clinicById(cid)?.name||'')}<span class="x" data-remove-clinic="${cid}">×</span></span>`).join('')}
+           ${initialClinicIds.length?'':'<span class="muted" style="font-size:13px;padding:4px 0;">Выберите клиники...</span>'}
+           <div class="multi-select-dropdown" id="agentClinicsDropdown">
+             ${ownClinics.map(c=>`<div class="multi-select-option ${initialClinicIds.includes(c.id)?'selected':''}" data-add-clinic="${c.id}">${esc(c.name)}</div>`).join('')}
+           </div>
+         </div>
+       </div>
+       <div class="field"><label>Ответственный администратор</label><input value="${esc(currentAdmin()?.name||'')}" disabled></div>
+       <div class="field"><label>Доступ</label><select name="active">${options([{id:'true',name:'Активен'},{id:'false',name:'Отключён'}],String(x?.active!==false))}</select></div>
+       ${formActions(isNew?'Создать агента':'Сохранить')}
+     </form>`
+  );
+  setTimeout(()=>setupMultiSelect('agentClinicsSelect','agentClinicsDropdown'),0);
+}
 function editAgentFormClinic(id){const x=agentById(id);if(!x)throw Error('Агент не найден.');open('Редактировать профиль агента',`<form id="agentProfileForm" data-id="${id}"><div class="field"><label>ФИО</label><input name="name" required value="${esc(x.name||'')}"></div><div class="field"><label>Телефон</label><input name="phone" type="tel" value="${esc(x.phone||'')}"></div><div class="field"><label>Доступ</label><select name="active">${options([{id:'true',name:'Активен'},{id:'false',name:'Отключён'}],String(x.active!==false))}</select></div><p class="note">Клиники и ответственного администратора изменяет администратор портала.</p>${formActions('Сохранить')}</form>`)}
 function succeed(msg){close();render();toast(msg)}
 function setupMultiSelect(wrapId,dropdownId){const wrap=document.getElementById(wrapId);if(!wrap)return;const dropdown=document.getElementById(dropdownId);const selected=new Set();wrap.querySelectorAll('.multi-select-tag').forEach(t=>{if(t.dataset.id)selected.add(Number(t.dataset.id))});wrap.addEventListener('click',e=>{if(e.target.closest('.multi-select-tag')){if(e.target.dataset.removeClinic){selected.delete(Number(e.target.dataset.removeClinic));e.stopPropagation();renderTags()}}else{dropdown.classList.toggle('show')}});wrap.addEventListener('mouseenter',()=>dropdown.classList.add('show'));wrap.addEventListener('mouseleave',()=>dropdown.classList.remove('show'));dropdown.querySelectorAll('.multi-select-option').forEach(opt=>{opt.addEventListener('click',e=>{e.stopPropagation();const cid=Number(opt.dataset.addClinic);if(selected.has(cid))selected.delete(cid);else selected.add(cid);renderTags();dropdown.classList.add('show')})});function renderTags(){wrap.querySelectorAll('.multi-select-tag').forEach(t=>t.remove());wrap.querySelector('span.muted')?.remove();const arr=[...selected];wrap.insertAdjacentHTML('afterbegin',arr.map(cid=>`<span class="multi-select-tag" data-id="${cid}">${esc(clinicById(cid)?.name||'')}<span class="x" data-remove-clinic="${cid}">×</span></span>`).join(''));if(!arr.length)wrap.insertAdjacentHTML('afterbegin','<span class="muted" style="font-size:13px;padding:4px 0;">Выберите клиники...</span>');dropdown.querySelectorAll('.multi-select-option').forEach(o=>{o.classList.toggle('selected',selected.has(Number(o.dataset.addClinic)))})}wrap.clinicSelected=()=>[...selected]}
@@ -409,7 +455,8 @@ function onClick(e){
     case'newClinicSpecialty':clinicSpecialtyForm(id);break;
     case'editClinicSpecialty':clinicSpecialtyForm(id,a.dataset.specialty);break;
     case'reportPreset':setReportPreset(a.dataset.preset);break;
-    case'editAgent':editAgentFormClinic(id);break;
+    case'newAgent':agentForm();break;
+    case'editAgent':agentForm(id);break;
   }}
   catch(error){toast(error.message)}
 }
@@ -449,7 +496,15 @@ function onSubmit(e){e.preventDefault();const f=e.target,v=Object.fromEntries(ne
     if(f.id==='rateModeForm'){setAgentRateMode(id,f.dataset.specialty,v.mode,v.customRate);succeed('Вознаграждение обновлено')}
     if(f.id==='clinicSpecialtyForm'){saveClinicSpecialty(id,f.dataset.specialty||null,v);succeed('Специализация сохранена')}
     if(f.id==='registrationDecisionForm'){decideRegistration(id,v.decision,null,v.reason);succeed('Решение сохранено')}
-    if(f.id==='agentProfileForm'){updateAgentProfileClinic(id,v);succeed('Профиль агента обновлён')}
+    if(f.id==='agentForm'){
+      const wrap=document.getElementById('agentClinicsSelect');
+      const clinicIds=wrap?.clinicSelected?wrap.clinicSelected():[];
+      if(!clinicIds.length)throw Error('Выберите хотя бы одну клинику.');
+      v.clinicIds=clinicIds;
+      v.adminId=currentAdminId;
+      saveAgentProfileClinic(id,v);
+      succeed(id?'Агент обновлён':'Агент создан');
+    }
   }catch(error){toast(error.message)}
 }
 document.addEventListener('click',onRateChoice);

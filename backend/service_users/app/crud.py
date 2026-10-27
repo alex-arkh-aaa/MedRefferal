@@ -37,16 +37,14 @@ async def get_user(db: AsyncSession, user_id: int) -> Optional[Doctor]:
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> Optional[Doctor]:
-    result = await db.execute(
-        select(Doctor).where(Doctor.email == email)
-    )
-    return result.scalar_one_or_none()
-
-
-async def get_user_by_email_including_inactive(db: AsyncSession, email: str) -> Optional[Doctor]:
-    """Получить пользователя даже если is_active=False (нужно для проверки при регистрации)"""
     result = await db.execute(select(Doctor).where(Doctor.email == email))
     return result.scalar_one_or_none()
+
+
+# async def get_user_by_email_including_inactive(db: AsyncSession, email: str) -> Optional[Doctor]:
+#     """Получить пользователя даже если is_active=False (нужно для проверки при регистрации)"""
+#     result = await db.execute(select(Doctor).where(Doctor.email == email))
+#     return result.scalar_one_or_none()
 
 
 async def get_users(
@@ -415,9 +413,10 @@ async def update_patient(
 
 
 async def delete_patient(db: AsyncSession, patient_id: int, doctor_id: int) -> bool:
-    """Удалить пациента"""
     patient = await get_patient_by_id(db, patient_id, doctor_id)
-    print(patient, '----------------------------------')
+    if not patient:
+        return False
+
     patient_name = patient.full_name
     result = await db.execute(
         delete(Patient).where(
@@ -427,9 +426,10 @@ async def delete_patient(db: AsyncSession, patient_id: int, doctor_id: int) -> b
     )
     await db.commit()
 
-    await add_history(db, doctor_id, "Удален пациент", f"{patient_name}")
-
-    return result.rowcount > 0
+    if result.rowcount > 0:
+        await add_history(db, doctor_id, "Удален пациент", f"{patient_name}")
+        return True
+    return False
 
 
 async def get_patient_referrals_count(db: AsyncSession, patient_id: int) -> int:
