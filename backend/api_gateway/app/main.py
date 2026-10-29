@@ -12,11 +12,12 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="API Gateway")
 
-# Вместо Jinja2Templates, используем прямое чтение файлов
+
 def render_template(template_name: str):
     template_path = os.path.join(os.path.dirname(__file__), "templates", template_name)
     with open(template_path, "r", encoding="utf-8") as f:
         return f.read()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,42 +27,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Rate Limiting Middleware
+
 @app.middleware("http")
 async def add_rate_limiting(request: Request, call_next):
     return await rate_limit_middleware(request, call_next)
 
 
-
-
 # ================== MIDDLEWARE ==================
 @app.middleware("http")
-async def auth_middleware(request: Request, call_next): 
+async def auth_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
-    
+
     public_paths = [
         '/', '/index', '/terms_and_privacy', '/api/v1/auth/login', '/register', '/api/v1/health',
         '/api/v1/login',
-        '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico'
+        '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico',
+        '/api/v1/auth/recover_account',
+        '/clinic-admin', '/portal-admin',
     ]
-
 
     if request.url.path in public_paths:
         return await call_next(request)
-    
+
+    if request.method == "POST" and request.url.path == "/api/v1/registrations":
+        return await call_next(request)
+
     token = request.cookies.get("access_token")
-    
+
     if not token:
         if request.url.path.startswith('/api/'):
             return JSONResponse(status_code=401, content={"error": "Unauthorized"})
         else:
             return RedirectResponse(url="/")
-        
+
     try:
         payload = jwt.decode(
-            token, 
-            os.getenv('JWT_SECRET_KEY'), 
+            token,
+            os.getenv('JWT_SECRET_KEY'),
             algorithms=[os.getenv('JWT_ALGORITHM')]
         )
         logger.info(f"✅ Valid JWT for user: {payload.get('sub')}")
@@ -76,10 +79,11 @@ async def auth_middleware(request: Request, call_next):
             return JSONResponse(status_code=401, content={"error": "Invalid token"})
         else:
             return RedirectResponse(url="/")
-    
+
     request.state.user = payload
     response = await call_next(request)
     return response
+
 
 # ================== HTML РОУТЫ ==================
 @app.exception_handler(404)
@@ -93,64 +97,75 @@ async def root_page(request: Request):
     html_content = render_template("index.html")
     return HTMLResponse(content=html_content)
 
+
 @app.get("/index", response_class=HTMLResponse)
 async def root_page(request: Request):
     html_content = render_template("index.html")
     return HTMLResponse(content=html_content)
+
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     html_content = render_template("dashboard.html")
     return HTMLResponse(content=html_content)
 
+
 @app.get("/create_referral", response_class=HTMLResponse)
 async def create_referral(request: Request):
     html_content = render_template("create_referral.html")
     return HTMLResponse(content=html_content)
+
 
 @app.get("/referrals", response_class=HTMLResponse)
 async def referrals(request: Request):
     html_content = render_template("referrals.html")
     return HTMLResponse(content=html_content)
 
+
 @app.get("/patients", response_class=HTMLResponse)
 async def patients(request: Request):
     html_content = render_template("patients.html")
     return HTMLResponse(content=html_content)
+
 
 @app.get("/clinics", response_class=HTMLResponse)
 async def clinics(request: Request):
     html_content = render_template("clinics.html")
     return HTMLResponse(content=html_content)
 
+
 @app.get("/reports", response_class=HTMLResponse)
 async def reports(request: Request):
     html_content = render_template("reports.html")
     return HTMLResponse(content=html_content)
+
 
 @app.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
     html_content = render_template("profile.html")
     return HTMLResponse(content=html_content)
 
+
 @app.get("/clinic-admin", response_class=HTMLResponse)
 async def clinic_admin_page():
-    print('------------------------------------------')
     return HTMLResponse(render_template("Medpoint_Clinic_Admin.html"))
+
 
 @app.get("/portal-admin", response_class=HTMLResponse)
 async def portal_admin_page():
-    print('------------------------------------------')
     return HTMLResponse(render_template("Medpoint_Portal_Admin.html"))
+
 
 # ================== ПРОКСИРОВАНИЕ ==================
 @app.api_route("/api/v1/users/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_users(request: Request, path: str):
     return await proxy_request(request, path)
 
+
 @app.api_route("/api/v1/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_users(request: Request, path: str):
     return await proxy_request(request, path)
+
 
 async def proxy_request(request: Request, path: str):
     target_url = f"http://service_users:8000/api/v1/{path}"
@@ -158,15 +173,15 @@ async def proxy_request(request: Request, path: str):
         key: value for key, value in request.headers.items()
         if key.lower() not in ['host', 'content-length']
     }
-    
+
     if hasattr(request.state, 'user'):
         user_data = request.state.user
         headers["X-User-ID"] = str(user_data.get("user_id", ""))
         headers["X-User-Email"] = str(user_data.get("sub", ""))
-        headers["X-User-Roles"] = str(",".join(user_data.get("roles", [])))
-    
+        headers["X-User-Role"] = str(user_data.get("role", ""))
+
     body = await request.body()
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.request(
@@ -177,21 +192,33 @@ async def proxy_request(request: Request, path: str):
                 params=request.query_params,
                 timeout=30.0
             )
-            return JSONResponse(
+
+            resp_headers = dict(response.headers)
+            resp_headers.pop("set-cookie", None)
+            resp_headers.pop("content-length", None)
+
+            json_response = JSONResponse(
                 content=response.json() if response.content else {},
                 status_code=response.status_code,
-                headers=dict(response.headers)
+                headers=resp_headers,
             )
+
+            for cookie in response.headers.get_list("set-cookie"):
+                json_response.headers.append("set-cookie", cookie)
+
+            return json_response
     except httpx.ConnectError:
         raise HTTPException(status_code=503, detail=f"Service unavailable")
     except Exception as e:
         logger.error(f"Error proxying to: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal gateway error")
 
+
 # ================== HEALTH CHECK ==================
 @app.get("/health")
 async def health():
     return {"status": "API Gateway is healthy"}
+
 
 @app.get("/api/health")
 async def api_health():

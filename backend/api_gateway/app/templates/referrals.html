@@ -145,6 +145,7 @@
         /* Sidebar */
         .sidebar {
             width: 250px;
+            flex-shrink: 0;
             background-color: white;
             box-shadow: var(--shadow);
             padding: 20px 0;
@@ -193,6 +194,7 @@
         /* Main Content */
         .main-content {
             flex: 1;
+            min-width: 0;
             padding: 30px;
         }
 
@@ -1074,14 +1076,11 @@
                     <div class="form-group">
                         <label>Статус</label>
                         <select id="statusFilter">
-                            <option value="">Все статусы</option>
-                            <option value="appointed">Создано</option>
-                            <option value="confirmed">Подтверждено клиникой</option>
-                            <option value="scheduled">Назначен визит</option>
-                            <option value="completed">Завершено</option>
-                            <option value="no-show">Пациент не пришел</option>
-                            <option value="cancelled">Отменено</option>
-                        </select>
+                        <option value="">Все статусы</option>
+                        <option value="new">Новая</option>
+                        <option value="approved">Подтверждена</option>
+                        <option value="rejected">Отклонена</option>
+                    </select>
                     </div>
                     
                     <div class="form-group">
@@ -1279,15 +1278,15 @@
             status: { label: 'Статус' },
             status_changed_at: { label: 'Изменение статуса' },
             commission_amount: { label: 'Сумма' },
-            is_paid: { label: 'Выплачено' },
-            actions: { label: 'Действия' }
+            payout_status: { label: 'Выплата' },
+            actions: { label: 'Действия' }        
         };
 
         const DEFAULT_ORDER = [
             "patient", "clinic", "specialization",
             "created_at", "visit_period", "status",
             "status_changed_at", "commission_amount",
-            "is_paid", "actions"
+            "payout_status", "actions"
         ];
 
         let currentColumnOrder = [...DEFAULT_ORDER];
@@ -1374,16 +1373,15 @@
         // Обновить статистику
         function updateStats() {
             const total = allReferrals.length;
-            const completed = allReferrals.filter(r => r.status === 'completed').length;
-            const pending = allReferrals.filter(r => r.status === 'appointed' || r.status === 'confirmed' || r.status === 'scheduled').length;
+            const completed = allReferrals.filter(r => r.status === 'approved').length;
+            const pending = allReferrals.filter(r => r.status === 'new').length;
             const conversion = total > 0 ? Math.round((completed / total) * 100) : 0;
-            
+
             document.getElementById('totalReferrals').textContent = total;
             document.getElementById('completedReferrals').textContent = completed;
             document.getElementById('pendingReferrals').textContent = pending;
             document.getElementById('conversionRate').textContent = conversion + '%';
         }
-
         // Рендер заголовка таблицы на основе порядка столбцов
         function renderTableHeader() {
             const thead = document.getElementById('referralsTableHead');
@@ -1443,13 +1441,12 @@
                 
                 case 'status': {
                     let statusClass = 'status-appointed';
-                    let statusText = 'Создано';
+                    let statusText = 'Новая';
                     switch(referral.status) {
-                        case 'confirmed': statusClass = 'status-confirmed'; statusText = 'Подтверждено'; break;
-                        case 'scheduled': statusClass = 'status-scheduled'; statusText = 'Назначен визит'; break;
-                        case 'completed': statusClass = 'status-completed'; statusText = 'Завершено'; break;
-                        case 'no-show': statusClass = 'status-no-show'; statusText = 'Не пришел'; break;
-                        case 'cancelled': statusClass = 'status-cancelled'; statusText = 'Отменено'; break;
+                        case 'approved': statusClass = 'status-completed'; statusText = 'Подтверждена'; break;
+                        case 'rejected': statusClass = 'status-no-show'; statusText = 'Отклонена'; break;
+                        case 'new':
+                        default: statusClass = 'status-appointed'; statusText = 'Новая';
                     }
                     return `<div class="status-badge ${statusClass}">${statusText}</div>`;
                 }
@@ -1467,10 +1464,16 @@
                 case 'commission_amount':
                     return `<div class="money-info">${(referral.commission_amount || 0).toLocaleString('ru-RU')} ₽</div>`;
                 
-                case 'is_paid':
-                    return referral.is_paid 
-                        ? `<div class="paid-badge paid-yes">Да</div>` 
-                        : `<div class="paid-badge paid-no">Нет</div>`;
+                case 'payout_status':
+                    switch(referral.payout_status) {
+                        case 'paid':
+                            return `<div class="paid-badge paid-yes">Выплачено</div>`;
+                        case 'processing':
+                            return `<div class="paid-badge" style="background:#fef3c7;color:#b45309">К выплате</div>`;
+                        case 'unpaid':
+                        default:
+                            return `<div class="paid-badge paid-no">Не выплачено</div>`;
+                    }
                 
                 case 'actions':
                     return `

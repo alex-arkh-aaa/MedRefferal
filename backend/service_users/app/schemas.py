@@ -26,8 +26,7 @@ class DoctorRegister(BaseModel):
     full_name: str = Field(..., min_length=1)
     phone: str = Field(...)
     code: int = Field(...)
-
-
+    comment: Optional[str] = None
 
 
 class UserRegisterPartner(BaseModel):
@@ -42,7 +41,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
     remember_me: Optional[bool] = False
-
 
 
 class EmailVerify(BaseModel):
@@ -77,8 +75,6 @@ class UserResponse(BaseModel):
     education: Optional[str] = None
     column_order: Optional[List[str]] = None
 
-
-
     class Config:
         from_attributes = True
 
@@ -95,9 +91,8 @@ class DoctorUpdate(BaseModel):
     date_of_birth: Optional[date] = None
     experience: Optional[str] = None
     about_myself: Optional[str] = None
-    education: Optional[str] = None  # 👈 добавить
-
-    specialization_ids: Optional[List[int]] = None  # список id специализаций
+    education: Optional[str] = None
+    specialization_ids: Optional[List[int]] = None
 
 
 class DoctorSpecializationResponse(BaseModel):
@@ -108,7 +103,7 @@ class DoctorSpecializationResponse(BaseModel):
         from_attributes = True
 
 
-# ==================== Change Email & Password Schemas ====================
+# ==================== Change Email & Password ====================
 
 class ChangeEmail(BaseModel):
     new_email: EmailStr
@@ -120,16 +115,20 @@ class ChangePassword(BaseModel):
     new_password: str = Field(..., min_length=8)
     confirm_password: str = Field(..., min_length=8)
 
+
 # ==================== Clinic Schemas ====================
 
 class ClinicResponse(BaseModel):
     id: int
     name: str
-    address: str
-    coordinates: str
+    city: str
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    active: bool
 
     class Config:
         from_attributes = True
+
 
 # ==================== Patient Schemas ====================
 
@@ -154,7 +153,7 @@ class PatientUpdate(BaseModel):
 
 class PatientResponse(BaseModel):
     id: int
-    doctor_id: int
+    agent_id: int
     full_name: str
     phone: str
     date_of_birth: Optional[date] = None
@@ -183,12 +182,15 @@ class PatientsStatsResponse(BaseModel):
     active: int
     new_patients: int
     activity: float
-    # ==================== Referral Schemas ====================
+
+
+# ==================== Referral Schemas ====================
 
 class ReferralCreate(BaseModel):
     clinic_id: int = Field(..., description="ID клиники")
     patient_id: int = Field(..., description="ID пациента")
     specialization_id: int = Field(..., description="ID специализации")
+    amount: Optional[int] = Field(0, ge=0, description="Стоимость услуги")
     expected_visit_start: date = Field(..., description="Начало ожидаемого периода визита")
     expected_visit_end: date = Field(..., description="Конец ожидаемого периода визита")
     med_indications: str = Field(..., min_length=1, description="Медицинские показания/жалобы")
@@ -197,56 +199,58 @@ class ReferralCreate(BaseModel):
 
 class ReferralResponse(BaseModel):
     id: int
-    doctor_id: int
+    agent_id: int
     clinic_id: int
     patient_id: int
     specialization_id: int
+    amount: int = 0
     expected_visit_start: date
     expected_visit_end: date
     med_indications: str
     special_wishes: Optional[str]
     status: str
     status_changed_at: Optional[datetime] = None
-    commission_amount: int = 0                  
-    is_paid: bool = False                       
+    commission_rate: Optional[float] = None
+    commission_amount: int = 0
+    payout_status: str = "unpaid"
+    paid_at: Optional[datetime] = None
+    payment_reference: Optional[str] = None
+    specialty_name_at_confirmation: Optional[str] = None
     created_at: datetime
-
 
     class Config:
         from_attributes = True
 
 
-
-        # ==================== Referral Update Schemas ====================
-
 class ReferralUpdate(BaseModel):
-    status: Optional[str] = Field(None, pattern="^(appointed|confirmed|scheduled|completed|no-show|cancelled)$")
+    status: Optional[str] = Field(None, pattern="^(new|approved|rejected)$")
     expected_visit_start: Optional[date] = None
     expected_visit_end: Optional[date] = None
     med_indications: Optional[str] = None
     special_wishes: Optional[str] = None
 
 
-
-    # ==================== Referral Response (расширенный) ====================
-
 class ReferralDetailResponse(BaseModel):
     id: int
-    doctor_id: int
+    agent_id: int
     clinic_id: int
     patient_id: int
     specialization_id: int
+    amount: int = 0
     expected_visit_start: date
     expected_visit_end: date
     med_indications: str
     special_wishes: Optional[str]
     status: str
-    status_changed_at: Optional[datetime] = None   
-    commission_amount: int = 0                   
-    is_paid: bool = False                        
+    status_changed_at: Optional[datetime] = None
+    commission_rate: Optional[float] = None
+    commission_amount: int = 0
+    payout_status: str = "unpaid"
+    paid_at: Optional[datetime] = None
+    payment_reference: Optional[str] = None
+    specialty_name_at_confirmation: Optional[str] = None
     created_at: datetime
-    
-    # Дополнительные поля для отображения
+
     patient_full_name: Optional[str] = None
     patient_phone: Optional[str] = None
     clinic_name: Optional[str] = None
@@ -256,9 +260,9 @@ class ReferralDetailResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ColumnOrderUpdate(BaseModel):
     column_order: List[str]
-
 
 
 class DashboardStatsResponse(BaseModel):
@@ -268,13 +272,10 @@ class DashboardStatsResponse(BaseModel):
     upcoming_visits: int
 
 
-
-
-
 class RecentActivityResponse(BaseModel):
     id: int
     label: str
-    info: str
+    text: str
     created_at: datetime
 
     class Config:
@@ -303,8 +304,6 @@ class TopClinicResponse(BaseModel):
         from_attributes = True
 
 
-
-
 # ==================== Reports Schemas ====================
 
 class ReportsStatsResponse(BaseModel):
@@ -313,8 +312,9 @@ class ReportsStatsResponse(BaseModel):
     completed_referrals: int
     conversion: float
     days_in_period: int
-    growth_text: str          # 👈 "15%" или "N завершено"
-    growth_positive: bool     # 👈 для цвета (зелёный/красный)
+    growth_text: str
+    growth_positive: bool
+
 
 class GoalResponse(BaseModel):
     id: Optional[int] = None
@@ -330,5 +330,38 @@ class GoalResponse(BaseModel):
 class GoalCreate(BaseModel):
     income_money: int = Field(..., ge=0)
     referrals: int = Field(..., ge=0)
-    month: int = Field(..., ge=1, le=12)  # 👈
-    year: int = Field(..., ge=2020)       # 👈
+    month: int = Field(..., ge=1, le=12)
+    year: int = Field(..., ge=2020)
+
+
+# ==================== Admin Schemas ====================
+
+class AdminResponse(BaseModel):
+    id: int
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    role: str
+    active: bool
+    permissions: dict = {}
+    clinic_ids: List[int] = []
+
+    class Config:
+        from_attributes = True
+
+
+class AdminCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    full_name: str = Field(..., min_length=1)
+    phone: Optional[str] = None
+    clinic_ids: List[int] = []
+
+
+class AdminUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    active: Optional[bool] = None
+    permissions: Optional[dict] = None
+    clinic_ids: Optional[List[int]] = None
+

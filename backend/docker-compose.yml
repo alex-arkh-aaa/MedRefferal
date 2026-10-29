@@ -20,6 +20,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.12-management-alpine
+    attach: false
     container_name: service_rabbitmq
     ports:
       - "5672:5672"

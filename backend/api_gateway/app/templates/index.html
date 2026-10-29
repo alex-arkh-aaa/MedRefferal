@@ -18,1366 +18,810 @@
             --shadow: 0 4px 24px rgba(0,0,0,0.08);
             --border-radius: 16px;
             --transition: all 0.3s ease;
+            --admin-primary: #146a70;
+            --admin-dark: #103b44;
+            --admin-light: #e6f2f1;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text-dark); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 10px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; flex-wrap: wrap; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 20px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--primary-color); }
+        .nav-buttons { display: flex; gap: 12px; align-items: center; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-outline { background: transparent; color: var(--text-dark); border: 2px solid var(--border-color); }
+        .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-success:hover { background: #15803d; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
+        .btn-lg { padding: 14px 32px; font-size: 1.1rem; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 10px;
-        }
+        .hero { padding: 80px 0 60px; background: var(--bg-light); text-align: center; }
+        .hero .container { display: flex; flex-direction: column; align-items: center; max-width: 900px; }
+        .hero h1 { font-size: 3rem; line-height: 1.2; margin-bottom: 20px; max-width: 800px; }
+        .hero h1 span { color: var(--primary-color); }
+        .hero p { font-size: 1.2rem; color: var(--gray-color); margin-bottom: 30px; max-width: 700px; }
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+        .stats { margin-top: 40px; display: flex; gap: 50px; justify-content: center; flex-wrap: wrap; }
+        .stats h3 { font-size: 2rem; color: var(--primary-color); }
+        .stats p { font-size: 1rem; color: var(--gray-color); margin-bottom: 0; }
 
-        /* Header */
-        header {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        .section-title { font-size: 2.5rem; text-align: center; margin-bottom: 50px; color: var(--text-dark); }
+        .features { padding: 80px 0; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .feature-card { background: white; padding: 30px; border-radius: 16px; box-shadow: var(--shadow); transition: transform 0.2s; border: 1px solid var(--border-color); }
+        .feature-card:hover { transform: translateY(-6px); }
+        .feature-icon { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 16px; }
+        .feature-card h3 { margin-bottom: 10px; }
+        .feature-card p { color: var(--gray-color); }
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            flex-wrap: wrap;
-        }
+        .how-it-works { padding: 80px 0; background: var(--bg-light); }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
+        .step { text-align: center; }
+        .step-number { width: 60px; height: 60px; border-radius: 50%; background: var(--primary-color); color: white; font-size: 1.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .step h3 { margin-bottom: 8px; }
+        .step p { color: var(--gray-color); }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        footer { background: var(--text-dark); color: white; padding: 60px 0 30px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-column h3 { margin-bottom: 16px; font-size: 1.1rem; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #cbd5e1; text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: white; }
+        .copyright { border-top: 1px solid #334155; padding-top: 24px; text-align: center; color: #94a3b8; font-size: 0.9rem; }
 
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            list-style: none;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background-color: white; border-radius: var(--border-radius); width: 90%; max-width: 500px; max-height: 90vh; padding: 40px; position: relative; animation: modalFade 0.3s ease; overflow-y: auto; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .close-modal { position: sticky; top: 0; float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-color); z-index: 10; padding: 5px 10px; margin-left: auto; }
+        .close-modal:hover { color: var(--text-dark); }
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: color 0.2s;
-        }
+        .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
+        .role-btn { padding: 20px; border: 2px solid var(--border-color); border-radius: 12px; background: white; cursor: pointer; transition: var(--transition); text-align: center; font-family: inherit; }
+        .role-btn:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .role-btn.active { border-color: var(--primary-color); background: #eff6ff; }
+        .role-btn.active.admin-role { border-color: var(--admin-primary); background: var(--admin-light); }
+        .role-btn .role-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .role-btn.agent-role .role-icon { color: var(--primary-color); }
+        .role-btn.admin-role .role-icon { color: var(--admin-primary); }
+        .role-btn strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+        .role-btn small { display: block; font-size: 0.8rem; color: var(--gray-color); }
 
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
+        .auth-form { display: none; padding-bottom: 10px; }
+        .auth-form.active { display: block; }
+        .auth-form.hidden { display: none; }
 
-        .nav-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.95rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: var(--transition); background: white; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
-        }
+        #adminLoginSection .form-group input:focus { border-color: var(--admin-primary); }
+        #adminLoginSection .btn-admin { background: var(--admin-primary); color: white; width: 100%; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        #adminLoginSection .btn-admin:hover { background: var(--admin-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(20, 106, 112, 0.3); }
+        #adminLoginSection .btn-admin:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
+        #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 16px 24px; border-radius: 12px; color: white; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,0.2); max-width: 420px; animation: slideIn 0.3s ease; transition: all 0.3s ease; }
+        .toast.success { background: var(--success-color); }
+        .toast.error { background: #dc2626; }
+        .toast.info { background: var(--primary-color); }
+        @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
+        #userPanel { display: none; align-items: center; gap: 15px; margin-left: 15px; }
+        #userName { font-weight: 500; text-align: right; line-height: 1.3; }
+        #userName span { font-weight: 400; font-size: 0.9rem; color: var(--gray-color); }
+        #userAvatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.1rem; flex-shrink: 0; }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--text-dark);
-            border: 2px solid var(--border-color);
-        }
+        .apply-step { display: none; }
+        .apply-step.active { display: block; }
+        .step-hint { color: var(--gray-color); font-size: 0.9rem; margin-bottom: 15px; }
+        .code-row { display: flex; gap: 10px; }
 
-        .btn-outline:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #15803d;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-        }
-
-        .btn-lg {
-            padding: 14px 32px;
-            font-size: 1.1rem;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 80px 0 60px;
-            background: var(--bg-light);
-            text-align: center; /* Добавляем центрирование текста */
-        }
-
-        .hero .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 900px; /* Ограничиваем ширину для лучшей читаемости */
-        }
-
-        .hero-content {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            max-width: 800px;
-        }
-
-        .hero h1 span {
-            color: var(--primary-color);
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--gray-color);
-            margin-bottom: 30px;
-            max-width: 700px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .hero-image {
-            display: none; /* Скрываем картинку */
-        }
-
-        .stats {
-            margin-top: 40px;
-            display: flex;
-            gap: 50px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .stats div {
-            text-align: center;
-        }
-
-        .stats h3 {
-            font-size: 2rem;
-            color: var(--primary-color);
-        }
-
-        .stats p {
-            font-size: 1rem;
-            color: var(--gray-color);
-            margin-bottom: 0;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .stats {
-                gap: 30px;
-            }
-            
-            .stats h3 {
-                font-size: 1.5rem;
-            }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .stats { gap: 30px; }
+            .stats h3 { font-size: 1.5rem; }
+            .modal-content { padding: 20px; }
+            .role-selector { grid-template-columns: 1fr; }
+            .form-group { margin-bottom: 14px; }
+            .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; font-size: 0.95rem; }
+            .modal-content .btn { padding: 10px 16px; font-size: 0.9rem; }
         }
-        /* Sections */
-        .section-title {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 50px;
-            color: var(--text-dark);
-        }
-
-        .features {
-            padding: 80px 0;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s;
-            border: 1px solid var(--border-color);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-6px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 16px;
-        }
-
-        .feature-card h3 {
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: var(--gray-color);
-        }
-
-        .how-it-works {
-            padding: 80px 0;
-            background: var(--bg-light);
-        }
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-        }
-
-        .step {
-            text-align: center;
-        }
-
-        .step-number {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-        }
-
-        .step h3 {
-            margin-bottom: 8px;
-        }
-
-        .step p {
-            color: var(--gray-color);
-        }
-
-        /* Footer */
-        footer {
-            background: var(--text-dark);
-            color: white;
-            padding: 60px 0 30px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-column h3 {
-            margin-bottom: 16px;
-            font-size: 1.1rem;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        .copyright {
-            border-top: 1px solid #334155;
-            padding-top: 24px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        /* Auth Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            padding: 40px;
-            position: relative;
-            animation: modalFade 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .modal-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 10px;
-        }
-
-        @keyframes modalFade {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .close-modal {
-            position: sticky;
-            top: 0;
-            float: right;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray-color);
-            z-index: 10;
-            padding: 5px 10px;
-            margin-left: auto;
-        }
-
-        .close-modal:hover {
-            color: var(--text-dark);
-        }
-
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-            position: sticky;
-            top: -40px;
-            background: white;
-            z-index: 5;
-            padding-top: 5px;
-        }
-
-        .auth-tab {
-            padding: 15px 30px;
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-color);
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .auth-tab.active {
-            color: var(--primary-color);
-        }
-
-        .auth-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: var(--primary-color);
-        }
-
-        .auth-form {
-            display: none;
-            padding-bottom: 10px;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .auth-form.hidden {
-            display: none;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .modal-content .btn {
-            padding: 12px 20px;
-            font-size: 0.95rem;
-        }
-
-        /* Toast */
-        #toastContainer {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            padding: 16px 24px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            max-width: 420px;
-            animation: slideIn 0.3s ease;
-            transition: all 0.3s ease;
-        }
-
-        .toast.success {
-            background: var(--success-color);
-        }
-
-        .toast.error {
-            background: #dc2626;
-        }
-
-        .toast.info {
-            background: var(--primary-color);
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(40px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* User Panel */
-        #userPanel {
-            display: none;
-            align-items: center;
-            gap: 15px;
-        }
-
-        #userAvatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero .container {
-                grid-template-columns: 1fr;
-            }
-            .nav-links {
-                display: none;
-            }
-            .hero h1 {
-                font-size: 2rem;
-            }
-            .modal-content {
-                padding: 20px;
-            }
-            .auth-tab {
-                padding: 12px 20px;
-                font-size: 1rem;
-            }
-            .form-group {
-                margin-bottom: 14px;
-            }
-            .form-group input {
-                padding: 10px 12px;
-                font-size: 0.95rem;
-            }
-            .modal-content .btn {
-                padding: 10px 16px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* User Panel */
-        #userPanel {
-            display: none;
-            align-items: center;
-            gap: 15px;
-            margin-left: 15px;
-        }
-
-        #userName {
-            font-weight: 500;
-            text-align: right;
-            line-height: 1.3;
-        }
-
-        #userName span {
-            font-weight: 400;
-            font-size: 0.9rem;
-            color: var(--gray-color);
-        }
-
-        #userAvatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
     </style>
 </head>
 <body>
 
-    <!-- Toast контейнер -->
-    <div id="toastContainer"></div>
+<div id="toastContainer"></div>
 
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav class="navbar">
-                <a href="#" class="logo">
-                    <i class="fas fa-hospital-alt"></i>
-                    MedReferral
-                </a>
-                
-                <ul class="nav-links">
-                    <li><a href="#features">Возможности</a></li>
-                    <li><a href="#how-it-works">Как это работает</a></li>
-                    <li><a href="#for-agents">Агентам</a></li>
-                    <li><a href="#clinics">Клиникам</a></li>
-                    <li><a href="#pricing">Тарифы</a></li>
-                    <li><a href="#contacts">Контакты</a></li>
-                </ul>
-                
-                <div class="nav-buttons" id="authButtons">
-                    <button class="btn btn-outline" id="loginOpenBtn">
-                        <i class="fas fa-sign-in-alt"></i> Вход
-                    </button>
-                    <button class="btn btn-primary" id="registerOpenBtn">
-                        <i class="fas fa-user-plus"></i> Регистрация
-                    </button>
-                </div>
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <i class="fas fa-hospital-alt"></i> MedReferral
+            </a>
 
-                <div id="userPanel">
-                    <span id="userName" style="font-weight: 500;"></span>
-                    <div id="userAvatar"></div>
-                    <button class="btn btn-outline" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </button>
-                </div>
-            </nav>
-        </div>
-    </header>
+            <ul class="nav-links">
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#how-it-works">Как это работает</a></li>
+                <li><a href="#contacts">Контакты</a></li>
+            </ul>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Портал для <span>медицинских агентов</span></h1>
-                <p>Автоматизируйте процесс направления пациентов в клиники. Управляйте заявками, отслеживайте статусы и получайте комиссию в удобной системе.</p>
-                <div class="hero-buttons">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="openModal('register')">
-                        <i class="fas fa-rocket"></i> Начать зарабатывать
-                    </button>
-                    <button type="button" class="btn btn-outline btn-lg" onclick="scrollToFeatures()">
-                        <i class="fas fa-play-circle"></i> Как это работает
-                    </button>
-                </div>
-                
-                <div class="stats" style="margin-top: 40px; display: flex; gap: 30px;">
-                    <div>
-                        <h3 style="font-size: 2rem; color: var(--primary-color);">250+</h3>
-                        <p>Клиник партнеров</p>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 2rem; color: var(--success-color);">5,000+</h3>
-                        <p>Направлений ежемесячно</p>
-                    </div>
-                    <div>
-                        <h3 style="font-size: 2rem; color: var(--accent-color);">15M ₽</h3>
-                        <p>Выплачено агентам</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="hero-image">
-                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Dashboard Preview">
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Features -->
-    <section class="features" id="features">
-        <div class="container">
-            <h2 class="section-title">Возможности платформы</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-user-md"></i></div>
-                    <h3>База клиник и услуг</h3>
-                    <p>Доступ к каталогу из 250+ клиник с подробными профилями, услугами и расписанием.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
-                    <h3>Электронный договор</h3>
-                    <p>Подписывайте договора онлайн с использованием электронной подписи.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3>Отслеживание статусов</h3>
-                    <p>Мгновенное уведомление о посещении пациентом клиники в реальном времени.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-calculator"></i></div>
-                    <h3>Автоматический расчет</h3>
-                    <p>Система автоматически рассчитывает вашу комиссию и формирует отчеты.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
-                    <h3>Прозрачные выплаты</h3>
-                    <p>Начисление процентов каждый месяц с детализацией по каждому направлению.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
-                    <h3>Поддержка 24/7</h3>
-                    <p>Круглосуточная поддержка агентов и помощь в сложных ситуациях.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <h2 class="section-title">Как стать агентом?</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Регистрация</h3>
-                    <p>Заполните анкету и подтвердите email. Это займет всего 5 минут.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Подписание договора</h3>
-                    <p>Подпишите договор онлайн с использованием электронной подписи.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Выбор профилей</h3>
-                    <p>Выберите медицинские профили, по которым будете работать.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Начало работы</h3>
-                    <p>Получите доступ к базе клиник и начните направлять пациентов.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section style="padding: 80px 0; text-align: center; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white;">
-        <div class="container">
-            <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Начните зарабатывать с нами уже сегодня</h2>
-            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto 30px;">Присоединяйтесь к 500+ агентам, которые уже используют нашу платформу</p>
-            <button class="btn btn-success btn-lg" onclick="openModal('register')" style="font-size: 1.2rem; padding: 15px 40px;">
-                <i class="fas fa-play"></i> Начать сейчас
-            </button>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>MedReferral</h3>
-                    <p>Платформа для медицинских агентов. Создаем удобные инструменты для эффективной работы.</p>
-                    <div style="margin-top: 20px; display: flex; gap: 15px;">
-                        <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-telegram"></i></a>
-                        <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-vk"></i></a>
-                    </div>
-                </div>
-                <div class="footer-column">
-                    <h3>Для агентов</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Как начать работать</a></li>
-                        <li><a href="#">Тарифы и комиссии</a></li>
-                        <li><a href="#">База знаний</a></li>
-                        <li><a href="#">Вопросы и ответы</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Для клиник</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Стать партнером</a></li>
-                        <li><a href="#">Подключение к системе</a></li>
-                        <li><a href="#">API документация</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Контакты</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-phone" style="margin-right: 10px;"></i> +7 (495) 123-45-67</li>
-                        <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> support@medreferral.ru</li>
-                        <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> Москва, ул. Медицинская, 15</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2024 MedReferral. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Auth Modal -->
-    <div class="modal" id="authModal">
-        <div class="modal-content">
-            
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Вход</button>
-                <button class="auth-tab" data-tab="register">Регистрация</button>
-                <button class="close-modal" id="modalCloseBtn">&times;</button>
-            </div>
-
-            <h2 id="modalTitle" style="margin-bottom: 5px;">Вход</h2>
-            <p id="modalSub" style="color: var(--gray-color); margin-bottom: 20px;">Войдите в свой аккаунт</p>
-            <!-- Login Form -->
-            <form id="loginFormElement" class="auth-form active">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="Ваш email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="loginPassword">Пароль</label>
-                    <input type="password" id="loginPassword" placeholder="Ваш пароль" required>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="rememberMeCheckbox"> Запомнить меня
-                    </label>
-                    <a href="#" style="color: var(--primary-color); text-decoration: none;">Забыли пароль?</a>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Войти
+            <div class="nav-buttons" id="authButtons">
+                <button class="btn btn-outline" id="loginOpenBtn">
+                    <i class="fas fa-sign-in-alt"></i> Вход
                 </button>
-                
-                <div style="text-align: center; margin-top: 20px; color: var(--gray-color);">
-                    <p>Нет аккаунта? <a href="#" id="switchToRegister" style="color: var(--primary-color); font-weight: 600;">Зарегистрироваться</a></p>
-                </div>
-            </form>
-            
-            <!-- Registration Form -->
-            <form id="registerFormElement" class="auth-form">
-                <!-- ШАГ 1: Только email -->
-                <div id="regStep1">
-                    <div class="form-group">
-                        <label for="regEmail">Email</label>
-                        <input type="email" id="regEmail" placeholder="Введите ваш email" required>
-                    </div>
-                    
-                    <button type="button" class="btn btn-primary" style="width: 100%;" id="sendCodeBtn">
-                        Получить код подтверждения
-                    </button>
-                    
-                    <div style="text-align: center; margin-top: 15px; color: var(--gray-color); font-size: 0.9rem;">
-                        <p>Уже есть аккаунт? <a href="#" id="switchToLogin" style="color: var(--primary-color); font-weight: 600;">Войти</a></p>
-                    </div>
-                </div>
+                <button class="btn btn-primary" id="applyOpenBtn">
+                    <i class="fas fa-paper-plane"></i> Подать заявку
+                </button>
+            </div>
 
-                <!-- ШАГ 2: Все остальные поля + код -->
-                <div id="regStep2" style="display: none;">
-                    <div class="form-group">
-                        <label for="regFullName">ФИО</label>
-                        <input type="text" id="regFullName" placeholder="Иванов Иван Иванович" maxlength="40" required>
-                        <small id="fullNameCounter" style="display: block; margin-top: 5px; color: var(--gray-color); font-size: 0.85rem;">30</small>
-                    </div>
+            <div id="userPanel">
+                <span id="userName" style="font-weight: 500;"></span>
+                <div id="userAvatar"></div>
+                <button class="btn btn-outline" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </div>
+        </nav>
+    </div>
+</header>
 
-                    
-                    <div class="form-group">
-                        <label for="regPhone">Телефон</label>
-                        <input type="tel" id="regPhone" placeholder="+7 (999) 123-45-67" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="regPassword">Пароль</label>
-                        <input type="password" id="regPassword" placeholder="Не менее 8 символов" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="regConfirmPassword">Подтвердите пароль</label>
-                        <input type="password" id="regConfirmPassword" placeholder="Повторите пароль" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="regCode">Код подтверждения</label>
-                        <input type="text" id="regCode" placeholder="Введите 6-значный код" maxlength="6" required>
-                    </div>
-                    
-                    <label style="align-items: start; margin-bottom: 20px; font-size: 0.9rem;">
-                        <input type="checkbox" id="termsCheck" required>
-                        Я соглашаюсь с <a href="terms_and_privacy.html" target="_blank" rel="noopener noreferrer"  style="color: var(--primary-color);">условиями использования и  политикой конфиденциальности</a>
-                    </label>
-                    
-                    <button type="submit" class="btn btn-success" style="width: 100%;" id="registerBtn">
-                        <i class="fas fa-user-plus"></i> Зарегистрироваться
-                    </button>
-                    
-                    <button type="button" class="btn btn-outline" style="width: 100%; margin-top: 10px;" id="backToStep1Btn">
-                        <i class="fas fa-arrow-left"></i> Назад
-                    </button>
-                </div>
-            </form>
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Портал для <span>медицинских агентов</span></h1>
+            <p>Автоматизируйте процесс направления пациентов в клиники. Управляйте заявками, отслеживайте статусы и получайте комиссию в удобной системе.</p>
+            <div class="hero-buttons">
+                <button type="button" class="btn btn-primary btn-lg" onclick="openModal('apply')">
+                    <i class="fas fa-rocket"></i> Подать заявку
+                </button>
+                <button type="button" class="btn btn-outline btn-lg" onclick="scrollToFeatures()">
+                    <i class="fas fa-play-circle"></i> Как это работает
+                </button>
+            </div>
+
+            <div class="stats">
+                <div><h3>250+</h3><p>Клиник партнеров</p></div>
+                <div><h3>5,000+</h3><p>Направлений ежемесячно</p></div>
+                <div><h3>15M ₽</h3><p>Выплачено агентам</p></div>
+            </div>
         </div>
     </div>
+</section>
 
-    <script>
-        // ============================================================
-        // РЕАЛЬНАЯ ИНТЕГРАЦИЯ С ВАШИМ БЭКЕНДОМ
-        // ============================================================
-        const API_BASE = '/api/v1/auth';
+<section class="features" id="features">
+    <div class="container">
+        <h2 class="section-title">Возможности платформы</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+                <h3>База клиник и услуг</h3>
+                <p>Доступ к каталогу из 250+ клиник с подробными профилями, услугами и расписанием.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-file-contract"></i></div>
+                <h3>Электронный договор</h3>
+                <p>Подписывайте договора онлайн с использованием электронной подписи.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Отслеживание статусов</h3>
+                <p>Мгновенное уведомление о посещении пациентом клиники в реальном времени.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calculator"></i></div>
+                <h3>Автоматический расчет</h3>
+                <p>Система автоматически рассчитывает вашу комиссию и формирует отчеты.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <h3>Прозрачные выплаты</h3>
+                <p>Начисление процентов каждый месяц с детализацией по каждому направлению.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                <h3>Поддержка 24/7</h3>
+                <p>Круглосуточная поддержка агентов и помощь в сложных ситуациях.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        // DOM элементы
-        const modal = document.getElementById('authModal');
-        const loginOpenBtn = document.getElementById('loginOpenBtn');
-        const registerOpenBtn = document.getElementById('registerOpenBtn');
-        const closeBtn = document.getElementById('modalCloseBtn');
-        const loginTab = document.querySelector('[data-tab="login"]');
-        const registerTab = document.querySelector('[data-tab="register"]');
-        const loginForm = document.getElementById('loginFormElement');
-        const registerForm = document.getElementById('registerFormElement');
-        const switchToRegister = document.getElementById('switchToRegister');
-        const switchToLogin = document.getElementById('switchToLogin');
-        const authButtons = document.getElementById('authButtons');
-        const userPanel = document.getElementById('userPanel');
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const logoutBtn = document.getElementById('logoutBtn');
+<section class="how-it-works" id="how-it-works">
+    <div class="container">
+        <h2 class="section-title">Как стать агентом?</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Подайте заявку</h3>
+                <p>Заполните анкету. Мы проверим данные и свяжемся с вами.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Дождитесь одобрения</h3>
+                <p>Администратор рассмотрит заявку в течение 24 часов.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Начните работу</h3>
+                <p>После одобрения вы сможете войти в систему и направлять пациентов.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Получайте комиссию</h3>
+                <p>Автоматический расчёт вознаграждения за каждого пациента.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
-        // Ограничение на ФИО - максимум 25 символов с счетчиком
-        const fullNameInput = document.getElementById('regFullName');
-        const fullNameCounter = document.getElementById('fullNameCounter');
+<section style="padding: 80px 0; text-align: center; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white;">
+    <div class="container">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Начните зарабатывать с нами уже сегодня</h2>
+        <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto 30px;">Присоединяйтесь к 500+ агентам, которые уже используют нашу платформу</p>
+        <button class="btn btn-success btn-lg" onclick="openModal('apply')" style="font-size: 1.2rem; padding: 15px 40px;">
+            <i class="fas fa-play"></i> Подать заявку
+        </button>
+    </div>
+</section>
 
-        if (fullNameInput && fullNameCounter) {
-            fullNameInput.addEventListener('input', function(e) {
-                const maxLength = 40;
-                const currentLength = this.value.length;
-                
-                // Если превышает - обрезаем
-                if (currentLength > maxLength) {
-                    this.value = this.value.slice(0, maxLength);
-                    showToast(`⚠️ Максимум ${maxLength} символов`, 'warning');
-                }
-                
-                // Обновляем счетчик
-                const remaining = maxLength - this.value.length;
-                fullNameCounter.textContent = `${remaining}`;
-                fullNameCounter.style.color = remaining < 5 ? '#dc2626' : 'var(--gray-color)';
-            });
+<footer id="contacts">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>MedReferral</h3>
+                <p>Платформа для медицинских агентов. Создаем удобные инструменты для эффективной работы.</p>
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-telegram"></i></a>
+                    <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" style="color: white; font-size: 1.5rem;"><i class="fab fa-vk"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Для агентов</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Как начать работать</a></li>
+                    <li><a href="#">Тарифы и комиссии</a></li>
+                    <li><a href="#">База знаний</a></li>
+                    <li><a href="#">Вопросы и ответы</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Для клиник</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Стать партнером</a></li>
+                    <li><a href="#">Подключение к системе</a></li>
+                    <li><a href="#">API документация</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Контакты</h3>
+                <ul class="footer-links">
+                    <li><i class="fas fa-phone" style="margin-right: 10px;"></i> +7 (495) 123-45-67</li>
+                    <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> support@medreferral.ru</li>
+                    <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> Москва, ул. Медицинская, 15</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 MedReferral. Все права защищены.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+    <div class="modal-content" id="loginModalContent">
+        <button class="close-modal" id="loginCloseBtn">&times;</button>
+
+        <h2 id="loginTitle" style="margin-bottom: 5px; text-align: center;">Вход</h2>
+        <p id="loginSub" style="color: var(--gray-color); margin-bottom: 20px; text-align: center;">Выберите, кто вы</p>
+
+        <div class="role-selector" id="roleSelector">
+            <button class="role-btn agent-role active" data-role="agent">
+                <span class="role-icon"><i class="fas fa-user-md"></i></span>
+                <strong>Агент</strong>
+                <small>Врач / агент</small>
+            </button>
+            <button class="role-btn admin-role" data-role="admin">
+                <span class="role-icon"><i class="fas fa-user-shield"></i></span>
+                <strong>Администратор</strong>
+                <small>Клиника / портал</small>
+            </button>
+        </div>
+
+        <form id="agentLoginForm" class="auth-form active">
+            <div class="form-group">
+                <label for="agentLoginEmail">Email</label>
+                <input type="email" id="agentLoginEmail" placeholder="Ваш email" required>
+            </div>
+            <div class="form-group">
+                <label for="agentLoginPassword">Пароль</label>
+                <input type="password" id="agentLoginPassword" placeholder="Ваш пароль" required>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                    <input type="checkbox" id="agentRememberMe"> Запомнить меня
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="agentLoginBtn">
+                <i class="fas fa-sign-in-alt"></i> Войти как агент
+            </button>
+        </form>
+
+        <div id="adminLoginSection" class="auth-form hidden">
+            <div class="form-group">
+                <label for="adminLoginEmail">Email</label>
+                <input type="email" id="adminLoginEmail" placeholder="admin@medpoint.ru" required>
+            </div>
+            <div class="form-group">
+                <label for="adminLoginPassword">Пароль</label>
+                <input type="password" id="adminLoginPassword" placeholder="Ваш пароль" required>
+            </div>
+            <button type="button" class="btn-admin" id="adminLoginBtn">
+                <i class="fas fa-user-shield"></i> Войти как администратор
+            </button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; color: var(--gray-color); font-size: 0.9rem;">
+            <p>Нет аккаунта? <a href="#" id="switchToApply" style="color: var(--primary-color); font-weight: 600;">Подать заявку</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- APPLY MODAL -->
+<div class="modal" id="applyModal">
+    <div class="modal-content">
+        <button class="close-modal" id="applyCloseBtn">&times;</button>
+
+        <h2 style="margin-bottom: 5px;">Подать заявку</h2>
+        <p style="color: var(--gray-color); margin-bottom: 20px;">Заполните форму — администратор рассмотрит вашу заявку</p>
+
+        <!-- ШАГ 1 -->
+        <div class="apply-step active" id="applyStep1">
+            <p class="step-hint">Шаг 1 из 2 — подтвердите email</p>
+            <div class="form-group">
+                <label for="applyEmail">Email</label>
+                <input type="email" id="applyEmail" placeholder="your@email.com" required>
+            </div>
+            <button type="button" class="btn btn-primary" style="width: 100%;" id="applySendCodeBtn">
+                <i class="fas fa-paper-plane"></i> Получить код
+            </button>
+        </div>
+
+        <!-- ШАГ 2 -->
+        <div class="apply-step" id="applyStep2">
+            <p class="step-hint">Шаг 2 из 2 — заполните данные</p>
+
+            <div class="form-group">
+                <label for="applyCode">Код из письма</label>
+                <input type="text" id="applyCode" placeholder="6 цифр" maxlength="6" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label for="applyFullName">ФИО</label>
+                <input type="text" id="applyFullName" placeholder="Иванов Иван Иванович" maxlength="40">
+            </div>
+            <div class="form-group">
+                <label for="applyPhone">Телефон</label>
+                <input type="tel" id="applyPhone" placeholder="+7 (999) 123-45-67">
+            </div>
+            <div class="form-group">
+                <label for="applyPassword">Пароль</label>
+                <input type="password" id="applyPassword" placeholder="Не менее 8 символов">
+            </div>
+            <div class="form-group">
+                <label for="applyConfirmPassword">Подтвердите пароль</label>
+                <input type="password" id="applyConfirmPassword" placeholder="Повторите пароль">
+            </div>
+            <div class="form-group">
+                <label for="applyComment">О себе / пожелания</label>
+                <textarea id="applyComment" rows="4" placeholder="Опыт работы, желаемая специализация, клиники — всё, что хотите сообщить администратору"></textarea>
+            </div>
+
+            <label style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+                <input type="checkbox" id="applyTerms" style="margin-top: 4px;">
+                <span>Я соглашаюсь с <a href="terms_and_privacy.html" target="_blank" rel="noopener noreferrer" style="color: var(--primary-color);">условиями использования и политикой конфиденциальности</a></span>
+            </label>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" id="applyBackBtn">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+                <button type="button" class="btn btn-primary" style="flex: 1;" id="applySubmitBtn">
+                    <i class="fas fa-paper-plane"></i> Отправить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = '/api/v1';
+
+    const loginModal = document.getElementById('loginModal');
+    const applyModal = document.getElementById('applyModal');
+    const loginOpenBtn = document.getElementById('loginOpenBtn');
+    const applyOpenBtn = document.getElementById('applyOpenBtn');
+    const loginCloseBtn = document.getElementById('loginCloseBtn');
+    const applyCloseBtn = document.getElementById('applyCloseBtn');
+    const switchToApply = document.getElementById('switchToApply');
+    const authButtons = document.getElementById('authButtons');
+    const userPanel = document.getElementById('userPanel');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    function openModal(tab) {
+        closeAllModals();
+        if (tab === 'login') {
+            loginModal.classList.add('active');
+            setRole('agent');
+        } else if (tab === 'apply') {
+            applyModal.classList.add('active');
+            resetApplyForm();
         }
+    }
 
-        let registrationEmail = '';
+    function closeAllModals() {
+        loginModal.classList.remove('active');
+        applyModal.classList.remove('active');
+    }
 
-        // Toast уведомления
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(40px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+    function setRole(role) {
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.role === role);
+        });
+
+        const agentForm = document.getElementById('agentLoginForm');
+        const adminSection = document.getElementById('adminLoginSection');
+        const loginTitle = document.getElementById('loginTitle');
+        const loginSub = document.getElementById('loginSub');
+
+        if (role === 'admin') {
+            agentForm.classList.remove('active');
+            agentForm.classList.add('hidden');
+            adminSection.classList.remove('hidden');
+            adminSection.classList.add('active');
+            loginTitle.textContent = 'Вход для администратора';
+            loginSub.textContent = 'Клиника или портал Medpoint';
+        } else {
+            adminSection.classList.remove('active');
+            adminSection.classList.add('hidden');
+            agentForm.classList.remove('hidden');
+            agentForm.classList.add('active');
+            loginTitle.textContent = 'Вход для агента';
+            loginSub.textContent = 'Врач, направляющий пациентов';
         }
+    }
 
-        // Открыть модалку
-        function openModal(tab = 'login') {
-            modal.classList.add('active');
-            resetRegistrationSteps();
+    document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.addEventListener('click', () => setRole(btn.dataset.role));
+    });
 
-            if (tab === 'register') {
-                loginTab.classList.remove('active');
-                registerTab.classList.add('active');
-                loginForm.classList.remove('active');
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                registerForm.classList.add('active');
-                document.getElementById('modalTitle').textContent = 'Регистрация';
-                document.getElementById('modalSub').textContent = 'Создайте аккаунт агента';
+    function updateUI(user) {
+        if (user) {
+            authButtons.style.display = 'none';
+            userPanel.style.display = 'flex';
+            const fullName = user.full_name || user.email || 'Пользователь';
+            const parts = fullName.trim().split(' ');
+            const lastName = parts[0] || '';
+            const firstName = parts.slice(1).join(' ') || '';
+            userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
+            userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
+
+            if (user.role === 'admin' || user.role === 'chef') {
+                userAvatar.style.background = 'var(--admin-primary)';
             } else {
-                loginTab.classList.add('active');
-                registerTab.classList.remove('active');
-                loginForm.classList.remove('hidden');
-                loginForm.classList.add('active');
-                registerForm.classList.remove('active');
-                registerForm.classList.add('hidden');
-                document.getElementById('modalTitle').textContent = 'Вход';
-                document.getElementById('modalSub').textContent = 'Войдите в свой аккаунт';
+                userAvatar.style.background = 'var(--primary-color)';
             }
+        } else {
+            authButtons.style.display = 'flex';
+            userPanel.style.display = 'none';
         }
+    }
 
-        function resetRegistrationSteps() {
-            document.getElementById('regStep1').style.display = 'block';
-            document.getElementById('regStep2').style.display = 'none';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regFullName').value = '';
-            document.getElementById('regPhone').value = '';
-            document.getElementById('regPassword').value = '';
-            document.getElementById('regConfirmPassword').value = '';
-            document.getElementById('regCode').value = '';
-            registrationEmail = '';
-            const sendBtn = document.getElementById('sendCodeBtn');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Получить код подтверждения';
-        }
-
-        // Закрыть модалку
-        function closeModal() {
-            modal.classList.remove('active');
-            resetRegistrationSteps();
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        }
-
-        // Обновить UI в зависимости от авторизации
-        function updateUI(user) {
-            if (user) {
-                authButtons.style.display = 'none';
-                userPanel.style.display = 'flex';
-                const fullName = user.full_name || user.email || 'Пользователь';
-                
-                // Разбиваем ФИО на части
-                const nameParts = fullName.trim().split(' ');
-                let firstName = '';
-                let lastName = '';
-                
-                if (nameParts.length >= 2) {
-                    // Если есть хотя бы 2 слова - фамилия и имя
-                    lastName = nameParts[0]; // Фамилия
-                    firstName = nameParts.slice(1).join(' '); // Имя и отчество (все остальное)
-                } else {
-                    // Если только одно слово - используем его как имя
-                    firstName = fullName;
-                }
-                
-                // Обновляем элементы
-                userName.innerHTML = `${lastName}<br><span style="font-weight: 400; font-size: 0.9rem; color: var(--gray-color);">${firstName}</span>`;
-                userAvatar.textContent = (lastName || firstName).charAt(0).toUpperCase();
-            } else {
-                authButtons.style.display = 'flex';
-                userPanel.style.display = 'none';
+    async function checkAuth() {
+        try {
+            const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+            if (response.ok) {
+                const user = await response.json();
+                updateUI(user);
+                return user;
             }
+            updateUI(null);
+            return null;
+        } catch (err) {
+            updateUI(null);
+            return null;
         }
+    }
 
-
-        // Проверить текущего пользователя при загрузке
-        async function checkAuth() {
-            try {
-                const response = await fetch(`${API_BASE}/me`, {
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    const user = await response.json();
-                    updateUI(user);
-                    return user;
-                }
-                updateUI(null);
-                return null;
-            } catch (err) {
-                updateUI(null);
-                return null;
-            }
-        }
-
-        // Редирект на dashboard
-        function redirectToDashboard() {
+    function redirectByRole(user) {
+        const role = user?.role || 'agent';
+        if (role === 'chef') {
+            window.location.href = '/portal-admin';
+        } else if (role === 'admin') {
+            window.location.href = '/clinic-admin';
+        } else {
             window.location.href = '/dashboard';
         }
+    }
 
-        // ----- ЛОГИН -----
-        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.getElementById('loginBtn');
-            
-            if (!email || !password) {
-                showToast('Заполните все поля', 'error');
-                return;
-            }
-            
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+    document.getElementById('agentLoginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('agentLoginEmail').value.trim();
+        const password = document.getElementById('agentLoginPassword').value;
+        const rememberMe = document.getElementById('agentRememberMe').checked;
+        const btn = document.getElementById('agentLoginBtn');
 
-            try {
-                const rememberMe = document.getElementById('rememberMeCheckbox').checked;
-                const response = await fetch(`${API_BASE}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ 
-                        email: email, 
-                        password: password,
-                        remember_me: rememberMe
-                    })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    showToast('✅ Добро пожаловать!', 'success');
-                    closeModal();
-                    await checkAuth();
-                    setTimeout(() => redirectToDashboard(), 500);
-                } else {
-                    showToast('❌ ' + (data.detail || 'Неверный email или пароль'), 'error');
-                }
-            } catch (err) {
-                showToast('⚠️ Ошибка соединения с сервером', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
-            }
-        });
-
-        // ----- ОТПРАВКА КОДА (Шаг 1) -----
-        document.getElementById('sendCodeBtn').addEventListener('click', async function() {
-            const email = document.getElementById('regEmail').value.trim();
-            
-            if (!email) {
-                showToast('Введите email', 'error');
-                return;
-            }
-            
-            if (!email.includes('@') || !email.includes('.')) {
-                showToast('Введите корректный email', 'error');
-                return;
-            }
-            
-            try {
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-                
-                const response = await fetch(`${API_BASE}/send_code`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Ошибка при отправке кода');
-                }
-                
-                // Успех - переходим на шаг 2
-                registrationEmail = email;
-                document.getElementById('regStep1').style.display = 'none';
-                document.getElementById('regStep2').style.display = 'block';
-                showToast('✅ Код отправлен на вашу почту', 'success');
-                
-            } catch (err) {
-                showToast('❌ ' + err.message, 'error');
-                document.getElementById('regStep1').style.display = 'block';
-                document.getElementById('regStep2').style.display = 'none';
-            } finally {
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-paper-plane"></i> Получить код подтверждения';
-            }
-        });
-
-        // ----- РЕГИСТРАЦИЯ (Шаг 2) -----
-        document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const fullName = document.getElementById('regFullName').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-            const code = document.getElementById('regCode').value.trim();
-            const terms = document.getElementById('termsCheck').checked;
-            const registerBtn = document.getElementById('registerBtn');
-            
-            // Валидация
-            if (!fullName || !phone || !password || !confirmPassword || !code) {
-                showToast('Заполните все поля', 'error');
-                return;
-            }
-            
-            if (password.length < 8) {
-                showToast('Пароль должен быть не менее 8 символов', 'error');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showToast('Пароли не совпадают', 'error');
-                return;
-            }
-            
-            if (code.length !== 6 || !/^\d+$/.test(code)) {
-                showToast('Введите 6-значный числовой код', 'error');
-                return;
-            }
-            
-            if (!terms) {
-                showToast('Подтвердите согласие с условиями', 'error');
-                return;
-            }
-            
-            try {
-                registerBtn.disabled = true;
-                registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Регистрация...';
-                
-                const response = await fetch(`${API_BASE}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: registrationEmail,
-                        password: password,
-                        full_name: fullName,
-                        phone: phone,
-                        code: parseInt(code, 10)
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Ошибка регистрации');
-                }
-                
-                // УСПЕХ - закрываем модалку и редирект
-                showToast('✅ ' + (data.message || 'Регистрация успешна!'), 'success');
-                closeModal();
-                
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 1000);
-                
-            } catch (err) {
-                // ОШИБКА - остаемся на шаге 2, показываем ошибку
-                showToast('❌ ' + err.message, 'error');
-                document.getElementById('regStep2').style.display = 'block';
-                document.getElementById('regStep1').style.display = 'none';
-            } finally {
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Зарегистрироваться';
-            }
-        });
-
-        // ----- НАЗАД К ШАГУ 1 -----
-        document.getElementById('backToStep1Btn').addEventListener('click', () => {
-            document.getElementById('regStep1').style.display = 'block';
-            document.getElementById('regStep2').style.display = 'none';
-            const sendBtn = document.getElementById('sendCodeBtn');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Получить код подтверждения';
-        });
-
-        // ----- ВЫХОД -----
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch(`${API_BASE}/logout`, {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    showToast('✅ Выход выполнен', 'success');
-                    updateUI(null);
-                    await checkAuth();
-                }
-            } catch (err) {
-                showToast('⚠️ Ошибка при выходе', 'error');
-            }
-        });
-
-        // ----- Обработчики модалки -----
-        loginOpenBtn.addEventListener('click', () => openModal('login'));
-        registerOpenBtn.addEventListener('click', () => openModal('register'));
-        closeBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        // Переключение табов
-        loginTab.addEventListener('click', () => {
-            loginTab.classList.add('active');
-            registerTab.classList.remove('active');
-            loginForm.classList.remove('hidden');
-            loginForm.classList.add('active');
-            registerForm.classList.remove('active');
-            registerForm.classList.add('hidden');
-            document.getElementById('modalTitle').textContent = 'Вход';
-            document.getElementById('modalSub').textContent = 'Войдите в свой аккаунт';
-            resetRegistrationSteps();
-        });
-
-        registerTab.addEventListener('click', () => {
-            registerTab.classList.add('active');
-            loginTab.classList.remove('active');
-            loginForm.classList.remove('active');
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-            registerForm.classList.add('active');
-            document.getElementById('modalTitle').textContent = 'Регистрация';
-            document.getElementById('modalSub').textContent = 'Создайте аккаунт агента';
-            resetRegistrationSteps();
-        });
-
-        switchToRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            registerTab.click();
-        });
-        
-        switchToLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginTab.click();
-        });
-
-        // Закрытие по Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // Маска телефона
-        document.getElementById('regPhone').addEventListener('input', function(e) {
-            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-            if (!x) return;
-            e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-        });
-
-        // Smooth scroll
-        function scrollToFeatures() {
-            document.getElementById('features').scrollIntoView({ 
-                behavior: 'smooth' 
-            });
+        if (!email || !password) {
+            showToast('Заполните все поля', 'error');
+            return;
         }
 
-        // Проверяем авторизацию при загрузке
-        checkAuth();
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
 
-        // Демо: автооткрытие через 5 секунд
-        setTimeout(() => {
-            if (!localStorage.getItem('modalShown')) {
-                openModal('register');
-                localStorage.setItem('modalShown', 'true');
+        try {
+            const response = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email, password, remember_me: rememberMe }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showToast('✅ Добро пожаловать!', 'success');
+                closeAllModals();
+                const user = await checkAuth();
+                setTimeout(() => redirectByRole(user), 500);
+            } else {
+                showToast('❌ ' + (data.detail || 'Неверный email или пароль'), 'error');
             }
-        }, 5000);
-    </script>
+        } catch (err) {
+            showToast('⚠️ Ошибка соединения', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти как агент';
+        }
+    });
+
+    document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+        const email = document.getElementById('adminLoginEmail').value.trim();
+        const password = document.getElementById('adminLoginPassword').value;
+        const btn = document.getElementById('adminLoginBtn');
+
+        if (!email || !password) {
+            showToast('Заполните все поля', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email, password, remember_me: false }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showToast('✅ Добро пожаловать!', 'success');
+                closeAllModals();
+                const user = await checkAuth();
+
+                if (user && (user.role === 'admin' || user.role === 'chef')) {
+                    setTimeout(() => redirectByRole(user), 500);
+                } else {
+                    showToast('❌ Это не администратор', 'error');
+                    updateUI(null);
+                }
+            } else {
+                showToast('❌ ' + (data.detail || 'Неверный email или пароль'), 'error');
+            }
+        } catch (err) {
+            showToast('⚠️ Ошибка соединения', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-shield"></i> Войти как администратор';
+        }
+    });
+
+    function resetApplyForm() {
+        document.getElementById('applyStep1').classList.add('active');
+        document.getElementById('applyStep2').classList.remove('active');
+        document.getElementById('applyEmail').value = '';
+        document.getElementById('applyCode').value = '';
+        document.getElementById('applyFullName').value = '';
+        document.getElementById('applyPhone').value = '';
+        document.getElementById('applyPassword').value = '';
+        document.getElementById('applyConfirmPassword').value = '';
+        document.getElementById('applyComment').value = '';
+        document.getElementById('applyTerms').checked = false;
+        document.getElementById('applySendCodeBtn').disabled = false;
+        document.getElementById('applySendCodeBtn').innerHTML = '<i class="fas fa-paper-plane"></i> Получить код';
+    }
+
+    document.getElementById('applySendCodeBtn').addEventListener('click', async function () {
+        const email = document.getElementById('applyEmail').value.trim();
+        if (!email || !email.includes('@') || !email.includes('.')) {
+            showToast('Введите корректный email', 'error');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/send_code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Ошибка при отправке');
+            }
+
+            showToast('✅ Код отправлен на почту', 'success');
+            document.getElementById('applyStep1').classList.remove('active');
+            document.getElementById('applyStep2').classList.add('active');
+        } catch (err) {
+            showToast('❌ ' + err.message, 'error');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-paper-plane"></i> Получить код';
+        }
+    });
+
+    document.getElementById('applyBackBtn').addEventListener('click', () => {
+        document.getElementById('applyStep2').classList.remove('active');
+        document.getElementById('applyStep1').classList.add('active');
+    });
+
+    document.getElementById('applySubmitBtn').addEventListener('click', async function () {
+        const email = document.getElementById('applyEmail').value.trim();
+        const code = document.getElementById('applyCode').value.trim();
+        const fullName = document.getElementById('applyFullName').value.trim();
+        const phone = document.getElementById('applyPhone').value.trim();
+        const password = document.getElementById('applyPassword').value;
+        const confirmPassword = document.getElementById('applyConfirmPassword').value;
+        const comment = document.getElementById('applyComment').value.trim();
+        const terms = document.getElementById('applyTerms').checked;
+
+        if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+            showToast('Введите 6-значный код', 'error');
+            return;
+        }
+        if (!fullName) {
+            showToast('Укажите ФИО', 'error');
+            return;
+        }
+        if (!phone || phone.length < 10) {
+            showToast('Укажите телефон', 'error');
+            return;
+        }
+        if (password.length < 8) {
+            showToast('Пароль не менее 8 символов', 'error');
+            return;
+        }
+        if (password !== confirmPassword) {
+            showToast('Пароли не совпадают', 'error');
+            return;
+        }
+        if (!terms) {
+            showToast('Подтвердите согласие с условиями', 'error');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    full_name: fullName,
+                    phone,
+                    code: parseInt(code, 10),
+                    comment: comment || null,
+                }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showToast('✅ Заявка отправлена! Ожидайте одобрения.', 'success');
+                closeAllModals();
+            } else {
+                showToast('❌ ' + (data.detail || 'Ошибка отправки'), 'error');
+            }
+        } catch (err) {
+            showToast('⚠️ Ошибка соединения', 'error');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+            showToast('✅ Выход выполнен', 'success');
+            updateUI(null);
+            await checkAuth();
+        } catch (err) {
+            showToast('⚠️ Ошибка при выходе', 'error');
+        }
+    });
+
+    loginOpenBtn.addEventListener('click', () => openModal('login'));
+    applyOpenBtn.addEventListener('click', () => openModal('apply'));
+    loginCloseBtn.addEventListener('click', closeAllModals);
+    applyCloseBtn.addEventListener('click', closeAllModals);
+    switchToApply.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal('apply');
+    });
+
+    [loginModal, applyModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeAllModals();
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
+    });
+
+    document.getElementById('applyPhone').addEventListener('input', function (e) {
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        if (!x) return;
+        e.target.value = !x[2] ? '+7' : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+    });
+
+    function scrollToFeatures() {
+        document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    checkAuth();
+</script>
 </body>
 </html>
