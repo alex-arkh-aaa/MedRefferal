@@ -930,30 +930,476 @@ async def get_goal_facts(
     return await crud.get_goal_facts(db, current_agent.id, month, year)
 
 
+# ==================== Admin: Agents ====================
+
+@app.get("/api/v1/agents", response_model=List[AgentResponse])
+async def list_agents_endpoint(
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    clinic_id: Optional[int] = None,
+    page: int = 1,
+    limit: int = 100,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Список агентов. Шеф — все, админ — только его клиник."""
+    if admin.role == "chef":
+        clinic_ids = None
+    else:
+        clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if not clinic_ids:
+            return []
+        if clinic_id is not None:
+            if clinic_id not in clinic_ids:
+                raise HTTPException(status_code=403, detail="Нет доступа")
+            clinic_ids = [clinic_id]
+
+    skip = (page - 1) * limit
+    agents, total = await crud.list_agents(
+        db=db,
+        clinic_ids=clinic_ids,
+        status=status,
+        search=search,
+        skip=skip,
+        limit=limit,
+    )
+
+    result = []
+    for a in agents:
+        result.append(await _build_agent_response(db, a))
+    return result
 
 
-# ==================== Admin endpoints (заглушки) ====================
-# TODO: следующие шаги — полные CRUD для админов, регистраций, ставок, клиник
+@app.get("/api/v1/agents/{agent_id}", response_model=AgentResponse)
+async def get_agent_endpoint(
+    agent_id: int,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    agent = await crud.get_agent(db, agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Агент не найден")
 
-@app.get("/api/v1/admins/me")
-async def get_admin_me(admin: Admin = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
-    clinic_ids = await crud.get_admin_clinic_ids(db, admin.id) if admin.role == "admin" else []
-    return {
-        "id": admin.id,
-        "email": admin.email,
-        "full_name": admin.full_name,
-        "phone": admin.phone,
-        "role": admin.role,
-        "active": admin.active,
-        "permissions": admin.permissions,
-        "clinic_ids": clinic_ids,
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа к агенту")
+
+    return await _build_agent_response(db, agent)
+
+
+@app.put("/api/v1/agents/{agent_id}", response_model=AgentResponse)
+async def update_agent_endpoint(
+    agent_id: int,
+    data: AgentUpdate,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    agent = await crud.get_agent(db, agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Агент не найден")
+
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа к агенту")
+
+    update_data = data.dict(exclude_unset=True)
+
+    clinic_ids = update_data.pop("clinic_ids", None)
+    specialization_ids = update_data.pop("specialization_ids", None)
+
+    if update_data:
+        await crud.update_agent(db, agent_id, **update_data)
+
+    if clinic_ids is not None:
+        if admin.role != "chef":
+            admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+            if not set(clinic_ids).issubset(set(admin_clinic_ids)):
+                raise HTTPException(status_code=403, detail="Нельзя привязать к чужой клинике")
+        await crud.set_agent_clinics(db, agent_id, clinic_ids)
+
+    if specialization_ids is not None:
+        await crud.set_agent_specializations(db, agent_id, specialization_ids)
+
+    agent = await crud.get_agent(db, agent_id)
+    return await _build_agent_response(db, agent)
+
+
+@app.post("/api/v1/agents/{agent_id}/approve", response_model=AgentResponse)
+async def approve_agent_endpoint(
+    agent_id: int,
+    data: AgentApprove,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    agent = await crud.get_agent(db, agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Агент не найден")
+    if agent.status != "pending":
+        raise HTTPException(status_code=400, detail="Агент не в статусе 'pending'")
+
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if not set(data.clinic_ids).issubset(set(admin_clinic_ids)):
+            raise HTTPException(status_code=403, detail="Нельзя привязать к чужой клинике")
+
+    await crud.update_agent(
+        db, agent_id,
+        status="active",
+        admin_id=data.admin_id if admin.role == "chef" else admin.id,
+    )
+    await crud.set_agent_clinics(db, agent_id, data.clinic_ids)
+    if data.specialization_ids:
+        await crud.set_agent_specializations(db, agent_id, data.specialization_ids)
+
+    await crud.add_history(
+        db, "admin", admin.id,
+        "Агент одобрен",
+        f"Агент #{agent_id} ({agent.email}) одобрен",
+        admin.full_name,
+    )
+
+    email_data = {
+        "email": agent.email,
+        "subject": "Medpoint — регистрация одобрена",
+        "message": f"Ваша заявка одобрена! Войдите в систему: http://localhost/",
     }
+    await broker.publish(email_data, queue="email_queue")
+
+    agent = await crud.get_agent(db, agent_id)
+    return await _build_agent_response(db, agent)
 
 
-@app.get("/api/v1/admins")
-async def list_admins(
+@app.post("/api/v1/agents/{agent_id}/reject", response_model=AgentResponse)
+async def reject_agent_endpoint(
+    agent_id: int,
+    data: AgentReject,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    agent = await crud.get_agent(db, agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Агент не найден")
+    if agent.status != "pending":
+        raise HTTPException(status_code=400, detail="Агент не в статусе 'pending'")
+
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    await crud.update_agent(
+        db, agent_id,
+        status="rejected",
+        about_myself=(agent.about_myself or "") + f"\n\n[Отклонено: {data.decision_reason}]",
+    )
+
+    await crud.add_history(
+        db, "admin", admin.id,
+        "Агент отклонён",
+        f"Агент #{agent_id} ({agent.email}): {data.decision_reason}",
+        admin.full_name,
+    )
+
+    email_data = {
+        "email": agent.email,
+        "subject": "Medpoint — регистрация отклонена",
+        "message": f"Ваша заявка отклонена.\nПричина: {data.decision_reason}",
+    }
+    await broker.publish(email_data, queue="email_queue")
+
+    agent = await crud.get_agent(db, agent_id)
+    return await _build_agent_response(db, agent)
+
+
+@app.delete("/api/v1/agents/{agent_id}", response_model=MessageResponse)
+async def delete_agent_endpoint(
+    agent_id: int,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    agent = await crud.get_agent(db, agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Агент не найден")
+
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    await crud.soft_delete_agent(db, agent_id)
+    await crud.add_history(
+        db, "admin", admin.id, "Агент удалён",
+        f"Агент #{agent_id} ({agent.email})", admin.full_name,
+    )
+    return MessageResponse(message="Агент удалён")
+
+
+# ==================== Admin: Agents helper ====================
+
+async def _build_agent_response(db: AsyncSession, agent: Agent) -> AgentResponse:
+    clinic_ids = await crud.get_agent_clinic_ids(db, agent.id)
+    specializations = await crud.get_agent_specializations(db, agent.id)
+    return AgentResponse(
+        id=agent.id,
+        email=agent.email,
+        full_name=agent.full_name,
+        phone=agent.phone,
+        date_of_birth=agent.date_of_birth,
+        experience=agent.experience,
+        education=agent.education,
+        about_myself=agent.about_myself,
+        status=agent.status,
+        admin_id=agent.admin_id,
+        column_order=agent.column_order,
+        created_at=agent.created_at,
+        updated_at=agent.updated_at,
+        clinic_ids=clinic_ids,
+        specialization_ids=[s.specialization_id for s in specializations],
+    )
+
+
+# ==================== Admin: Admins CRUD ====================
+
+@app.get("/api/v1/admins", response_model=List[AdminResponse])
+async def list_admins_endpoint(
     chef: Admin = Depends(get_current_chef),
     db: AsyncSession = Depends(get_db),
 ):
     admins, total = await crud.list_admins(db)
-    return {"items": [{"id": a.id, "email": a.email, "full_name": a.full_name, "role": a.role, "active": a.active} for a in admins], "total": total}
+    result = []
+    for a in admins:
+        clinic_ids = await crud.get_admin_clinic_ids(db, a.id)
+        result.append(AdminResponse(
+            id=a.id, email=a.email, full_name=a.full_name, phone=a.phone,
+            role=a.role, active=a.active, permissions=a.permissions or {},
+            clinic_ids=clinic_ids,
+        ))
+    return result
+
+
+@app.post("/api/v1/admins", response_model=AdminResponse)
+async def create_admin_endpoint(
+    data: AdminCreate,
+    chef: Admin = Depends(get_current_chef),
+    db: AsyncSession = Depends(get_db),
+):
+    existing = await crud.get_admin_by_email(db, data.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email занят")
+
+    hashed = get_password_hash(data.password)
+    admin = await crud.create_admin(
+        db=db,
+        email=data.email,
+        password_hash=hashed,
+        full_name=data.full_name,
+        phone=data.phone,
+        role="admin",
+        clinic_ids=data.clinic_ids,
+    )
+    return AdminResponse(
+        id=admin.id, email=admin.email, full_name=admin.full_name, phone=admin.phone,
+        role=admin.role, active=admin.active, permissions=admin.permissions or {},
+        clinic_ids=data.clinic_ids,
+    )
+
+
+@app.put("/api/v1/admins/{admin_id}", response_model=AdminResponse)
+async def update_admin_endpoint(
+    admin_id: int,
+    data: AdminUpdate,
+    chef: Admin = Depends(get_current_chef),
+    db: AsyncSession = Depends(get_db),
+):
+    admin = await crud.get_admin(db, admin_id)
+    if not admin:
+        raise HTTPException(status_code=404, detail="Админ не найден")
+    if admin.role == "chef":
+        raise HTTPException(status_code=400, detail="Шефа нельзя редактировать")
+
+    update_data = data.dict(exclude_unset=True)
+    clinic_ids = update_data.pop("clinic_ids", None)
+
+    if update_data:
+        await crud.update_admin(db, admin_id, **update_data)
+    if clinic_ids is not None:
+        await crud.update_admin(db, admin_id, clinic_ids=clinic_ids)
+
+    admin = await crud.get_admin(db, admin_id)
+    clinic_ids = await crud.get_admin_clinic_ids(db, admin_id)
+    return AdminResponse(
+        id=admin.id, email=admin.email, full_name=admin.full_name, phone=admin.phone,
+        role=admin.role, active=admin.active, permissions=admin.permissions or {},
+        clinic_ids=clinic_ids,
+    )
+
+
+@app.delete("/api/v1/admins/{admin_id}", response_model=MessageResponse)
+async def delete_admin_endpoint(
+    admin_id: int,
+    chef: Admin = Depends(get_current_chef),
+    db: AsyncSession = Depends(get_db),
+):
+    admin = await crud.get_admin(db, admin_id)
+    if not admin:
+        raise HTTPException(status_code=404, detail="Админ не найден")
+    if admin.role == "chef":
+        raise HTTPException(status_code=400, detail="Шефа нельзя удалить")
+
+    await crud.delete_admin(db, admin_id)
+    return MessageResponse(message="Админ удалён")
+
+
+# ==================== Admin: Clinics ====================
+
+@app.post("/api/v1/clinics", response_model=ClinicResponse)
+async def create_clinic_endpoint(
+    data: ClinicCreate,
+    chef: Admin = Depends(get_current_chef),
+    db: AsyncSession = Depends(get_db),
+):
+    clinic = await crud.create_clinic(
+        db=db, name=data.name, city=data.city,
+        address=data.address, phone=data.phone, active=data.active,
+    )
+    return clinic
+
+
+@app.put("/api/v1/clinics/{clinic_id}", response_model=ClinicResponse)
+async def update_clinic_endpoint(
+    clinic_id: int,
+    data: ClinicUpdate,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    clinic = await crud.get_clinic(db, clinic_id)
+    if not clinic:
+        raise HTTPException(status_code=404, detail="Клиника не найдена")
+
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if clinic_id not in admin_clinic_ids:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    update_data = data.dict(exclude_unset=True)
+    clinic = await crud.update_clinic(db, clinic_id, **update_data)
+    return clinic
+
+
+# ==================== Admin: ClinicSpecialties ====================
+
+@app.get("/api/v1/clinics/{clinic_id}/specialties", response_model=List[ClinicSpecialtyResponse])
+async def get_clinic_specialties_endpoint(
+    clinic_id: int,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if clinic_id not in admin_clinic_ids:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    items = await crud.get_clinic_specialties(db, clinic_id, include_inactive=True)
+    return [
+        ClinicSpecialtyResponse(
+            id=cs.id,
+            clinic_id=cs.clinic_id,
+            specialization_id=cs.specialization_id,
+            specialization_name=cs.specialization.name if cs.specialization else "",
+            default_rate=float(cs.default_rate) if cs.default_rate is not None else None,
+            active=cs.active,
+        )
+        for cs in items
+    ]
+
+
+@app.put("/api/v1/clinics/{clinic_id}/specialties/{spec_id}", response_model=ClinicSpecialtyResponse)
+async def upsert_clinic_specialty_endpoint(
+    clinic_id: int,
+    spec_id: int,
+    data: ClinicSpecialtyUpdate,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if clinic_id not in admin_clinic_ids:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    cs = await crud.upsert_clinic_specialty(
+        db=db, clinic_id=clinic_id, specialization_id=spec_id,
+        default_rate=data.default_rate, active=data.active,
+    )
+    return ClinicSpecialtyResponse(
+        id=cs.id,
+        clinic_id=cs.clinic_id,
+        specialization_id=cs.specialization_id,
+        specialization_name=cs.specialization.name if cs.specialization else "",
+        default_rate=float(cs.default_rate) if cs.default_rate is not None else None,
+        active=cs.active,
+    )
+
+
+# ==================== Admin: AgentRates ====================
+
+@app.get("/api/v1/agents/{agent_id}/rates", response_model=List[AgentRateResponse])
+async def get_agent_rates_endpoint(
+    agent_id: int,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    rates = await crud.get_agent_rates(db, agent_id)
+    return [
+        AgentRateResponse(
+            id=r.id,
+            agent_id=r.agent_id,
+            specialization_id=r.specialization_id,
+            specialization_name=r.specialization.name if r.specialization else "",
+            mode=r.mode,
+            custom_rate=float(r.custom_rate) if r.custom_rate is not None else None,
+        )
+        for r in rates
+    ]
+
+
+@app.put("/api/v1/agents/{agent_id}/rates/{spec_id}", response_model=AgentRateResponse)
+async def set_agent_rate_endpoint(
+    agent_id: int,
+    spec_id: int,
+    data: AgentRateUpdate,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if admin.role != "chef":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, agent_id)
+        if not set(admin_clinic_ids) & set(agent_clinic_ids):
+            raise HTTPException(status_code=403, detail="Нет доступа")
+
+    if data.mode == "custom" and data.custom_rate is None:
+        raise HTTPException(status_code=400, detail="Для режима 'custom' нужен custom_rate")
+
+    rate = await crud.set_agent_rate(
+        db=db, agent_id=agent_id, specialization_id=spec_id,
+        mode=data.mode, custom_rate=data.custom_rate,
+    )
+    return AgentRateResponse(
+        id=rate.id,
+        agent_id=rate.agent_id,
+        specialization_id=rate.specialization_id,
+        specialization_name=rate.specialization.name if rate.specialization else "",
+        mode=rate.mode,
+        custom_rate=float(rate.custom_rate) if rate.custom_rate is not None else None,
+    )

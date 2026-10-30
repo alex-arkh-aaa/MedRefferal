@@ -365,3 +365,107 @@ class AdminUpdate(BaseModel):
     permissions: Optional[dict] = None
     clinic_ids: Optional[List[int]] = None
 
+
+
+# ==================== Agent (admin) Schemas ====================
+
+class AgentResponse(BaseModel):
+    id: int
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    experience: Optional[str] = None
+    education: Optional[str] = None
+    about_myself: Optional[str] = None
+    status: str
+    admin_id: Optional[int] = None
+    column_order: Optional[List[str]] = None
+    created_at: datetime
+    updated_at: datetime
+
+    clinic_ids: List[int] = []
+    specialization_ids: List[int] = []
+
+    class Config:
+        from_attributes = True
+
+
+class AgentUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    experience: Optional[str] = None
+    education: Optional[str] = None
+    about_myself: Optional[str] = None
+    status: Optional[str] = Field(None, pattern="^(pending|active|inactive|rejected)$")
+    admin_id: Optional[int] = None
+    clinic_ids: Optional[List[int]] = None
+    specialization_ids: Optional[List[int]] = None
+
+
+class AgentApprove(BaseModel):
+    clinic_ids: List[int] = Field(..., min_length=1)
+    specialization_ids: List[int] = []
+    admin_id: Optional[int] = None
+
+
+class AgentReject(BaseModel):
+    decision_reason: str = Field(..., min_length=1)
+
+
+# ==================== Clinic (admin) Schemas ====================
+
+class ClinicCreate(BaseModel):
+    name: str = Field(..., min_length=1)
+    city: str = Field(..., min_length=1)
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    active: bool = True
+
+
+class ClinicUpdate(BaseModel):
+    name: Optional[str] = None
+    city: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    active: Optional[bool] = None
+
+
+# ==================== ClinicSpecialty Schemas ====================
+
+class ClinicSpecialtyResponse(BaseModel):
+    id: int
+    clinic_id: int
+    specialization_id: int
+    specialization_name: str
+    default_rate: Optional[float] = None
+    active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class ClinicSpecialtyUpdate(BaseModel):
+    default_rate: Optional[float] = Field(None, ge=0, le=100)
+    active: bool
+
+
+# ==================== AgentRate Schemas ====================
+
+class AgentRateResponse(BaseModel):
+    id: int
+    agent_id: int
+    specialization_id: int
+    specialization_name: str
+    mode: str
+    custom_rate: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AgentRateUpdate(BaseModel):
+    mode: str = Field(..., pattern="^(clinic|custom)$")
+    custom_rate: Optional[float] = Field(None, ge=0, le=100)

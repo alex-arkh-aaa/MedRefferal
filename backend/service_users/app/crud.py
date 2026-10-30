@@ -309,6 +309,12 @@ async def create_admin(
     await db.refresh(admin)
 
     if clinic_ids:
+        # Проверка, что клиники существуют
+        result = await db.execute(select(Clinic.id).where(Clinic.id.in_(clinic_ids)))
+        existing_ids = {r[0] for r in result.all()}
+        missing = set(clinic_ids) - existing_ids
+        if missing:
+            raise ValueError(f"Клиники не найдены: {sorted(missing)}")
         for cid in clinic_ids:
             db.add(AdminClinic(admin_id=admin.id, clinic_id=cid))
         await db.commit()
@@ -334,10 +340,15 @@ async def update_admin(
     admin.updated_at = datetime.utcnow()
     await db.commit()
 
-    if clinic_ids is not None:
-        await db.execute(delete(AdminClinic).where(AdminClinic.admin_id == admin_id))
+    if clinic_ids:
+        # Проверка, что клиники существуют
+        result = await db.execute(select(Clinic.id).where(Clinic.id.in_(clinic_ids)))
+        existing_ids = {r[0] for r in result.all()}
+        missing = set(clinic_ids) - existing_ids
+        if missing:
+            raise ValueError(f"Клиники не найдены: {sorted(missing)}")
         for cid in clinic_ids:
-            db.add(AdminClinic(admin_id=admin_id, clinic_id=cid))
+            db.add(AdminClinic(admin_id=admin.id, clinic_id=cid))
         await db.commit()
 
     await db.refresh(admin)
@@ -975,6 +986,58 @@ async def get_top_clinics(db: AsyncSession, limit: int) -> List[dict]:
         {"id": r[0], "name": r[1], "address": r[2], "referrals_count": r[3]}
         for r in result.all()
     ]
+
+
+
+# ==================== Agents (admin) ====================
+
+async def get_agent(db: AsyncSession, agent_id: int) -> Optional[Agent]:
+    result = await db.execute(select(Agent).where(Agent.id == agent_id))
+    return result.scalar_one_or_none()
+
+
+async def list_agents(
+    db: AsyncSession,
+    clinic_ids: Optional[List[int]] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+) -> Tuple[List[Agent], int]:
+    query = select(Agent)
+
+    if clinic_ids is not None:
+        if not clinic_ids:
+            return [], 0
+        query = query.join(AgentClinic).where(AgentClinic.clinic_id.in_(clinic_ids))
+
+    if status:
+        query = query.where(Agent.status == status)
+
+    if search:
+        query = query.where(
+            or_(
+                Agent.email.ilike(f"%{search}%"),
+                Agent.full_name.ilike(f"%{search}%"),
+            )
+        )
+
+    count_query = select(func.count()).select_from(query.subquery())
+    total = (await db.execute(count_query)).scalar()
+
+    query = query.offset(skip).limit(limit).order_by(Agent.created_at.desc())
+    result = await db.execute(query)
+    return result.scalars().all(), total
+
+
+async def soft_delete_agent(db: AsyncSession, agent_id: int) -> Optional[Agent]:
+    agent = await get_agent(db, agent_id)
+    if agent:
+        agent.status = "inactive"
+        agent.deleted_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(agent)
+    return agent
 
 
 # ==================== History ====================
