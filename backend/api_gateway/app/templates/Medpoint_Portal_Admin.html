@@ -1,10 +1,10 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Medpoint · Шеф</title><meta name="description" content="Панель управления порталом Medpoint"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23144753'/%3E%3Cpath d='M32 15v34M15 32h34' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E"><style>
-:root{font-family:Manrope,Arial,sans-serif;color:#193337;background:#f5f8f8;font-synthesis:none}
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Medpoint · Шеф</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23144753'/%3E%3Cpath d='M32 15v34M15 32h34' stroke='%23fff' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E"><style>
+:root{font-family:Manrope,Arial,sans-serif;color:#193337;background:#f5f8f8}
 *{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #e5b842;outline-offset:3px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #e5b842;outline-offset:3px}
 .app{display:grid;grid-template-columns:205px minmax(0,1fr);min-height:100vh}
 .side{background:#103b44;color:#d6e7e9;padding:24px 12px;display:flex;flex-direction:column;gap:30px;position:sticky;top:0;height:100vh;overflow-y:auto}
-.brand{display:flex;align-items:center;gap:12px;padding:0 10px;color:white;font-size:19px;font-weight:800;letter-spacing:-.04em}
+.brand{display:flex;align-items:center;gap:12px;padding:0 10px;color:white;font-size:19px;font-weight:800;letter-spacing:-.04em;margin-bottom:20px}
 .mark{background:#f5d77e;color:#103b44;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:26px;line-height:1;flex-shrink:0}
 .nav{display:grid;gap:5px}
 .nav button{border:0;background:transparent;color:#c8dcdf;text-align:left;border-radius:10px;padding:12px 10px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:14px}
@@ -15,8 +15,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .sidefoot strong{display:block;color:white;font-size:14px}
 .main{min-width:0}
 .top{height:78px;background:white;border-bottom:1px solid #e2ebeb;display:flex;align-items:center;justify-content:space-between;padding:0 38px;gap:20px;position:sticky;top:0;z-index:2}
-.top-brand{display:flex;align-items:center;gap:12px;color:#193337;font-size:19px;font-weight:800;letter-spacing:-.04em;white-space:nowrap;flex:0 0 auto}
-.topright{display:flex;align-items:center;gap:12px;margin-left:auto;flex-shrink:0;justify-content:flex-end;white-space:nowrap}
+.top-brand{display:flex;align-items:center;gap:12px;color:#193337;font-size:19px;font-weight:800;letter-spacing:-.04em}
+.topright{display:flex;align-items:center;gap:12px;margin-left:auto}
 .top-user{font-size:13px;font-weight:700;color:#31565b;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .avatar{height:36px;width:36px;border-radius:50%;background:#d8ebe8;display:grid;place-items:center;font-weight:800;color:#22585b}
 .mobilemenu{display:none;background:none;border:0;font-size:22px;color:#245159}
@@ -25,12 +25,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .heading>div{min-width:0}
 h1{font-size:29px;letter-spacing:-.045em;margin:0;line-height:1.2;color:#193337}
 h2{font-size:19px;letter-spacing:-.03em;margin:0;color:#193337}
-h3{font-size:16px;margin:22px 0 12px;color:#193337}
 .muted{color:#748b90;font-size:14px;margin:7px 0 0}
-.btn{border:2px solid #146a70;background:white;color:#146a70;border-radius:10px;padding:9px 15px;font-size:14px;font-weight:700;white-space:nowrap;transition:background .15s,color .15s,border-color .15s;display:inline-flex;align-items:center;gap:6px}
+.btn{border:2px solid #146a70;background:white;color:#146a70;border-radius:10px;padding:9px 15px;font-size:14px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{background:#e6f2f1}
 .btn.primary{background:#146a70;color:white;border-color:#146a70}
-.btn.primary:hover{background:#10585d;border-color:#10585d}
+.btn.primary:hover{background:#10585d}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.small{padding:6px 12px;font-size:13px;border-radius:8px}
 .btn.danger-access{background:#fff4f4;color:#a52d36;border-color:#e8b7b7}
@@ -42,17 +41,13 @@ h3{font-size:16px;margin:22px 0 12px;color:#193337}
 .stat-lbl{font-size:13px;color:#71888d;font-weight:600;display:block}
 .stat strong{display:block;font-size:29px;margin:8px 0 1px;letter-spacing:-.05em;font-weight:800;color:#193337}
 .stat em{font-size:12px;color:#18836f;font-style:normal;display:block}
-.stat-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:auto}
-.stat-pair-item{min-width:0;padding:10px 11px;border-radius:10px;background:#f4f8f8;border:1px solid #e7efee}
-.stat-pair-item strong{display:block;font-size:22px;line-height:1.25;letter-spacing:-.04em;margin:0 0 5px;overflow-wrap:anywhere;font-weight:800;color:#193337}
-.stat-pair-item span{display:block;font-size:11px;line-height:1.4;color:#71888d;font-weight:700}
 .panel{background:white;border:1px solid #e1eaea;border-radius:15px;box-shadow:0 4px 18px #294f5208;overflow:hidden;margin-bottom:20px}
 .panelhead{display:flex;align-items:center;justify-content:space-between;padding:21px 22px;border-bottom:1px solid #edf2f2;gap:12px;flex-wrap:wrap}
 .panelhead p{margin:5px 0 0;color:#82989c;font-size:13px}
 .controls{display:flex;gap:10px;flex-wrap:wrap}
 .search,select.filter{height:40px;border:1px solid #dce7e7;border-radius:9px;background:white;padding:0 12px;color:#26494d;font-size:14px}
 .search{width:230px}
-.tablewrap{overflow:auto;overscroll-behavior-x:contain}
+.tablewrap{overflow:auto}
 table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#8a9fa2;background:#fbfcfc;padding:13px 22px}
 td{padding:15px 22px;border-top:1px solid #eff3f3;font-size:14px;vertical-align:middle}
@@ -61,17 +56,13 @@ td small{color:#8da1a4;font-size:12px;display:block;margin-top:4px;line-height:1
 td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 .pill{display:inline-block;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:800;background:#edf3f3;color:#547078}
 .pill.new{background:#fff1dc;color:#a16a17}
-.pill.work{background:#e7f1ff;color:#3266a7}
 .pill.approved{background:#e6f6ec;color:#217453}
 .pill.rejected{background:#fceced;color:#ae505a}
 .unset{color:#94671e;font-weight:700;font-size:13px}
 .initials{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:12px;background:#e7f2f1;color:#287977;font-weight:800}
-.agent-overview{display:flex;gap:13px;align-items:center;width:100%;border:0;border-bottom:1px solid #edf2f2;background:white;padding:17px 22px;text-align:left;color:#1d4147;font-size:14px;cursor:default}
+.agent-overview{display:flex;gap:13px;align-items:center;width:100%;border:0;border-bottom:1px solid #edf2f2;background:white;padding:17px 22px;text-align:left;color:#1d4147;font-size:14px}
 .agent-overview strong{display:block}
 .agent-overview small{display:block;color:#728d92;margin-top:3px;font-size:12px}
-.agent-overview-info{min-width:0;flex:1;cursor:default;pointer-events:none}
-.agent-overview .initials{cursor:default;pointer-events:none}
-.agent-overview .profile-action{pointer-events:auto;cursor:pointer;margin-left:auto}
 .split{display:grid;grid-template-columns:1.45fr 1fr;gap:20px}
 .change-item{display:grid;grid-template-columns:1fr auto;gap:14px;padding:14px 22px;border-bottom:1px solid #edf2f2;font-size:14px;align-items:start}
 .change-item:last-child{border-bottom:0}
@@ -89,54 +80,15 @@ td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 .field label{font-size:13px;font-weight:800;color:#526d73}
 .field input,.field select,.field textarea{border:1px solid #d8e5e5;border-radius:8px;padding:11px 12px;width:100%;background:white;color:#173b40;font:inherit}
 .field textarea{resize:vertical;min-height:85px}
-.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #76bbba}
 .field input:disabled{background:#f0f4f4;color:#8da0a0}
 .drawer .actions{display:flex;gap:9px;margin-top:24px;flex-wrap:wrap}
 .note{background:#edf7f5;border-radius:9px;padding:13px;font-size:13px;color:#42676a;line-height:1.5;margin:14px 0}
-.details{margin:18px 0}
 .details>div{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid #edf1f1;font-size:14px;line-height:1.5}
-.details dt{color:#748b90}
-.details dd{margin:0;text-align:right;font-weight:700}
-.history-item{border-left:2px solid #d4e9e6;padding:10px 15px;margin:14px 0;font-size:13px}
-.history-item strong{display:block;color:#205b61}
-.history-item small{display:block;color:#7e9699;margin-top:5px}
-.history-item p{margin:8px 0 0;line-height:1.5}
-.registration-person{display:flex;gap:14px;align-items:center}
-.registration-person h3{margin:0}
-.registration-person .initials{width:48px;height:48px;font-size:17px}
-.permission-box{border:1px solid #cddfdd;border-radius:12px;margin:22px 0;padding:17px;background:#f5faf9}
-.permission-box legend{font-size:14px;font-weight:800;color:#32676b;padding:0 5px}
-.permission-choice{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
-.permission-choice input{width:19px;height:19px;accent-color:#146a70;flex-shrink:0;margin-top:2px}
-.permission-choice strong{font-size:14px;display:block;line-height:1.5}
-.permission-choice small{font-size:12px;display:block;color:#71888c;margin-top:5px;line-height:1.7}
+.details dt{color:#748b90}.details dd{margin:0;text-align:right;font-weight:700}
 .profile-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;padding:23px}
 .meta-label{display:block;color:#799094;font-size:12px;margin-bottom:7px}
 .profile-summary strong{font-size:14px;line-height:1.6;font-weight:700}
 .back-link{margin-bottom:16px;display:inline-flex;align-items:center;gap:6px}
-.tabbar{display:flex;gap:6px;border-bottom:1px solid #dbe6e5;margin-bottom:20px;overflow-x:auto}
-.tabbar button{border:0;border-bottom:3px solid transparent;padding:13px 17px;background:none;color:#728b8f;font-size:14px;font-weight:700;white-space:nowrap}
-.tabbar button.selected{border-bottom-color:#147b7d;color:#16595f}
-.tabbar span{margin-left:8px;padding:2px 6px;background:#e2eeed;border-radius:5px;font-size:12px}
-.specialty-cell{white-space:normal;min-width:240px;max-width:430px}
-.specialty-cell strong{font-size:14px}
-.rate-note{padding:15px 22px;color:#617d82;background:#f7faf9;font-size:13px;line-height:1.7;border-bottom:1px solid #eaf0ef}
-.report-fields{display:grid;grid-template-columns:1fr 1fr 1.5fr 1.3fr;gap:18px;padding:0 22px 18px}
-.report-fields .field{margin-bottom:0;min-width:0}
-.report-fields input,.report-fields select{font:inherit;font-size:14px;min-width:0;max-width:100%;height:44px}
-.preset-buttons{display:flex;gap:8px;flex-wrap:wrap}
-.report-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.report-card{padding:24px;display:flex;flex-direction:column}
-.report-tag{font-size:11px;letter-spacing:.12em;color:#548487;font-weight:800;margin-bottom:13px}
-.report-card h2{font-size:21px}
-.report-card p{font-size:14px;color:#5c787d;line-height:1.7;margin:12px 0 0}
-.report-card small{display:block;font-size:12px;line-height:1.7;color:#7b9196;margin-top:16px}
-.report-card-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:auto;padding-top:22px}
-.report-warning{background:#fff5df;border:1px solid #ecd6a4;padding:12px;border-radius:8px;font-size:13px;line-height:1.6;color:#836324;margin-top:15px}
-.preview-switch{display:flex;gap:6px;flex-wrap:wrap}
-.clinic-rate-summary{display:flex;gap:24px;flex-wrap:wrap;background:#eaf3f1;border:1px solid #d1e3df;border-radius:12px;padding:18px 22px;margin-bottom:22px;font-size:14px;color:#4c6c70}
-.clinic-rate-summary strong{font-size:20px;color:#235c62;margin-right:6px}
-.clinic-rate-summary span:last-child{margin-left:auto;font-size:13px;align-self:center}
 .toast{position:fixed;bottom:20px;right:20px;padding:13px 18px;background:#173e46;color:white;border-radius:10px;box-shadow:0 12px 30px #1236;display:none;z-index:5;font-size:14px;max-width:calc(100vw - 40px);line-height:1.6}
 .toast.show{display:block}
 .multi-select{position:relative;border:1px solid #d8e5e5;border-radius:8px;background:white;padding:8px 10px;min-height:44px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:pointer}
@@ -147,475 +99,343 @@ td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 .multi-select-option{padding:10px 14px;cursor:pointer;font-size:14px}
 .multi-select-option:hover{background:#e6f2f1}
 .multi-select-option.selected{background:#eff7f6;color:#146a70;font-weight:700}
-.section-anchor{scroll-margin-top:90px}
-@media(max-width:1100px){.report-fields{grid-template-columns:1fr 1fr}.report-cards{grid-template-columns:1fr}.profile-summary{grid-template-columns:repeat(2,1fr)}}
+.report-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.report-tag{font-size:11px;letter-spacing:.12em;color:#548487;font-weight:800;margin-bottom:13px}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.app{grid-template-columns:180px 1fr}.content{padding:26px 22px}.top{padding:0 22px}}
-@media(max-width:700px){.app{display:block}.side{display:none;position:fixed;inset:0 auto 0 0;width:250px;z-index:4;height:100vh;overflow-y:auto}.side.open{display:flex}.mobilemenu{display:block}.top{height:66px;padding:0 15px}.top-user{display:none}.content{padding:24px 15px 45px}.heading{align-items:start}.grid{gap:9px}.stat{padding:15px;min-height:102px}.stat strong{font-size:23px}.panelhead{align-items:start;flex-direction:column}.search{width:100%}.controls{width:100%}.controls>*{flex:1}.avatar{display:none}.profile-summary{grid-template-columns:1fr}.report-fields{grid-template-columns:1fr;padding:0 17px 20px;gap:12px}.drawer{padding:22px}.details>div{flex-wrap:wrap}.details dd{text-align:left}.clinic-rate-summary span:last-child{margin-left:0}}
-</style></head><body><div class="app"><aside class="side" id="sidebar"><div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel"></strong><span id="userSub"></span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Открыть меню">☰</button><div class="top-brand"><span class="mark">+</span> Medpoint</div><div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" data-action="logout" type="button">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><header><h2 id="drawerTitle"></h2><button id="close" aria-label="Закрыть">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script>
-
-const seed={clinics:[{id:1,name:'Клиника на Тверской',city:'Москва',active:true},{id:2,name:'Медцентр Сфера',city:'Москва',active:true},{id:3,name:'Новая медицина',city:'Санкт-Петербург',active:true}],admins:[{id:1,name:'Анна Морозова',email:'a.morozova@medpoint.ru',clinicIds:[1],active:true,phone:'+7 (495) 111-11-11',dateOfBirth:'1985-05-12',about:'Руководитель клиники на Тверской',experience:'10',education:'higher',specializationIds:[]},{id:2,name:'Илья Соколов',email:'i.sokolov@medpoint.ru',clinicIds:[2],active:true,phone:'+7 (495) 222-22-22',dateOfBirth:'1990-08-20',about:'',experience:'5',education:'higher',specializationIds:[]},{id:3,name:'Елена Ким',email:'e.kim@medpoint.ru',clinicIds:[3],active:true,phone:'+7 (812) 333-33-33',dateOfBirth:'1988-03-15',about:'',experience:'7',education:'higher',specializationIds:[]}],doctors:[{id:1,name:'Мария Петрова',specialty:'Агент',clinicIds:[1],adminId:1,active:true,phone:'+7 (999) 111-11-11',email:'m.petrova@example.com'},{id:2,name:'Дмитрий Волков',specialty:'Агент',clinicIds:[1],adminId:1,active:true,phone:'+7 (999) 222-22-22',email:'d.volkov@example.com'},{id:3,name:'Ольга Романова',specialty:'Агент',clinicIds:[2],adminId:2,active:true,phone:'+7 (999) 333-33-33',email:'o.romanova@example.com'},{id:4,name:'Алексей Егоров',specialty:'Агент',clinicIds:[1],adminId:1,active:true,phone:'+7 (999) 444-44-44',email:'a.egorov@example.com'},{id:5,name:'Наталья Белова',specialty:'Агент',clinicIds:[3],adminId:3,active:true,phone:'+7 (999) 555-55-55',email:'n.belova@example.com'}],requests:[{id:1048,doctorId:1,clinicId:1,patient:'Александр К.',service:'Консультация специалиста',date:'23 сен 2026',status:'new',amount:4200},{id:1047,doctorId:2,clinicId:1,patient:'Марина С.',service:'Первичный приём специалиста',date:'23 сен 2026',status:'work',amount:3800},{id:1046,doctorId:4,clinicId:1,patient:'Ирина Л.',service:'Консультация специалиста',date:'22 сен 2026',status:'approved',amount:4500},{id:1045,doctorId:1,clinicId:1,patient:'Владимир П.',service:'Повторный приём',date:'22 сен 2026',status:'rejected',amount:2900},{id:1044,doctorId:3,clinicId:2,patient:'Ольга М.',service:'Приём специалиста',date:'21 сен 2026',status:'approved',amount:3500},{id:1043,doctorId:5,clinicId:3,patient:'Ксения Н.',service:'Консультация специалиста',date:'20 сен 2026',status:'approved',amount:3700}]};
-seed.registrations=[{id:201,name:'Екатерина Миронова',email:'e.mironova@example.com',phone:'Не указан',specialty:'Агент',clinicId:1,adminId:1,submittedAt:'2026-10-02T08:20:00Z',status:'pending',comment:'Хочу направлять пациентов на консультации и обследования.',history:[]},{id:202,name:'Сергей Лебедев',email:'s.lebedev@example.com',phone:'Не указан',specialty:'Хирург',clinicId:1,adminId:null,submittedAt:'2026-10-02T09:10:00Z',status:'pending',comment:'Заявка на сотрудничество с клиникой.',history:[]},{id:203,name:'Алина Орлова',email:'a.orlova@example.com',phone:'Не указан',specialty:'Агент',clinicId:2,adminId:2,submittedAt:'2026-10-01T12:30:00Z',status:'pending',comment:'Готова обсудить условия сотрудничества.',history:[]}];
-</script><script>
-'use strict';
-const SPECIALTIES=[['therapy','Терапия','Включая общую врачебную практику / семейную медицину'],['surgery','Хирургия','Общая'],['pediatrics','Педиатрия','Включая неонатологию'],['obgyn','Акушерство и гинекология',''],['neurology','Неврология',''],['cardiology','Кардиология','Включая детскую кардиологию'],['oncology','Онкология',''],['trauma','Травматология и ортопедия',''],['ophthalmology','Офтальмология',''],['ent','Оториноларингология','ЛОР'],['dermatology','Дерматовенерология',''],['psychiatry','Психиатрия','Включая наркологию и судебную психиатрию'],['anesthesia','Анестезиология и реаниматология',''],['infectious','Инфекционные болезни',''],['radiology','Рентгенология','Включая радиологию'],['ultrasound','Ультразвуковая диагностика',''],['functional','Функциональная диагностика',''],['endoscopy','Эндоскопия',''],['clinical_lab','Клиническая лабораторная диагностика',''],['dentistry','Стоматология','Общая практика / терапевтическая'],['lab','Лабораторная диагностика','']];
-const REQUEST_STATUSES={new:'Новая',approved:'Подтверждена',rejected:'Отклонена'};
-const PAYOUT_STATUSES={unpaid:'Не выплачено',processing:'К выплате',paid:'Выплачено'};
-const REGISTRATION_STATUSES={pending:'На рассмотрении',approved:'Одобрена',rejected:'Отклонена'};
-const specialtyName=(id,clinicId=null)=>data.clinics.find(c=>c.id===Number(clinicId))?.specialties?.find(s=>s.id===id)?.name||SPECIALTIES.find(s=>s[0]===id)?.[1]||data.clinics.flatMap(c=>c.specialties||[]).find(s=>s.id===id)?.name||'Не указана';
-const initialRate={therapy:8,surgery:10,pediatrics:8,obgyn:10,neurology:10,cardiology:12,oncology:10,trauma:10,ophthalmology:10,ent:8,dermatology:10,psychiatry:8,anesthesia:8,infectious:8,radiology:7,ultrasound:8,functional:8,endoscopy:9,clinical_lab:5,dentistry:10,lab:5};
-function inferSpecialization(record){const service=(record.service||'').toLowerCase();if(service.includes('кардиолог'))return 'cardiology';if(service.includes('невролог'))return 'neurology';if(service.includes('педиатр'))return 'pediatrics';if(service.includes('терапевт'))return 'therapy';return null}
-function isoDate(value){if(/^\d{4}-\d{2}-\d{2}$/.test(value||''))return value;const numeric=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value||'');if(numeric)return `${numeric[3]}-${numeric[2]}-${numeric[1]}`;const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];const text=/^(\d{1,2})\s+([а-я]+)\s+(\d{4})$/i.exec(value||'');if(text){const m=months.findIndex(x=>text[2].startsWith(x));if(m>=0)return `${text[3]}-${String(m+1).padStart(2,'0')}-${text[1].padStart(2,'0')}`}return ''}
-function migrateData(raw){
-  const d=structuredClone(raw);
-  d.rateHistory ||= [];d.requestHistory ||= [];d.payoutHistory ||= [];d.requests ||= [];
-  for(const agent of d.doctors){
-    agent.clinicIds ||= agent.clinicId?[agent.clinicId]:[];
-    delete agent.clinicId;
-    agent.rates ||= {};
-    for(const [id] of SPECIALTIES){
-      const old=agent.rates[id];
-      if(!old)agent.rates[id]={mode:'clinic',customRate:null};
-      else if(typeof old==='object'&&'approved' in old)agent.rates[id]={mode:old.approved!==null?'custom':'clinic',customRate:old.approved??null};
-      else if(typeof old==='object'&&'mode' in old)agent.rates[id]=old;
-      else agent.rates[id]={mode:'clinic',customRate:null};
-    }
-  }
-  for(const r of d.requests){
-    if(!('specializationId' in r))r.specializationId=inferSpecialization(r);
-    r.dateIso ||= isoDate(r.date);
-    if(r.status==='work')r.status='new';
-    if(!('clinicId' in r)&&r.doctorId){const a=d.doctors.find(x=>x.id===r.doctorId);r.clinicId=a?.clinicIds?.[0]||null}
-  }
-  for(const r of d.requests){
-    r.payoutStatus ||= 'unpaid';r.paidAt ||= null;r.paymentReference ||= '';
-    if(!('commissionRate' in r)){
-      if(r.status==='approved'){
-        const agent=d.doctors.find(x=>x.id===r.doctorId);
-        const rateEntry=agent?.rates?.[r.specializationId];
-        if(rateEntry?.mode==='custom'&&rateEntry.customRate!==null){
-          r.commissionRate=rateEntry.customRate;
-        }else{
-          const cid=r.clinicId??(agent?.clinicIds?.[0]||null);
-          const spec=d.clinics.find(c=>c.id===cid)?.specialties?.find(s=>s.id===r.specializationId);
-          r.commissionRate=spec?.active?spec.defaultRate??null:null;
-        }
-      }else{
-        r.commissionRate=null;
-      }
-    }
-  }  
-  d.adminHistory ||= [];d.registrations ??= structuredClone(seed.registrations||[]);
-  for(const admin of d.admins){
-    admin.permissions ||= {};admin.permissions.reviewRegistrations ??= false;
-    if(!('clinicIds' in admin))admin.clinicIds=admin.clinicId?[admin.clinicId]:[];
-    delete admin.clinicId;
-  }
-  for(const registration of d.registrations)registration.history ||= [];
-  d.clinicRateHistory ||= [];
-  for(const clinic of d.clinics)clinic.specialties ??= SPECIALTIES.map(([id,name,detail])=>({id,name,detail,defaultRate:initialRate[id],active:true}));
-  d.schemaVersion=8;return d;
-}
-const STORE_KEY='medpoint-portal-v8';
-let data,storageProblem=false;
-try{data=migrateData(JSON.parse(localStorage.getItem(STORE_KEY))||seed)}catch{data=migrateData(seed);storageProblem=true}
-function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(data));return true}catch{storageProblem=true;return false}}
-const agentById=id=>data.doctors.find(x=>x.id===Number(id));
-const clinicById=id=>data.clinics.find(x=>x.id===Number(id));
-const adminById=id=>data.admins.find(x=>x.id===Number(id));
-const clinicSpecialties=(clinicId,includeInactive=false)=>(clinicById(clinicId)?.specialties||[]).filter(s=>includeInactive||s.active);
-const clinicSpecialty=(clinicId,id)=>clinicById(clinicId)?.specialties?.find(s=>s.id===id);
-const agentRateMode=(agentId,specialty)=>{const r=agentById(agentId)?.rates?.[specialty];return r?.mode||'clinic'};
-const agentCustomRate=(agentId,specialty)=>{const r=agentById(agentId)?.rates?.[specialty];return r?.mode==='custom'?r.customRate:null};
-const approvedRate=(agentId,specialty,clinicId=null)=>{
-  const a=agentById(agentId);if(!a)return null;
-  if(agentRateMode(agentId,specialty)==='custom')return agentCustomRate(agentId,specialty);
-  const cid=clinicId??((a.clinicIds||[])[0]||null);
-  const s=clinicSpecialty(cid,specialty);
-  return s?.active?s.defaultRate??null:null;
-};
-const effectiveRateSource=(agentId,specialty,clinicId=null)=>approvedRate(agentId,specialty,clinicId)===null?'missing':agentRateMode(agentId,specialty)==='custom'?'individual':'clinic';
-const requestSpecialtyName=r=>r.specialtyNameAtConfirmation||specialtyName(r.specializationId,r.clinicId||(agentById(r.doctorId)?.clinicIds||[])[0]);
-function availableFilterSpecialties(){const map=new Map();for(const c of data.clinics)for(const s of c.specialties||[])if(!map.has(s.id))map.set(s.id,{id:s.id,name:SPECIALTIES.find(x=>x[0]===s.id)?.[1]||`${s.name} · ${c.name}`});for(const r of visibleRequests())if(r.specializationId&&!map.has(r.specializationId))map.set(r.specializationId,{id:r.specializationId,name:requestSpecialtyName(r)});return [...map.values()]}
-function fixRequestRate(r){if(r.commissionRate===null)r.commissionRate=approvedRate(r.doctorId,r.specializationId,r.clinicId);if(r.commissionRate!==null&&r.specializationId)r.specialtyNameAtConfirmation ||= specialtyName(r.specializationId,r.clinicId)}
-const commission=(amount,rate)=>rate===null||rate===undefined?null:Math.round((Number(amount)*Number(rate)/100+Number.EPSILON)*100)/100;
-const requestRate=r=>r.commissionRate??approvedRate(r.doctorId,r.specializationId,r.clinicId);
-const requestReward=r=>commission(r.amount,requestRate(r));
-function validateRate(value){if(value===null||value===undefined||String(value).trim()==='')throw Error('Укажите процент от 0 до 100.');const num=Number(String(value).replace(',','.'));if(!Number.isFinite(num)||num<0||num>100||Math.abs(num*100-Math.round(num*100))>0.00001)throw Error('Допустим процент от 0 до 100, до двух знаков после запятой.');return num}
-const now=()=>new Date().toISOString();
-const role='portal';let currentAdminId=1;
-const currentAdmin=()=>adminById(currentAdminId);
-const actorName=()=>'Шеф';
-const visibleAgents=()=>data.doctors;
-const visibleRequests=()=>data.requests;
-const visibleClinics=()=>data.clinics;
-const visibleRegistrations=()=>data.registrations;
-const canReviewRegistrations=()=>true;
-function setRequestStatus(id,newStatus){const r=data.requests.find(x=>x.id===Number(id));if(!r)throw Error('Заявка не найдена.');if(!Object.hasOwn(REQUEST_STATUSES,newStatus))throw Error('Неизвестный статус.');if(r.status===newStatus)return;if(newStatus!=='approved'&&r.payoutStatus!=='unpaid')throw Error('Сначала верните выплату в статус «Не выплачено».');data.requestHistory.unshift({id:crypto.randomUUID(),requestId:r.id,old:r.status,new:newStatus,date:now(),actor:actorName()});r.status=newStatus;if(newStatus==='approved')fixRequestRate(r);save()}
-function setPayout(id,next,comment,reference){const r=data.requests.find(x=>x.id===Number(id));if(!r)throw Error('Заявка не найдена.');if(!Object.hasOwn(PAYOUT_STATUSES,next))throw Error('Неизвестный статус выплаты.');if(r.payoutStatus===next)return;if(next!=='unpaid'&&r.status!=='approved')throw Error('Выплата доступна только для подтверждённой заявки.');if(next!=='unpaid'&&requestReward(r)===null)throw Error('Сначала укажите специализацию.');if(next!=='unpaid')fixRequestRate(r);data.payoutHistory.unshift({id:crypto.randomUUID(),requestId:r.id,old:r.payoutStatus,new:next,date:now(),actor:actorName(),comment:String(comment||'').trim(),reference:String(reference||'').trim()});r.payoutStatus=next;r.paidAt=next==='paid'?now():null;r.paymentReference=next==='paid'?String(reference||'').trim():'';save()}
-function assertAgentSpecialty(agentId,specialty){const a=agentById(agentId);if(!a||!a.clinicIds?.length)throw Error('У агента не выбрано ни одной клиники.');const ok=a.clinicIds.some(cid=>clinicSpecialty(cid,specialty)?.active);if(!ok)throw Error('Специализация не активна ни в одной клинике агента.')}
-function recordAgentRate(agentId,specialty,action,old,next,comment){data.rateHistory.unshift({id:crypto.randomUUID(),agentId:Number(agentId),specialty,specialtyName:specialtyName(specialty),action,old,new:next,date:now(),actor:actorName(),comment:String(comment||'').trim()})}
-function setAgentRateMode(agentId,specialty,mode,customRate){
-  assertAgentSpecialty(agentId,specialty);
-  const a=agentById(agentId);a.rates[specialty] ||= {mode:'clinic',customRate:null};
-  const before=approvedRate(agentId,specialty);
-  if(mode==='custom'){
-    const rate=validateRate(customRate);
-    a.rates[specialty].mode='custom';a.rates[specialty].customRate=rate;
-    recordAgentRate(agentId,specialty,'set_custom',before,rate,'');
-  }else{
-    a.rates[specialty].mode='clinic';a.rates[specialty].customRate=null;
-    recordAgentRate(agentId,specialty,'set_clinic',before,approvedRate(agentId,specialty),'');
-  }
-  save();
-}
-const blankRates=()=>Object.fromEntries(SPECIALTIES.map(([id])=>[id,{mode:'clinic',customRate:null}]));
-const normalizeEmail=v=>String(v||'').trim().toLowerCase();
-function validateEmail(email,required=true){if(!email&&!required)return;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Укажите корректную электронную почту.')}
-function auditAdmin(action,entityId,details,entityType=null){const type=entityType||(action.startsWith('registration_')?'registration':action.startsWith('clinic_')?'clinic':action.startsWith('agent_')?'agent':'admin');data.adminHistory.unshift({id:crypto.randomUUID(),action,entityId,entityType:type,date:now(),actor:actorName(),details})}
-
-function decideRegistration(id,decision,assignedAdminId,reason){
-  const r=visibleRegistrations().find(x=>x.id===Number(id));if(!r)throw Error('Заявка на регистрацию недоступна.');
-  if(r.status!=='pending')throw Error('Решение по заявке уже принято.');
-  if(!['approved','rejected'].includes(decision))throw Error('Выберите одобрение или отклонение.');
-  const note=String(reason||'').trim();
-  if(decision==='rejected'&&!note)throw Error('Укажите причину отклонения.');
-  let newAgent=null;
-  if(decision==='approved'){
-    const adminId=Number(assignedAdminId),admin=adminById(adminId);
-    if(!admin?.active||!admin.clinicIds.includes(r.clinicId)||!clinicById(r.clinicId)?.active)throw Error('Выберите активного администратора этой клиники.');
-    if(data.doctors.some(a=>normalizeEmail(a.email)===normalizeEmail(r.email)))throw Error('Агент с такой почтой уже зарегистрирован.');
-    validateEmail(normalizeEmail(r.email));
-    newAgent={id:Math.max(0,...data.doctors.map(a=>a.id))+1,name:r.name,email:normalizeEmail(r.email),phone:r.phone||'',specialty:r.specialty,clinicIds:[r.clinicId],adminId,active:true,rates:blankRates(),registrationId:r.id};
-    data.doctors.push(newAgent);r.agentId=newAgent.id;r.adminId=adminId;
-  }
-  r.status=decision;r.reviewedAt=now();r.reviewedBy=actorName();r.decisionReason=note;
-  r.history.unshift({date:r.reviewedAt,actor:r.reviewedBy,status:decision,comment:note});
-  auditAdmin(decision==='approved'?'registration_approved':'registration_rejected',r.id,`${r.name}: ${decision==='approved'?'одобрена':'отклонена'}${note?' · '+note:''}`);
-  save();return newAgent;
-}
-
-function saveAdminAccount(id,values){
-  const existing=adminById(id),name=String(values.name||'').trim(),email=normalizeEmail(values.email);
-  if(id&&!existing)throw Error('Администратор не найден.');
-  if(!name)throw Error('Укажите ФИО администратора.');
-  validateEmail(email);
-  if(data.admins.some(a=>a.id!==Number(id)&&normalizeEmail(a.email)===email))throw Error('Этот адрес уже используется администратором.');
-  const clinicIds=Array.isArray(values.clinicIds)?values.clinicIds.map(Number).filter(Boolean):[];
-  if(!clinicIds.length)throw Error('Выберите хотя бы одну клинику.');
-  if(clinicIds.some(cid=>!clinicById(cid)))throw Error('Выбрана несуществующая клиника.');
-  if(!existing&&String(values.password||'').length<8)throw Error('Для новой учётной записи укажите пароль не менее 8 символов.');
-  const next={name,email,phone:String(values.phone||'').trim(),clinicIds,active:values.active==='true',permissions:{...(existing?.permissions||{}),reviewRegistrations:values.reviewRegistrations==='on'||values.reviewRegistrations===true}};
-  const result=existing||{id:Math.max(0,...data.admins.map(a=>a.id))+1,createdAt:now()};
-  if(existing&&JSON.stringify(existing.clinicIds)!==JSON.stringify(clinicIds)){const removed=existing.clinicIds.filter(c=>!clinicIds.includes(c));for(const r of data.registrations)if(r.adminId===existing.id&&r.status==='pending'&&removed.includes(r.clinicId))r.adminId=null}
-  Object.assign(result,next);if(!existing)data.admins.push(result);
-  auditAdmin(existing?'admin_updated':'admin_created',result.id,`${result.name}: ${existing?'профиль обновлён':'профиль создан'}`);
-  save();return result;
-}
-function deleteAdminAccount(id){
-  const a=adminById(id);if(!a)throw Error('Администратор не найден.');
-  if(data.doctors.some(d=>d.adminId===id))throw Error('Сначала переназначьте закреплённых агентов.');
-  data.admins=data.admins.filter(x=>x.id!==id);
-  auditAdmin('admin_deleted',id,`${a.name}: профиль удалён`);
-  save();
-}
-function saveAgentProfile(id,values){
-  const existing=agentById(id),email=normalizeEmail(values.email);
-  const clinicIds=Array.isArray(values.clinicIds)?values.clinicIds.map(Number).filter(Boolean):[];
-  const next={name:String(values.name||'').trim(),email,phone:String(values.phone||'').trim(),specialty:String(values.specialty||'').trim(),clinicIds,adminId:Number(values.adminId)||null,active:values.active==='true'};
-  if(id&&!existing)throw Error('Агент не найден.');
-  if(!next.name||!next.specialty)throw Error('Укажите ФИО и специальность.');
-  if(!clinicIds.length)throw Error('Выберите хотя бы одну клинику.');
-  if(clinicIds.some(cid=>!clinicById(cid)))throw Error('Выбрана несуществующая клиника.');
-  validateEmail(email,false);
-  if(email&&data.doctors.some(a=>a.id!==Number(id)&&normalizeEmail(a.email)===email))throw Error('Агент с такой почтой уже существует.');
-  if(next.adminId&&!data.admins.some(a=>a.id===next.adminId&&a.active&&clinicIds.some(c=>a.clinicIds.includes(c))))throw Error('Выберите активного администратора одной из клиник агента.');
-  const result=existing||{id:Math.max(0,...data.doctors.map(a=>a.id))+1,rates:blankRates()};
-  for(const [sp] of SPECIALTIES)result.rates[sp] ||= {mode:'clinic',customRate:null};
-  Object.assign(result,next);
-  if(!existing)data.doctors.push(result);
-  auditAdmin(existing?'agent_updated':'agent_created',result.id,`${result.name}: ${existing?'профиль изменён':'профиль создан'}`);
-  save();return result;
-}
-function saveClinicSpecialty(clinicId,specialtyId,values){
-  const clinic=clinicById(clinicId);if(!clinic)throw Error('Клиника не найдена.');
-  const existing=clinicSpecialty(clinicId,specialtyId),name=String(values.name||'').trim(),detail=String(values.detail||'').trim(),active=values.active==='true'||values.active===true;
-  if(specialtyId&&!existing)throw Error('Специализация не найдена в этой клинике.');
-  if(!name)throw Error('Укажите название специализации.');
-  if(clinic.specialties.some(s=>s.id!==specialtyId&&s.name.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))throw Error('Специализация с таким названием уже есть в клинике.');
-  const defaultRate=String(values.defaultRate??'').trim()===''?null:validateRate(values.defaultRate);
-  if(active&&defaultRate===null)throw Error('Для действующей специализации задайте процент по умолчанию.');
-  let id=specialtyId;
-  if(!existing){const source=String(values.source||'custom');id=source==='custom'?'custom_'+crypto.randomUUID():source;if(clinic.specialties.some(s=>s.id===id))throw Error('Специализация уже добавлена.')}
-  const before=existing?structuredClone(existing):null,result=existing||{id};Object.assign(result,{name,detail,defaultRate,active});if(!existing)clinic.specialties.push(result);
-  if(before&&JSON.stringify(before)===JSON.stringify(result))return result;
-  data.clinicRateHistory.unshift({id:crypto.randomUUID(),clinicId:Number(clinicId),specialty:id,date:now(),actor:actorName(),before,after:structuredClone(result)});
-  auditAdmin('clinic_specialty_updated',clinic.id,`${clinic.name}: ${name}, ставка ${defaultRate===null?'не задана':defaultRate+'%'}, ${active?'действует':'отключена'}`);
-  save();return result;
-}
-function saveClinic(id,values){const existing=clinicById(id),name=String(values.name||'').trim(),city=String(values.city||'').trim();if(id&&!existing)throw Error('Клиника не найдена.');if(!name||!city)throw Error('Укажите название и город.');if(data.clinics.some(c=>c.id!==Number(id)&&c.name.toLowerCase()===name.toLowerCase()))throw Error('Клиника с таким названием уже существует.');const result=existing||{id:Math.max(0,...data.clinics.map(c=>c.id))+1,specialties:[]};Object.assign(result,{name,city,active:values.active==='true'});if(!existing)data.clinics.push(result);auditAdmin(existing?'clinic_updated':'clinic_created',result.id,`${name}: ${result.active?'действующая клиника':'доступ клиники отключён'}`);save();return result}
-</script><script>
-'use strict';
-let clinicSettingsId=null,clinicSpecialtyQuery='',clinicSpecialtyStatus='all',clinicSettingsTab='rates';
-function clinicSpecialtiesPage(id){const c=clinicById(id);if(!c)return heading('Клиника не найдена','','<button class="btn small" data-page="clinics">К клиникам</button>');const enabled=clinicSpecialties(id),agents=data.doctors.filter(a=>(a.clinicIds||[]).includes(id));return `<button class="btn small back-link" data-page="clinics">← Назад</button>`+heading(c.name,'','<button class="btn primary" data-action="newClinicSpecialty" data-id="${id}">Добавить специализацию</button>')+`<div class="clinic-rate-summary"><span><strong>${enabled.length}</strong> действующих специализаций</span><span><strong>${agents.length}</strong> агентов клиники</span></div><div class="tabbar"><button class="${clinicSettingsTab==='rates'?'selected':''}" data-clinic-tab="rates">Список и ставки</button><button class="${clinicSettingsTab==='history'?'selected':''}" data-clinic-tab="history">История изменений <span>${data.clinicRateHistory.filter(h=>h.clinicId===id).length}</span></button></div><section class="panel">${clinicSettingsTab==='history'?`<div class="panelhead"><h2>Изменения условий клиники</h2></div>${clinicSpecialtyHistory(id)}`:`<div class="panelhead"><div class="controls"><input class="search" id="clinicSpecialtySearch" placeholder="Поиск специализации" value="${esc(clinicSpecialtyQuery)}"><select class="filter" id="clinicSpecialtyStatus">${options([{id:'all',name:'Все специализации'},{id:'active',name:'Действующие'},{id:'inactive',name:'Отключённые'}],clinicSpecialtyStatus)}</select></div></div><div class="rate-note">Изменение базового процента применяется к заявкам без личной ставки агента.</div><div id="clinicSpecialtyResults">${clinicSpecialtyTable(id)}</div>`}</section>`}
-function clinicSpecialtyTable(id){const rows=clinicSpecialties(id,true).filter(s=>(clinicSpecialtyStatus==='all'||s.active===(clinicSpecialtyStatus==='active'))&&(s.name+' '+s.detail).toLowerCase().includes(clinicSpecialtyQuery.toLowerCase()));return table(['Специализация','Процент по умолчанию','Агентов','Статус',''],rows.map(s=>{const count=data.doctors.filter(a=>(a.clinicIds||[]).includes(id)).length;return `<tr><td class="specialty-cell"><strong>${esc(s.name)}</strong>${s.detail?`<small>${esc(s.detail)}</small>`:''}</td><td><strong>${s.defaultRate===null?'Не задан':percent(s.defaultRate)}</strong></td><td>${count}</td><td>${pill(s.active?'Действует':'Отключена',s.active?'approved':'')}</td><td><button class="btn small" data-action="editClinicSpecialty" data-id="${id}" data-specialty="${s.id}">Изменить</button></td></tr>`}))}
-function clinicSpecialtyHistory(id){const rows=data.clinicRateHistory.filter(h=>h.clinicId===id);return rows.length?table(['Дата / автор','Специализация','Ставка до','Ставка после','Изменение'],rows.map(h=>`<tr><td><strong>${dateTime(h.date)}</strong><small>${esc(h.actor)}</small></td><td class="wrap"><strong>${esc(h.after.name)}</strong></td><td>${h.before?percent(h.before.defaultRate):'—'}</td><td>${h.after.defaultRate===null?'Не задана':percent(h.after.defaultRate)}</td><td>${!h.before?'Добавлена':h.before.active!==h.after.active?(h.after.active?'Включена':'Отключена'):'Обновлена'}</td></tr>`)):'<div class="empty">Изменений пока нет.</div>'}
-function clinicSpecialtyForm(clinicId,specialtyId=null){const clinic=clinicById(clinicId);if(!clinic)throw Error('Клиника не найдена.');const s=clinicSpecialty(clinicId,specialtyId),available=SPECIALTIES.filter(x=>!clinic.specialties.some(y=>y.id===x[0]));if(specialtyId&&!s)throw Error('Специализация не найдена.');open(s?'Настройки специализации':'Новая специализация',`<p class="muted">${esc(clinic.name)}</p><form id="clinicSpecialtyForm" data-id="${clinicId}" data-specialty="${s?.id||''}">${!s?`<div class="field"><label>Добавить из справочника или создать свою</label><select name="source"><option value="custom">Своя специализация</option>${options(available.map(x=>({id:x[0],name:x[1]})),'custom')}</select></div>`:''}<div class="field"><label>Название</label><input name="name" required value="${esc(s?.name||'')}"></div><div class="field"><label>Уточнение</label><input name="detail" value="${esc(s?.detail||'')}" placeholder="Необязательно"></div><div class="field"><label>Процент по умолчанию</label><input type="number" name="defaultRate" min="0" max="100" step="0.01" value="${s?.defaultRate??''}" placeholder="От 0 до 100"></div><div class="field"><label>Использование в клинике</label><select name="active">${options([{id:'true',name:'Действует'},{id:'false',name:'Отключена'}],String(s?.active!==false))}</select></div><p class="note">Ставка применяется к агентам без личной ставки.</p>${formActions(s?'Сохранить специализацию':'Добавить специализацию')}</form>`)}
-</script><script>
-'use strict';
-let registrationFilter='pending',registrationClinicFilter='all',adminStatusFilter='all',adminClinicFilter='all',adminProfileId=null;
-function filteredRegistrations(){return visibleRegistrations().filter(r=>(registrationFilter==='all'||r.status===registrationFilter)&&(registrationClinicFilter==='all'||String(r.clinicId)===registrationClinicFilter)&&[r.id,r.name,r.email,r.specialty,clinicById(r.clinicId)?.name].join(' ').toLowerCase().includes(query.toLowerCase()))}
-function filteredAdmins(){return data.admins.filter(a=>(adminStatusFilter==='all'||String(a.active)===adminStatusFilter)&&(adminClinicFilter==='all'||a.clinicIds.includes(Number(adminClinicFilter)))&&[a.name,a.email,...a.clinicIds.map(id=>clinicById(id)?.name||'')].join(' ').toLowerCase().includes(query.toLowerCase()))}
-function admins(){if(adminProfileId)return adminProfile(adminProfileId);return heading('Администраторы клиник','','<button class="btn primary" data-action="newAdmin">Добавить администратора</button>')+`<section class="panel"><div class="panelhead"><div class="controls"><input class="search" id="search" value="${esc(query)}" placeholder="Имя или почта"><select id="adminStatusFilter" class="filter"><option value="all">Любой доступ</option>${options([{id:'true',name:'Активные'},{id:'false',name:'Отключённые'}],adminStatusFilter)}</select><select id="adminClinicFilter" class="filter"><option value="all">Все клиники</option>${options(data.clinics,adminClinicFilter)}</select></div></div><div id="tableResults">${adminTable()}</div></section>`}
-function adminTable(){return table(['Администратор','Клиники','Регистрации','Доступ',''],filteredAdmins().map(a=>`<tr><td><strong>${esc(a.name)}</strong><small>${esc(a.email)}</small></td><td class="wrap">${a.clinicIds.map(id=>esc(clinicById(id)?.name||'')).join(', ')||'—'}</td><td>${pill(a.permissions.reviewRegistrations?'Разрешена':'Выключена',a.permissions.reviewRegistrations?'approved':'')}</td><td>${pill(a.active?'Активен':'Отключён',a.active?'approved':'rejected')}</td><td><button class="btn small" data-action="adminProfile" data-id="${a.id}">Профиль</button></td></tr>`))}
-function adminProfile(id){
-  const a=adminById(id);
-  if(!a)return heading('Администратор не найден','','<button class="btn small" data-page="admins">Назад</button>');
-  const linkedAgents=data.doctors.filter(d=>d.adminId===id);
-  const actions=`<div style="display:flex;gap:10px"><button class="btn small" data-action="editAdmin" data-id="${a.id}">Редактировать</button><button class="btn small danger-access" data-action="deleteAdmin" data-id="${a.id}">Удалить профиль</button></div>`;
-  return `<button class="btn small back-link" data-page="admins">← Назад</button>`
-    +heading(a.name,'',actions)
-    +`<section class="panel profile-summary">
-        <div><span class="meta-label">ФИО</span><strong>${esc(a.name)}</strong></div>
-        <div><span class="meta-label">Email</span><strong>${esc(a.email)}</strong></div>
-        <div><span class="meta-label">Телефон</span><strong>${esc(a.phone||'—')}</strong></div>
-        <div><span class="meta-label">Дата рождения</span><strong>${esc(a.dateOfBirth||'—')}</strong></div>
-        <div><span class="meta-label">Опыт работы</span><strong>${esc(a.experience||'—')}</strong></div>
-        <div><span class="meta-label">Образование</span><strong>${esc(a.education||'—')}</strong></div>
-        <div><span class="meta-label">Доступ</span>${pill(a.active?'Активен':'Отключён',a.active?'approved':'rejected')}</div>
-        <div><span class="meta-label">Регистрации</span>${pill(a.permissions.reviewRegistrations?'Разрешены':'Выключены',a.permissions.reviewRegistrations?'approved':'')}</div>
-      </section>
-      <section class="panel"><div class="panelhead"><h2>Клиники</h2></div><div style="padding:18px 22px">${a.clinicIds.map(cid=>`<span class="multi-select-tag" style="margin:0 6px 6px 0">${esc(clinicById(cid)?.name||'—')}</span>`).join('')||'<span class="muted">Нет клиник</span>'}</div></section>
-      <section class="panel"><div class="panelhead"><h2>Закреплённые агенты</h2><span class="muted">${linkedAgents.length} агентов</span></div>${table(['Агент','Клиники','Доступ',''],linkedAgents.map(d=>`<tr><td><strong>${esc(d.name)}</strong></td><td>${(d.clinicIds||[]).map(id=>esc(clinicById(id)?.name||'')).filter(Boolean).join(', ')||'—'}</td><td>${pill(d.active?'Активен':'Отключён',d.active?'approved':'rejected')}</td><td><button class="btn small" data-page="agents" data-agent="${d.id}">Профиль</button></td></tr>`))}</section>
-      <section class="panel"><div class="panelhead"><h2>История изменений</h2></div>${adminHistoryView(a.id)}</section>`;
-}function adminHistoryView(id){const rows=data.adminHistory.filter(h=>h.entityId===id&&h.entityType!=='agent'&&['admin_created','admin_updated','assignments_updated','password_reset_demo'].includes(h.action));return rows.length?rows.slice(0,12).map(h=>`<div class="history-item"><strong>${esc(h.details)}</strong><small>${dateTime(h.date)} · ${esc(h.actor)}</small></div>`).join(''):'<p class="muted">Изменений пока нет.</p>'}
-function adminForm(id){const x=adminById(id),isNew=!x;open(isNew?'Новый администратор клиники':'Редактировать администратора',`<form id="adminForm" data-id="${id||''}"><div class="field"><label>ФИО</label><input name="name" required value="${esc(x?.name||'')}"></div><div class="field"><label>Электронная почта</label><input type="email" name="email" required value="${esc(x?.email||'')}"></div><div class="field"><label>Телефон</label><input type="tel" name="phone" value="${esc(x?.phone||'')}"></div><div class="field"><label>Клиники</label><div class="multi-select" data-name="clinicIds" id="adminClinicsSelect">${(x?.clinicIds||[]).map(cid=>`<span class="multi-select-tag" data-id="${cid}">${esc(clinicById(cid)?.name||'')}<span class="x" data-remove-clinic="${cid}">×</span></span>`).join('')}<span class="muted" style="font-size:13px;padding:4px 0;">${(x?.clinicIds||[]).length?'':'Выберите клиники...'}</span><div class="multi-select-dropdown" id="adminClinicsDropdown">${data.clinics.map(c=>`<div class="multi-select-option ${(x?.clinicIds||[]).includes(c.id)?'selected':''}" data-add-clinic="${c.id}">${esc(c.name)}</div>`).join('')}</div></div></div><div class="field"><label>Дата рождения</label><input type="date" name="dateOfBirth" value="${esc(x?.dateOfBirth||'')}"></div><div class="field"><label>Опыт работы (лет)</label><input type="number" name="experience" min="0" max="50" value="${esc(x?.experience||'')}"></div><div class="field"><label>Образование</label><select name="education"><option value="">Не указано</option><option value="higher" ${x?.education==='higher'?'selected':''}>Высшее</option><option value="secondary" ${x?.education==='secondary'?'selected':''}>Среднее</option><option value="other" ${x?.education==='other'?'selected':''}>Другое</option></select></div><div class="field"><label>О себе</label><textarea name="about" rows="3">${esc(x?.about||'')}</textarea></div><div class="field"><label>Доступ к кабинету</label><select name="active">${options([{id:'true',name:'Активен'},{id:'false',name:'Отключён'}],String(x?.active!==false))}</select></div><fieldset class="permission-box"><legend>Дополнительные возможности</legend><label class="permission-choice"><input type="checkbox" name="reviewRegistrations" ${x?.permissions.reviewRegistrations?'checked':''}><span><strong>Рассмотрение регистраций агентов</strong><small>Показывает вкладку «Регистрация агентов». Разрешает просматривать, одобрять и отклонять заявки своей клиники.</small></span></label></fieldset>${isNew?'<div class="field"><label>Начальный пароль</label><input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Не менее 8 символов"></div>':''}${formActions(isNew?'Создать администратора':'Сохранить настройки')}</form>`);setTimeout(()=>setupMultiSelect('adminClinicsSelect','adminClinicsDropdown'),0)}
-function registrations(){return heading('Регистрация агентов','Заявки на сотрудничество по всем клиникам')+`<section class="panel"><div class="panelhead"><div><h2>Заявки на регистрацию</h2><p>На рассмотрении: ${visibleRegistrations().filter(r=>r.status==='pending').length}</p></div><div class="controls"><input id="search" class="search" placeholder="Имя или почта" value="${esc(query)}"><select id="registrationFilter" class="filter"><option value="all" ${registrationFilter==='all'?'selected':''}>Все статусы</option>${options(Object.entries(REGISTRATION_STATUSES).map(([id,name])=>({id,name})),registrationFilter)}</select><select id="registrationClinicFilter" class="filter"><option value="all">Все клиники</option>${options(data.clinics,registrationClinicFilter)}</select></div></div><div id="tableResults">${registrationTable()}</div></section>`}
-function registrationTable(){return table(['Заявка / дата','Кандидат','Клиника / получатель','Статус',''],filteredRegistrations().map(r=>`<tr><td><strong>Р-${r.id}</strong><small>${dateTime(r.submittedAt)}</small></td><td><strong>${esc(r.name)}</strong><small>${esc(r.email)}</small></td><td><strong>${esc(clinicById(r.clinicId)?.name)}</strong><small>${esc(adminById(r.adminId)?.name||'Не распределена')}</small></td><td>${pill(REGISTRATION_STATUSES[r.status],r.status==='pending'?'new':r.status)}</td><td><button class="btn small" data-action="registration" data-id="${r.id}">${r.status==='pending'?'Рассмотреть':'Открыть'}</button></td></tr>`))}
-function registrationForm(id){const r=visibleRegistrations().find(x=>x.id===id);if(!r)throw Error('Заявка недоступна.');const eligible=data.admins.filter(a=>a.active&&a.clinicIds.includes(r.clinicId));open('Регистрация Р-'+r.id,`<div class="registration-person"><span class="initials">${esc(r.name.split(' ').map(x=>x[0]).join(''))}</span><div><h3>${esc(r.name)}</h3></div></div><dl class="details"><div><dt>Подана</dt><dd>${dateTime(r.submittedAt)}</dd></div><div><dt>Клиника</dt><dd>${esc(clinicById(r.clinicId)?.name)}</dd></div><div><dt>Почта</dt><dd>${esc(r.email)}</dd></div><div><dt>Телефон</dt><dd>${esc(r.phone||'Не указан')}</dd></div><div><dt>Статус</dt><dd>${pill(REGISTRATION_STATUSES[r.status],r.status==='pending'?'new':r.status)}</dd></div></dl><p class="note">${esc(r.comment||'Комментария нет.')}</p>${r.status==='pending'?`<form id="registrationDecisionForm" data-id="${id}"><div class="field"><label>Решение</label><select name="decision"><option value="approved">Одобрить регистрацию</option><option value="rejected">Отклонить регистрацию</option></select></div><div class="field"><label>Ответственный администратор при одобрении</label><select name="adminId"><option value="">Выберите администратора</option>${options(eligible,r.adminId)}</select></div><div class="field"><label>Комментарий / причина отклонения</label><textarea name="reason" rows="3"></textarea></div>${formActions('Сохранить решение')}</form>`:''}`)}
-function clinics(){if(clinicSettingsId)return clinicSpecialtiesPage(clinicSettingsId);return heading('Клиники','','<button class="btn primary" data-action="newClinic">Добавить клинику</button>')+`<section class="panel"><div class="panelhead">${searchControls('Поиск')}</div><div id="tableResults">${clinicTable()}</div></section>`}
-function clinicTable(){return table(['Клиника','Город','Специализации','Агенты','Администраторы','Доступ',''],data.clinics.filter(c=>[c.name,c.city].join(' ').toLowerCase().includes(query.toLowerCase())).map(c=>`<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(c.city)}</td><td><button class="btn small" data-page="clinics" data-clinic="${c.id}">${clinicSpecialties(c.id).length} · ставки</button></td><td>${data.doctors.filter(a=>(a.clinicIds||[]).includes(c.id)).length}</td><td>${data.admins.filter(a=>a.clinicIds.includes(c.id)).length}</td><td>${pill(c.active?'Активна':'Отключена',c.active?'approved':'rejected')}</td><td><button class="btn small" data-action="clinic" data-id="${c.id}">Изменить</button></td></tr>`))}
-function clinicForm(id){const c=clinicById(id);open(c?'Настройки клиники':'Новая клиника',`<form id="clinicForm" data-id="${id||''}"><div class="field"><label>Название</label><input required name="name" value="${esc(c?.name||'')}"></div><div class="field"><label>Город</label><input required name="city" value="${esc(c?.city||'')}"></div><div class="field"><label>Доступ клиники</label><select name="active">${options([{id:'true',name:'Активна'},{id:'false',name:'Отключена'}],String(c?.active!==false))}</select></div><p class="note">При отключении клиники её администраторы теряют доступ к операциям.</p>${formActions(c?'Сохранить клинику':'Создать клинику')}</form>`)}
-function portalOverview(){
-  const pending=data.registrations.filter(r=>r.status==='pending');
-  const items=[
-    {label:'Заявки',value:data.requests.length,detail:'Все заявки',page:'requests'},
-    {label:'Администраторы',value:data.admins.filter(a=>a.active).length,detail:'Управление доступом',page:'admins'},
-    {label:'Агенты',value:data.doctors.length,detail:'Профили и назначения',page:'agents'},
-    {label:'Клиники',value:data.clinics.length,detail:'Организации и доступ',page:'clinics'},
-    {label:'Отчёты',value:'→',detail:'Финансы и выплаты',page:'reports'}
-  ];
-  return heading('Обзор','Сводная информация по порталу')
-    +`<div class="grid">${items.slice(0,4).map(i=>`<button class="stat stat-action" data-page="${i.page}"><span class="stat-lbl">${i.label}</span><strong>${i.value}</strong><em>${i.detail}</em></button>`).join('')}</div>`
-    +`<div class="split">
-        <section class="panel"><div class="panelhead"><div><h2>Регистрация агентов</h2><p>Последние заявки на сотрудничество</p></div><button class="btn small" data-page="agents">Все</button></div>${table(['Кандидат','Клиника',''],pending.slice(0,5).map(r=>`<tr><td><strong>${esc(r.name)}</strong><small>${esc(r.specialty)}</small></td><td class="wrap">${esc(clinicById(r.clinicId)?.name)}</td><td><button class="btn small" data-action="registration" data-id="${r.id}">Открыть</button></td></tr>`))}</section>
-        <section class="panel"><div class="panelhead"><div><h2>Ваши администраторы</h2><p>Быстрый доступ</p></div><button class="btn small" data-page="admins">Все</button></div>${table(['ФИО','Клиника',''],data.admins.slice(0,5).map(a=>`<tr><td><strong>${esc(a.name)}</strong></td><td>${esc(a.clinicIds.map(id=>clinicById(id)?.name||'').join(', ')||'—')}</td><td><button class="btn small" data-action="adminProfileFromOverview" data-id="${a.id}">Профиль</button></td></tr>`))}</section>
-      </div>
-      <section class="panel"><div class="panelhead"><h2>История изменений</h2></div>${historyFeed()}</section>`;
-}
-function historyFeed(){
-  const all=[];
-  for(const h of data.adminHistory)all.push({date:h.date,label:labelOf(h.action),text:h.details});
-  for(const h of data.requestHistory){const r=data.requests.find(x=>x.id===h.requestId);all.push({date:h.date,label:`Статус заявки: ${REQUEST_STATUSES[h.old]||''} → ${REQUEST_STATUSES[h.new]||''}`,text:r?`Заявка № ${r.id} · ${r.patient} · ${r.service}`:'—'})}
-  for(const h of data.payoutHistory){const r=data.requests.find(x=>x.id===h.requestId);all.push({date:h.date,label:`Выплата: ${PAYOUT_STATUSES[h.old]} → ${PAYOUT_STATUSES[h.new]}`,text:r?`Заявка № ${r.id} · ${r.patient}`:'—'})}
-  all.sort((a,b)=>b.date.localeCompare(a.date));
-  if(!all.length)return '<div class="empty">Здесь появятся изменения учётных записей, назначений и решения по регистрациям.</div>';
-  return all.slice(0,12).map(h=>`<div class="change-item"><div class="change-item-body"><strong>${esc(h.label)}</strong><small>${esc(h.text)}</small></div><div class="change-item-time">${dateTime(h.date)}</div></div>`).join('');
-}
-function labelOf(action){const m={registration_approved:'Регистрация одобрена',registration_rejected:'Регистрация отклонена',clinic_updated:'Клиника обновлена',clinic_created:'Клиника создана',clinic_specialty_updated:'Специализация клиники обновлена',agent_updated:'Агент обновлён',agent_created:'Агент создан',admin_updated:'Администратор обновлён',admin_created:'Администратор создан',admin_deleted:'Администратор удалён',assignments_updated:'Назначения обновлены',password_reset_demo:'Смена пароля'};return m[action]||action}
-</script><script>
-'use strict';
-const requestDates=visibleRequests().map(r=>r.dateIso).filter(Boolean).sort();
-const localToday=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-let reportFilters={from:requestDates[0]||localToday,to:requestDates.at(-1)||localToday,specialty:'all',agent:'all'},reportPreview='payroll';
-const decimal=n=>Number(n).toFixed(2).replace('.',',');
-function reportRows(f){return visibleRequests().filter(r=>r.dateIso&&r.dateIso>=f.from&&r.dateIso<=f.to&&(f.agent==='all'||String(r.doctorId)===String(f.agent))&&(f.specialty==='all'||(f.specialty==='missing'?!r.specializationId:r.specializationId===f.specialty)))}
-function payrollSummary(f){const candidates=reportRows(f).filter(r=>r.status==='approved'&&r.payoutStatus!=='paid');const missing=candidates.filter(r=>requestReward(r)===null),map=new Map();for(const r of candidates){const reward=requestReward(r);if(reward===null||reward===0)continue;const current=map.get(r.doctorId)||{agentId:r.doctorId,cents:0};current.cents+=Math.round(reward*100);map.set(r.doctorId,current)}return {rows:[...map.values()].map(x=>({agentId:x.agentId,amount:x.cents/100})),missing,candidates}}
-function reports(){return heading('Отчёты','Выплаты агентам и аналитика по заявкам')+`<section class="panel"><div class="panelhead"><div><h2>Параметры отчётов</h2><p>Период по дате заявки, обе границы включены</p></div><div class="preset-buttons"><button class="btn small" data-action="reportPreset" data-preset="month">Этот месяц</button><button class="btn small" data-action="reportPreset" data-preset="previous">Прошлый месяц</button><button class="btn small" data-action="reportPreset" data-preset="all">Весь период</button></div></div><div class="report-fields"><div class="field"><label>Начало периода</label><input type="date" data-report-field="from" value="${esc(reportFilters.from)}"></div><div class="field"><label>Конец периода</label><input type="date" data-report-field="to" value="${esc(reportFilters.to)}"></div><div class="field"><label>Специализация услуги</label><select data-report-field="specialty"><option value="all">Все специализации</option>${options(availableFilterSpecialties(),reportFilters.specialty)}<option value="missing" ${reportFilters.specialty==='missing'?'selected':''}>Не указана</option></select></div><div class="field"><label>Агент</label><select data-report-field="agent"><option value="all">Все агенты</option>${options(visibleAgents(),reportFilters.agent)}</select></div></div></section><div id="reportResults">${reportResults()}</div>`}
-function reportResults(){try{const rows=reportRows(reportFilters),pay=payrollSummary(reportFilters),approved=rows.filter(r=>r.status==='approved'),sum=pay.rows.reduce((a,x)=>a+Math.round(x.amount*100),0)/100;return `<div class="grid">${[{label:'Заявок в периоде',value:rows.length,detail:'По выбранным фильтрам'},{label:'Подтверждено',value:approved.length,detail:'Учитываются для выплаты'},{label:'Выручка',value:money(approved.reduce((a,x)=>a+x.amount,0)),detail:'По подтверждённым заявкам'},{label:'Вознаграждение к выплате',value:money(sum),detail:pay.missing.length?'Есть заявки без расчёта':pay.rows.length+' агентов'}].map(i=>`<div class="stat"><span class="stat-lbl">${i.label}</span><strong>${i.value}</strong><em>${i.detail}</em></div>`).join('')}</div><div class="report-cards"><section class="panel report-card"><span class="report-tag">01 · ВЫПЛАТЫ</span><h2>Ведомость для 1С ЗУП</h2><p>Одна строка на агента: код, ФИО, период и сумма вознаграждения.</p>${pay.missing.length?`<div class="report-warning">Не рассчитано заявок: ${pay.missing.length}.</div>`:''}<div class="report-card-actions"><button class="btn primary" data-action="exportPayroll" ${!pay.rows.length||pay.missing.length?'disabled':''}>Скачать CSV</button><button class="btn small" data-report-preview="payroll">Предпросмотр</button></div></section><section class="panel report-card"><span class="report-tag">02 · АНАЛИТИКА</span><h2>Детальный реестр</h2><p>Каждая заявка: агент, пациент, услуга, специализация, стоимость, ставка, вознаграждение и статусы.</p><div class="report-card-actions"><button class="btn primary" data-action="exportAnalyst" ${!rows.length?'disabled':''}>Скачать CSV</button><button class="btn small" data-report-preview="analyst">Предпросмотр</button></div></section></div><section class="panel"><div class="panelhead"><div><h2>${reportPreview==='payroll'?'Предпросмотр ведомости':'Предпросмотр детального реестра'}</h2><p>${reportFilters.from} — ${reportFilters.to}</p></div><div class="preview-switch"><button class="btn small ${reportPreview==='payroll'?'primary':''}" data-report-preview="payroll">Для выплаты</button><button class="btn small ${reportPreview==='analyst'?'primary':''}" data-report-preview="analyst">Для аналитика</button></div></div>${reportPreview==='payroll'?payrollTable(pay.rows):analystTable(rows)}</section>`}catch(error){return `<section class="panel"><div class="empty">${esc(error.message)}</div></section>`}}
-function payrollTable(rows){return table(['Код агента','ФИО агента','Период','Вознаграждение к выплате'],rows.map(x=>`<tr><td>AG-${x.agentId}</td><td>${esc(agentById(x.agentId)?.name||'—')}</td><td>${reportFilters.from} — ${reportFilters.to}</td><td><strong>${money(x.amount)}</strong></td></tr>`))}
-function analystTable(rows){return table(['Заявка / дата','Агент','Услуга / пациент','Специализация','Стоимость','Ставка','Вознаграждение','Статус заявки','Выплата'],rows.map(x=>`<tr><td><strong>№ ${x.id}</strong><small>${esc(x.date)}</small></td><td>${esc(agentById(x.doctorId)?.name||'—')}</td><td class="wrap"><strong>${esc(x.service)}</strong><small>${esc(x.patient)}</small></td><td class="wrap">${esc(requestSpecialtyName(x))}</td><td>${money(x.amount)}</td><td>${percent(requestRate(x))}</td><td>${requestReward(x)===null?'Не рассчитано':money(requestReward(x))}</td><td>${pill(REQUEST_STATUSES[x.status],x.status)}</td><td>${pill(PAYOUT_STATUSES[x.payoutStatus],x.payoutStatus==='paid'?'approved':'')}</td></tr>`))}
-function refreshReports(){if(page==='reports')$('#reportResults').innerHTML=reportResults()}
-function setReportPreset(preset){const [year,month]=localToday.split('-').map(Number),iso=d=>d.toISOString().slice(0,10);if(preset==='all'){const dates=visibleRequests().map(r=>r.dateIso).filter(Boolean).sort();reportFilters.from=dates[0]||localToday;reportFilters.to=dates.at(-1)||localToday}else if(preset==='month'){reportFilters.from=iso(new Date(Date.UTC(year,month-1,1)));reportFilters.to=iso(new Date(Date.UTC(year,month,0)))}else if(preset==='previous'){reportFilters.from=iso(new Date(Date.UTC(year,month-2,1)));reportFilters.to=iso(new Date(Date.UTC(year,month-1,0)))}render()}
-function csvText(lines){const safe=v=>{const s=String(v??'');return /^[=+\-@\t\r]/.test(s)?"'"+s:s};return '\uFEFF'+lines.map(row=>row.map(v=>'"'+safe(v).replace(/"/g,'""')+'"').join(';')).join('\r\n')}
-function downloadCsv(lines,filename){const url=URL.createObjectURL(new Blob([csvText(lines)],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function payrollExportRows(){const pay=payrollSummary(reportFilters);if(pay.missing.length)throw Error('Есть заявки без расчёта.');if(!pay.rows.length)throw Error('Нет сумм для выплаты.');return [['Код агента','ФИО','Организация','Начало','Конец','Сумма','Валюта'],...pay.rows.map(x=>['AG-'+x.agentId,agentById(x.agentId)?.name,(agentById(x.agentId)?.clinicIds||[]).map(c=>clinicById(c)?.name).filter(Boolean).join(', '),reportFilters.from,reportFilters.to,decimal(x.amount),'RUB'])]}
-function exportPayroll(){const rows=payrollExportRows();downloadCsv(rows,`ZUP_vedomost_${reportFilters.from}_${reportFilters.to}.csv`);toast(`Ведомость выгружена: ${rows.length-1} агентов.`)}
-function analystExportRows(){const rows=reportRows(reportFilters);if(!rows.length)throw Error('Нет заявок.');return [['Номер','Дата','Клиника','Агент','Пациент','Услуга','Специализация','Стоимость','Процент','Вознаграждение','Статус','Выплата'],...rows.map(x=>[x.id,x.dateIso,clinicById(x.clinicId)?.name,agentById(x.doctorId)?.name,x.patient,x.service,requestSpecialtyName(x),decimal(x.amount),requestRate(x)===null?'':decimal(requestRate(x)),requestReward(x)===null?'':decimal(requestReward(x)),REQUEST_STATUSES[x.status],PAYOUT_STATUSES[x.payoutStatus]])]}
-function exportAnalyst(){const rows=analystExportRows();downloadCsv(rows,`Analitika_zayavki_${reportFilters.from}_${reportFilters.to}.csv`);toast(`Детальный реестр выгружен: ${rows.length-1} заявок`)}
-</script><script>
+@media(max-width:700px){.app{display:block}.side{display:none;position:fixed;inset:0 auto 0 0;width:250px;z-index:4;height:100vh;overflow-y:auto}.side.open{display:flex}.mobilemenu{display:block}.top{height:66px;padding:0 15px}.content{padding:24px 15px}.grid{gap:9px}.split{grid-template-columns:1fr}.profile-summary{grid-template-columns:1fr}.report-cards{grid-template-columns:1fr}}
+</style></head><body><div class="app"><aside class="side" id="sidebar"><div><div class="brand"><span class="mark">+</span> Medpoint</div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Шеф</strong><span id="userSub">Управление сетью</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button><div class="top-brand"><span class="mark">+</span> Medpoint</div><div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
+<script>
 'use strict';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=n=>new Intl.NumberFormat('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2}).format(n)+' ₽';
-const percent=n=>n===null||n===undefined?'Не согласован':new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+'%';
-const dateTime=v=>new Date(v).toLocaleString('ru-RU',{dateStyle:'short',timeStyle:'short'});
-let page='overview',query='',filter='all',payoutFilter='all',specialtyFilter='all',profileId=null,profileTab='rates',profileQuery='',profileHistoryFilter='all',lastFocus=null;
-const names={overview:'Обзор',requests:'Заявки',reports:'Отчёты',agents:'Агенты',admins:'Администраторы',clinics:'Клиники'};
-const icons={overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',requests:'<path d="M4 4h16v16H4zM8 9h8M8 13h8M8 17h5"/>',reports:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',agents:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3-7 8-7s8 3 8 7"/>',admins:'<circle cx="9" cy="8" r="3"/><path d="M2 20c0-4 2-6 7-6s7 2 7 6M16 5h6M19 2v6"/>',clinics:'<path d="M4 21V5l8-3 8 3v16M2 21h20M9 8h6M12 5v6M9 15h6v6"/>'};
-const NAV_ORDER=['overview','requests','admins','agents','clinics','reports'];
-function navigate(target,options={}){const params=new URLSearchParams();params.set('page',target);if(options.filter&&options.filter!=='all')params.set('filter',options.filter);if(options.agent)params.set('agent',options.agent);if(options.clinic)params.set('clinic',options.clinic);if(options.admin)params.set('admin',options.admin);const hash='#'+params.toString();if(location.hash===hash)readRoute();else location.hash=hash}
-function readRoute(){const p=new URLSearchParams(location.hash.slice(1));page=p.get('page')||'overview';if(page==='doctors')page='agents';if(page==='registrations')page='agents';if(!Object.hasOwn(names,page))page='overview';filter=p.get('filter')||'all';payoutFilter='all';profileId=page==='agents'?Number(p.get('agent'))||null:null;adminProfileId=page==='admins'?Number(p.get('admin'))||null:null;clinicSettingsId=page==='clinics'?Number(p.get('clinic'))||null:null;clinicSpecialtyQuery='';clinicSpecialtyStatus='all';clinicSettingsTab='rates';query='';specialtyFilter='all';profileQuery='';profileTab='rates';profileHistoryFilter='all';close();render();window.scrollTo(0,0)}
+const dt=v=>v?new Date(v).toLocaleString('ru-RU',{dateStyle:'short',timeStyle:'short'}):'—';
+const API='/api/v1';
+const S={user:null,agents:[],admins:[],clinics:[],specs:[]};
+let page='overview',query='',agentFilter='all',agentId=null,adminId=null,clinicId=null;
+
+const NAME={overview:'Обзор',pending:'Заявки',admins:'Администраторы',agents:'Агенты',clinics:'Клиники',reports:'Отчёты'};
+const SL={pending:'Ожидает',active:'Активен',inactive:'Отключён',rejected:'Отклонён'};
+const SP={pending:'new',active:'approved',inactive:'rejected',rejected:'rejected'};
+const NAV=['overview','pending','admins','agents','clinics','reports'];
+
+async function api(p,o={}){
+  const r=await fetch(API+p,{credentials:'include',...o});
+  if(r.status===401){location.href='/';throw new Error('401')}
+  if(r.status===403)throw new Error('Нет доступа');
+  const t=await r.text();let d=null;
+  if(t){try{d=JSON.parse(t)}catch{d=t}}
+  if(!r.ok)throw new Error((d&&d.detail)||(d&&d.error)||('HTTP '+r.status));
+  return d;
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),4000);}
+function openDrawer(title,body){$('#drawerTitle').textContent=title;$('#drawerBody').innerHTML=body;$('#backdrop').classList.add('open');document.body.style.overflow='hidden';}
+function closeDrawer(){$('#backdrop').classList.remove('open');document.body.style.overflow='';}
+
+const cName=id=>S.clinics.find(c=>c.id===Number(id))?.name||'—';
+const aName=id=>S.admins.find(a=>a.id===Number(id))?.full_name||'—';
+const sName=id=>S.specs.find(s=>s.id===Number(id))?.name||('#'+id);
+const heading=(t,d,act='')=>`<div class="heading"><div><h1>${esc(t)}</h1>${d?`<p class="muted">${esc(d)}</p>`:''}</div>${act}</div>`;
+const table=(h,rows)=>`<div class="tablewrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td colspan="${h.length}" class="empty">Ничего не найдено</td></tr>`}</tbody></table></div>`;
+const pill=(l,t='')=>`<span class="pill ${t}">${esc(l)}</span>`;
+
+async function loadAll(){
+  try{
+    const [a,ad,c,s]=await Promise.all([api('/agents'),api('/admins'),api('/clinics'),api('/specializations')]);
+    S.agents=a||[];S.admins=ad||[];S.clinics=c||[];S.specs=s||[];
+  }catch(e){toast('Ошибка загрузки: '+e.message);}
+}
+function navigate(p){page=p;agentId=null;adminId=null;clinicId=null;query='';location.hash=p;render();scrollTo(0,0);}
+function render(){nav();const m={overview,requests,admins,agents,clinics,reports,pending:requests};$('#content').innerHTML=(m[page]||overview)();}
 function nav(){
-  $('#nav').innerHTML=NAV_ORDER.map(t=>`<button class="${page===t?'active':''}" data-page="${t}" ${page===t?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${icons[t]}</svg>${names[t]}</button>`).join('');
-  $('#userLabel').textContent='Шеф';$('#userSub').textContent='Управление сетью';$('#topUserName').textContent='Шеф';$('#topAvatar').textContent='Ш';$('#sidebar').classList.remove('open');
+  const pc=S.agents.filter(a=>a.status==='pending').length;
+  $('#nav').innerHTML=NAV.map(t=>`<button class="${page===t?'active':''}" data-page="${t}">${NAME[t]}${t==='pending'&&pc?`<span class="nav-count">${pc}</span>`:''}</button>`).join('');
+  const u=S.user||{};
+  $('#userLabel').textContent=u.full_name||'Шеф';$('#topUserName').textContent=u.full_name||'Шеф';
+  $('#topAvatar').textContent=(u.full_name||'Ш').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+  $('#sidebar').classList.remove('open');
 }
-const heading=(title,desc,action='')=>`<div class="heading"><div><h1>${esc(title)}</h1>${desc?`<p class="muted">${esc(desc)}</p>`:''}</div>${action}</div>`;
-function stats(items){return `<div class="grid">${items.map(i=>`<${i.page?'button':'div'} class="stat ${i.page?'stat-action':''}" ${i.page?`data-page="${i.page}"`:''}><span class="stat-lbl">${i.label}</span><strong>${i.value}</strong><em>${i.detail||''}</em></${i.page?'button':'div'}>`).join('')}</div>`}
-function table(headers,rows){return `<div class="tablewrap"><table><thead><tr>${headers.map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td colspan="${headers.length}" class="empty">По заданным условиям ничего не найдено</td></tr>`}</tbody></table></div>`}
-const pill=(label,type='')=>`<span class="pill ${type}">${esc(label)}</span>`;
-const options=(items,selected)=>items.map(x=>`<option value="${x.id}" ${String(x.id)===String(selected)?'selected':''}>${esc(x.name)}</option>`).join('');
-function rewardCell(reward,rate){return reward===null?'<span class="unset">Не рассчитано</span>':`<strong>${money(reward)}</strong><small>${percent(rate)} от стоимости услуги</small>`}
-function searchControls(label,withSpecialty=false){return `<div class="controls"><input class="search" id="search" placeholder="${label}" value="${esc(query)}">${withSpecialty?`<select class="filter" id="specialtyFilter"><option value="all">Все специализации</option>${options(availableFilterSpecialties(),specialtyFilter)}<option value="missing" ${specialtyFilter==='missing'?'selected':''}>Не указана</option></select>`:''}${page==='requests'?`<select class="filter" id="filter"><option value="all">Все статусы заявок</option>${options(Object.entries(REQUEST_STATUSES).map(([id,name])=>({id,name})),filter)}</select><select class="filter" id="payoutFilter"><option value="all">Все статусы выплат</option>${options(Object.entries(PAYOUT_STATUSES).map(([id,name])=>({id,name})),payoutFilter)}</select>`:''}</div>`}
-function overview(){return portalOverview()}
-function filteredRequests(){return visibleRequests().filter(x=>(filter==='all'||x.status===filter)&&(payoutFilter==='all'||x.payoutStatus===payoutFilter)&&(specialtyFilter==='all'||(specialtyFilter==='missing'?!x.specializationId:x.specializationId===specialtyFilter))&&[x.id,x.patient,x.service,agentById(x.doctorId)?.name,requestSpecialtyName(x)].join(' ').toLowerCase().includes(query.toLowerCase()))}
-function requestTable(){return table(['Заявка','Пациент и услуга','Агент','Специализация','Стоимость','Вознаграждение','Статус','Выплата',''],filteredRequests().map(x=>`<tr><td><strong>№ ${x.id}</strong><small>${esc(x.date)}</small></td><td class="wrap"><strong>${esc(x.patient)}</strong><small>${esc(x.service)}</small></td><td>${esc(agentById(x.doctorId)?.name||'—')}</td><td class="wrap">${esc(requestSpecialtyName(x))}</td><td>${money(x.amount)}</td><td>${rewardCell(requestReward(x),requestRate(x))}</td><td>${pill(REQUEST_STATUSES[x.status],x.status)}</td><td>${pill(PAYOUT_STATUSES[x.payoutStatus],x.payoutStatus==='paid'?'approved':x.payoutStatus==='processing'?'work':'')}</td><td><button class="btn small" data-action="request" data-id="${x.id}">Изменить</button></td></tr>`))}
-function requests(){return heading('Заявки','Просмотр заявок по всем клиникам','<button class="btn small" data-page="reports">В отчёты</button>')+`<section class="panel"><div class="panelhead"><div><h2>Заявки</h2></div>${searchControls('Поиск по заявкам',true)}</div><div id="tableResults">${requestTable()}</div></section>`}
-function filteredAgents(){return visibleAgents().filter(x=>[x.name,...(x.clinicIds||[]).map(id=>clinicById(id)?.name||''),adminById(x.adminId)?.name].join(' ').toLowerCase().includes(query.toLowerCase()))}
-function agentTable(){return table(['Агент','Клиники','Доступ',''],filteredAgents().map(x=>`<tr><td><strong>${esc(x.name)}</strong></td><td class="wrap">${(x.clinicIds||[]).map(id=>esc(clinicById(id)?.name||'')).filter(Boolean).join(', ')||'—'}</td><td>${pill(x.active?'Активен':'Отключён',x.active?'approved':'rejected')}</td><td><button class="btn small" data-page="agents" data-agent="${x.id}">Профиль</button></td></tr>`))}
-function agents(){if(profileId)return profile();const pending=visibleRegistrations().filter(r=>r.status==='pending');return heading('Агенты','',`<div style="display:flex;gap:10px;align-items:center">${pending.length?`<button class="btn" onclick="scrollToRegistrations()">Новые ↓ ${pending.length}</button>`:''}<button class="btn primary" data-action="newAgent">Добавить агента</button></div>`)+`<section class="panel"><div class="panelhead">${searchControls('Поиск агента')}</div><div id="tableResults">${agentTable()}</div></section><section class="panel section-anchor" id="registrationsBlock"><div class="panelhead"><div><h2>Регистрация агентов</h2><p>На рассмотрении: ${pending.length}</p></div><div class="controls"><input id="searchReg" class="search" placeholder="Имя или почта" value="${esc(query)}"><select id="registrationFilter" class="filter"><option value="all">Все статусы</option>${options(Object.entries(REGISTRATION_STATUSES).map(([id,name])=>({id,name})),registrationFilter)}</select><select id="registrationClinicFilter" class="filter"><option value="all">Все клиники</option>${options(data.clinics,registrationClinicFilter)}</select></div></div><div id="regResults">${registrationTable()}</div></section>`}
-function scrollToRegistrations(){document.getElementById('registrationsBlock')?.scrollIntoView({behavior:'smooth',block:'start'})}
-function profile(){const x=visibleAgents().find(a=>a.id===profileId);if(!x)return heading('Агент не найден','','<button class="btn small" data-page="agents">Назад</button>');const clinicNames=(x.clinicIds||[]).map(id=>clinicById(id)?.name).filter(Boolean).join(', ')||'—';return `<button class="btn small back-link" data-page="agents">← Назад</button>`+heading(x.name,'',`<button class="btn" data-action="editAgent" data-id="${x.id}">Редактировать профиль</button>`)+`<section class="panel profile-summary"><div><span class="meta-label">Телефон</span><strong>${esc(x.phone||'—')}</strong></div><div><span class="meta-label">Почта</span><strong>${esc(x.email||'—')}</strong></div><div><span class="meta-label">Клиники</span><strong>${esc(clinicNames)}</strong></div><div><span class="meta-label">Ответственный администратор</span><strong>${esc(adminById(x.adminId)?.name||'Не назначен')}</strong></div><div><span class="meta-label">Доступ</span>${pill(x.active?'Активен':'Отключён',x.active?'approved':'rejected')}</div></section><div class="tabbar"><button class="${profileTab==='rates'?'selected':''}" data-tab="rates">Вознаграждение <span>${clinicSpecialties((x.clinicIds||[])[0],true).length}</span></button><button class="${profileTab==='history'?'selected':''}" data-tab="history">История агента <span>${agentRateHistoryEvents(x.id).length}</span></button></div><section class="panel">${profileContents(x)}</section>`}
-function profileContents(x){if(profileTab==='history')return `<div class="panelhead"><div><h2>История агента</h2><p>Автор, дата и основание каждого изменения</p></div><select class="filter" id="historyFilter"><option value="all">Все специализации</option>${options(agentHistorySpecialties(x.id),profileHistoryFilter)}</select></div><div id="rateResults">${rateHistory(x.id)}</div>`;
-return `<div class="panelhead"><div><h2>Вознаграждение агента</h2><p>Процент от стоимости услуги по её специализации</p></div><input class="search" id="profileSearch" placeholder="Найти специализацию" value="${esc(profileQuery)}"></div><div class="rate-note">Если выбрано «По клиникам» — процент берётся из клиники, куда направлен пациент. Если «Личная ставка» — применяется указанный процент ко всем клиникам агента.</div><div id="rateResults">${rateTable(x)}</div>`}
-function rateTable(x){const allSpecialties=new Map();for(const cid of x.clinicIds||[])for(const s of clinicSpecialties(cid,true))allSpecialties.set(s.id,s);const rows=[...allSpecialties.values()].filter(s=>(s.name+' '+(s.detail||'')).toLowerCase().includes(profileQuery.toLowerCase()));return table(['Специализация','Клиники','Применяется',''],rows.map(s=>{const mode=agentRateMode(x.id,s.id),custom=agentCustomRate(x.id,s.id);const ratesByClinic=(x.clinicIds||[]).map(cid=>{const cs=clinicSpecialty(cid,s.id);return {cid,clinic:clinicById(cid),rate:mode==='custom'?custom:(cs?.active?cs.defaultRate:null)}});const uniqueRates=[...new Set(ratesByClinic.map(r=>r.rate).filter(r=>r!==null))];const applies=mode==='custom'?`${percent(custom)} (личная)`:uniqueRates.length===1?`${percent(uniqueRates[0])} (по клиникам)`:'По клиникам';return `<tr><td class="specialty-cell"><strong>${esc(s.name)}</strong>${s.detail?`<small>${esc(s.detail)}</small>`:''}</td><td><button class="btn small" data-action="agentClinicsRates" data-id="${x.id}" data-specialty="${s.id}">Посмотреть</button></td><td><strong>${applies}</strong></td><td><button class="btn small" data-action="rateMode" data-id="${x.id}" data-specialty="${s.id}">Изменить</button></td></tr>`}))}
-function agentRateHistoryEvents(agentId){return data.rateHistory.filter(h=>h.agentId===agentId).slice().sort((a,b)=>b.date.localeCompare(a.date))}
-function agentHistorySpecialties(agentId){const map=new Map();for(const h of agentRateHistoryEvents(agentId))if(!map.has(h.specialty))map.set(h.specialty,{id:h.specialty,name:h.specialtyName||specialtyName(h.specialty)});return [...map.values()]}
-function rateHistory(agentId){const history=agentRateHistoryEvents(agentId).filter(h=>profileHistoryFilter==='all'||h.specialty===profileHistoryFilter);if(!history.length)return '<div class="empty">Изменений пока нет.</div>';const labels={set_custom:'Установлена личная ставка',set_clinic:'Возврат к ставке клиники',approval:'Согласование',inherit:'Возврат к ставке клиники',profile_update:'Профиль'};return table(['Дата / автор','Специализация','Изменение','Прежний процент','Новый процент','Комментарий'],history.map(h=>`<tr><td><strong>${dateTime(h.date)}</strong><small>${esc(h.actor)}</small></td><td class="wrap">${esc(h.specialtyName||'')}</td><td class="wrap">${pill(labels[h.action]||h.action,h.action==='set_custom'?'approved':'')}</td><td>${percent(h.old)}</td><td>${percent(h.new)}</td><td class="wrap">${esc(h.comment||'—')}</td></tr>`))}
-function render(){nav();$('#content').innerHTML=({overview,requests,reports,agents,admins,clinics})[page]()}
-function refreshTable(){if($('#tableResults'))$('#tableResults').innerHTML=({requests:requestTable,agents:agentTable,admins:adminTable,clinics:clinicTable})[page]()}
-function open(title,body){lastFocus=document.activeElement;$('#drawerTitle').textContent=title;$('#drawerBody').innerHTML=body;$('#backdrop').classList.add('open');document.body.style.overflow='hidden';setTimeout(()=>$('#close').focus(),50)}
-function close(){if(!$('#backdrop').classList.contains('open'))return;$('#backdrop').classList.remove('open');document.body.style.overflow='';lastFocus?.focus()}
-function toast(msg){const t=$('#toast');t.textContent=msg+(storageProblem?' Изменения доступны до закрытия страницы.':'');t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),4500)}
-const formActions=label=>`<div class="actions"><button class="btn primary" type="submit">${label}</button><button class="btn" type="button" data-action="close">Отмена</button></div>`;
-function requestForm(id){const x=visibleRequests().find(y=>y.id===id);if(!x)return;const history=data.requestHistory.filter(h=>h.requestId===id);const payoutHistory=data.payoutHistory.filter(h=>h.requestId===id);open('Заявка № '+id,`<p class="muted">${esc(x.date)} · ${esc(agentById(x.doctorId)?.name||'')}</p><dl class="details"><div><dt>Пациент</dt><dd>${esc(x.patient)}</dd></div><div><dt>Услуга</dt><dd>${esc(x.service)}</dd></div><div><dt>Стоимость</dt><dd>${money(x.amount)}</dd></div><div><dt>Вознаграждение</dt><dd>${requestReward(x)===null?'Не рассчитано':money(requestReward(x))+' · '+percent(requestRate(x))}</dd></div></dl><form id="requestForm" data-id="${id}"><div class="field"><label>Статус заявки</label><select name="status">${options(Object.entries(REQUEST_STATUSES).map(([id,name])=>({id,name})),x.status)}</select></div><div class="field"><label>Статус выплаты</label><select name="payoutStatus">${options(Object.entries(PAYOUT_STATUSES).map(([id,name])=>({id,name})),x.payoutStatus)}</select></div>${formActions('Сохранить')}</form>${history.length?`<h3>История статусов</h3>${history.map(h=>`<div class="history-item"><strong>${esc(REQUEST_STATUSES[h.old]||'Новая')} → ${esc(REQUEST_STATUSES[h.new]||'Новая')}</strong><small>${dateTime(h.date)} · ${esc(h.actor)}</small></div>`).join('')}`:''}${payoutHistory.length?`<h3>История выплат</h3>${payoutHistory.map(h=>`<div class="history-item"><strong>${esc(PAYOUT_STATUSES[h.old]||'—')} → ${esc(PAYOUT_STATUSES[h.new]||'—')}</strong><small>${dateTime(h.date)} · ${esc(h.actor)}</small></div>`).join('')}`:''}`)}
-function rateModeForm(agentId,specialty){
-  const a=agentById(agentId);if(!a)throw Error('Агент не найден.');
-  const mode=agentRateMode(agentId,specialty),custom=agentCustomRate(agentId,specialty);
-  const spName=specialtyName(specialty);
-  const clinicsList=(a.clinicIds||[]).map(cid=>{const cs=clinicSpecialty(cid,specialty);return `<div><dt>${esc(clinicById(cid)?.name||'')}</dt><dd>${cs?.active?percent(cs.defaultRate):'Не задана'}</dd></div>`}).join('');
-  const customActive=mode==='custom';
-  open('Вознаграждение: '+spName,
-    `<dl class="details">${clinicsList||'<div><dt>Клиники</dt><dd>Не выбраны</dd></div>'}</dl>
-     <form id="rateModeForm" data-id="${agentId}" data-specialty="${specialty}">
-       <input type="hidden" name="mode" value="${mode}">
-       <button type="button" class="rate-choice ${mode==='clinic'?'active':''}" data-mode-choice="clinic" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${mode==='clinic'?'#146a70':'#d8e5e5'};border-radius:12px;background:${mode==='clinic'?'#eff7f6':'white'};text-align:left;cursor:pointer;font:inherit">
-         <strong style="display:block;color:#146a70;font-size:15px">По клиникам</strong>
-         <small style="display:block;color:#71888c;margin-top:4px">Процент берётся из клиники, куда направлен пациент</small>
-       </button>
-       <div class="rate-choice ${customActive?'active':''}" data-mode-choice="custom" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${customActive?'#146a70':'#d8e5e5'};border-radius:12px;background:${customActive?'#eff7f6':'white'};cursor:pointer;font:inherit">
-         <strong style="display:block;color:#146a70;font-size:15px">Личная ставка (для всех клиник)</strong>
-         <small style="display:block;color:#71888c;margin-top:4px">Один процент на все клиники агента</small>
-         <div class="field" id="customRateField" style="margin:12px 0 0">
-           <label>Процент</label>
-           <input type="number" name="customRate" min="0" max="100" step="0.01" value="${custom??''}" ${customActive?'':'disabled'} onclick="event.stopPropagation()" style="cursor:${customActive?'text':'not-allowed'}">
-         </div>
-       </div>
-       <div class="actions">
-         <button class="btn primary" type="submit">Сохранить</button>
-         <button class="btn" type="button" data-action="close">Отмена</button>
-       </div>
-     </form>`
-  );
+
+function overview(){
+  const pend=S.agents.filter(a=>a.status==='pending'),act=S.agents.filter(a=>a.status==='active');
+  return heading('Обзор','Сводная информация по порталу')
+    +`<div class="grid">${[{l:'Заявки',v:pend.length,d:'Новые агенты',p:'pending'},{l:'Администраторы',v:S.admins.length,d:'Всего',p:'admins'},{l:'Агенты',v:act.length,d:'Активные',p:'agents'},{l:'Клиники',v:S.clinics.length,d:'Всего',p:'clinics'}].map(i=>`<button class="stat stat-action" data-page="${i.p}"><span class="stat-lbl">${i.l}</span><strong>${i.v}</strong><em>${i.d}</em></button>`).join('')}</div>`
+    +`<div class="split"><section class="panel"><div class="panelhead"><div><h2>Новые заявки</h2><p>Ожидают рассмотрения</p></div><button class="btn small" data-page="pending">Все</button></div>${pend.length?pend.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" data-action="viewAgent" data-id="${a.id}">Открыть</button></div>`).join(''):'<div class="empty">Заявок нет</div>'}</section><section class="panel"><div class="panelhead"><div><h2>Администраторы</h2></div><button class="btn small" data-page="admins">Все</button></div>${S.admins.length?S.admins.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" data-action="viewAdmin" data-id="${a.id}">Профиль</button></div>`).join(''):'<div class="empty">Администраторов нет</div>'}</section></div>`;
 }
-function showAgentClinicsRates(agentId,specialty){
-  const a=agentById(agentId);if(!a)return;
-  const mode=agentRateMode(agentId,specialty),custom=agentCustomRate(agentId,specialty);
-  const spName=specialtyName(specialty);
-  const rows=(a.clinicIds||[]).map(cid=>{
-    const cs=clinicSpecialty(cid,specialty);
-    const rate=cs?.active?cs.defaultRate:null;
-    return `<tr><td><strong>${esc(clinicById(cid)?.name||'')}</strong></td><td>${rate===null?'—':percent(rate)}</td><td>${cs?.active?pill('Действует','approved'):pill('Отключена','rejected')}</td></tr>`;
-  }).join('');
-  const customRow=mode==='custom'?`<tr style="background:#eff7f6"><td><strong>Личная ставка</strong> <small style="color:#146a70">(выбрано)</small></td><td><strong>${percent(custom)}</strong></td><td>${pill('Применяется','approved')}</td></tr>`:'';
-  open('Проценты по клиникам',
-    `<p class="muted">${esc(a.name)} · ${esc(spName)}</p>
-     ${table(['Клиника','Процент','Статус'],[rows,customRow].filter(Boolean).join('')?[rows+customRow]:['<tr><td colspan="3" class="empty">Нет клиник</td></tr>'])}
-     <div class="actions"><button class="btn" type="button" data-action="close">Закрыть</button></div>`
-  );
-}function agentForm(id){const x=agentById(id),isNew=!x;open(isNew?'Новый агент':'Редактировать агента',`<form id="agentForm" data-id="${id||''}"><div class="field"><label>ФИО</label><input name="name" required value="${esc(x?.name||'')}"></div><div class="field"><label>Электронная почта</label><input type="email" name="email" value="${esc(x?.email||'')}"></div><div class="field"><label>Телефон</label><input type="tel" name="phone" value="${esc(x?.phone||'')}"></div><div class="field"><label>Специальность</label><input name="specialty" required value="${esc(x?.specialty||'Агент')}"></div><div class="field"><label>Клиники</label><div class="multi-select" data-name="clinicIds" id="agentClinicsSelect">${(x?.clinicIds||[]).map(cid=>`<span class="multi-select-tag" data-id="${cid}">${esc(clinicById(cid)?.name||'')}<span class="x" data-remove-clinic="${cid}">×</span></span>`).join('')}${(x?.clinicIds||[]).length?'':'<span class="muted" style="font-size:13px;padding:4px 0;">Выберите клиники...</span>'}<div class="multi-select-dropdown" id="agentClinicsDropdown">${data.clinics.map(c=>`<div class="multi-select-option ${(x?.clinicIds||[]).includes(c.id)?'selected':''}" data-add-clinic="${c.id}">${esc(c.name)}</div>`).join('')}</div></div></div><div class="field"><label>Ответственный администратор</label><select id="agentAdminSelect" name="adminId"></select></div><div class="field"><label>Доступ</label><select name="active">${options([{id:'true',name:'Активен'},{id:'false',name:'Отключён'}],String(x?.active!==false))}</select></div>${formActions(isNew?'Создать агента':'Сохранить')}</form>`);setTimeout(()=>{setupMultiSelect('agentClinicsSelect','agentClinicsDropdown');setAgentAdminOptions(x?.adminId)},0)}
-function setAgentAdminOptions(selected){const wrap=document.getElementById('agentClinicsSelect');if(!wrap)return;const clinicIds=wrap.clinicSelected?wrap.clinicSelected():[];const el=document.getElementById('agentAdminSelect');if(!el)return;el.innerHTML='<option value="">Не назначен</option>'+options(data.admins.filter(x=>x.active&&x.clinicIds.some(c=>clinicIds.includes(c))),selected)}
-function setupMultiSelect(wrapId,dropdownId){const wrap=document.getElementById(wrapId);if(!wrap)return;const dropdown=document.getElementById(dropdownId);const selected=new Set();wrap.querySelectorAll('.multi-select-tag').forEach(t=>{if(t.dataset.id)selected.add(Number(t.dataset.id))});wrap.addEventListener('click',e=>{if(e.target.closest('.multi-select-tag')){if(e.target.dataset.removeClinic){selected.delete(Number(e.target.dataset.removeClinic));e.stopPropagation();renderTags()}}else{dropdown.classList.toggle('show')}});wrap.addEventListener('mouseenter',()=>dropdown.classList.add('show'));wrap.addEventListener('mouseleave',()=>dropdown.classList.remove('show'));dropdown.querySelectorAll('.multi-select-option').forEach(opt=>{opt.addEventListener('click',e=>{e.stopPropagation();const cid=Number(opt.dataset.addClinic);if(selected.has(cid))selected.delete(cid);else selected.add(cid);renderTags();dropdown.classList.add('show');if(wrapId==='agentClinicsSelect')setAgentAdminOptions()})});function renderTags(){wrap.querySelectorAll('.multi-select-tag').forEach(t=>t.remove());wrap.querySelector('span.muted')?.remove();const arr=[...selected];wrap.insertAdjacentHTML('afterbegin',arr.map(cid=>`<span class="multi-select-tag" data-id="${cid}">${esc(clinicById(cid)?.name||'')}<span class="x" data-remove-clinic="${cid}">×</span></span>`).join(''));if(!arr.length)wrap.insertAdjacentHTML('afterbegin','<span class="muted" style="font-size:13px;padding:4px 0;">Выберите клиники...</span>');dropdown.querySelectorAll('.multi-select-option').forEach(o=>{o.classList.toggle('selected',selected.has(Number(o.dataset.addClinic)))})}wrap.clinicSelected=()=>[...selected]}
-function succeed(message){close();render();toast(message)}
-function onClick(e){
-  const p=e.target.closest('[data-page]');if(p){navigate(p.dataset.page,{agent:p.dataset.agent,clinic:p.dataset.clinic,admin:p.dataset.admin});return}
-  const report=e.target.closest('[data-report-preview]');if(report){reportPreview=report.dataset.reportPreview;refreshReports();return}
-  const clinicTab=e.target.closest('[data-clinic-tab]');if(clinicTab){clinicSettingsTab=clinicTab.dataset.clinicTab;render();return}
-  const t=e.target.closest('[data-tab]');if(t){profileTab=t.dataset.tab;render();return}
-  const a=e.target.closest('[data-action]');if(!a)return;const id=Number(a.dataset.id);
-  try{switch(a.dataset.action){
-    case'request':requestForm(id);break;
-    case'adminProfile':case'adminProfileFromOverview':navigate('admins',{admin:id});break;
-    case'editAdmin':adminForm(id);break;
-    case'deleteAdmin':if(!confirm('Удалить профиль администратора?'))return;deleteAdminAccount(id);succeed('Профиль удалён');break;
-    case'rateMode':rateModeForm(id,a.dataset.specialty);break;
-    case'agentClinicsRates':showAgentClinicsRates(id,a.dataset.specialty);break;
-    case'newAgent':agentForm();break;
-    case'editAgent':agentForm(id);break;
-    case'newAdmin':adminForm();break;
-    case'registration':registrationForm(id);break;
-    case'newClinic':clinicForm();break;
-    case'clinic':clinicForm(id);break;
-    case'newClinicSpecialty':clinicSpecialtyForm(id);break;
-    case'editClinicSpecialty':clinicSpecialtyForm(id,a.dataset.specialty);break;
-    case'close':close();break;
-    case'exportPayroll':exportPayroll();break;
-    case'exportAnalyst':exportAnalyst();break;
-    case'reportPreset':setReportPreset(a.dataset.preset);break;
-  }}
-  catch(error){toast(error.message)}
+
+function requests(){
+  const list=S.agents.filter(a=>a.status==='pending').filter(a=>!query||[a.full_name,a.email].join(' ').toLowerCase().includes(query.toLowerCase()));
+  return heading('Заявки','Ожидают одобрения')+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Имя или email" value="${esc(query)}"></div>${table(['Кандидат','Email','Телефон','Дата',''],list.map(a=>`<tr><td><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td><td>${esc(a.email)}</td><td>${esc(a.phone||'—')}</td><td>${dt(a.created_at)}</td><td><button class="btn small" data-action="viewAgent" data-id="${a.id}">Рассмотреть</button></td></tr>`))}</section>`;
 }
-function onRateChoice(e){
-  if(e.target.closest('#customRateField'))return;
-  const b=e.target.closest('[data-mode-choice]');if(!b)return;
-  const form=b.closest('form');if(!form)return;
-  const mode=b.dataset.modeChoice;
-  form.querySelector('input[name="mode"]').value=mode;
-  form.querySelectorAll('.rate-choice').forEach(el=>{
-    const active=el.dataset.modeChoice===mode;
-    el.classList.toggle('active',active);
-    el.style.borderColor=active?'#146a70':'#d8e5e5';
-    el.style.background=active?'#eff7f6':'white';
-  });
-  const input=form.querySelector('#customRateField input[name="customRate"]');
-  if(input){
-    const custom=mode==='custom';
-    input.disabled=!custom;
-    input.style.cursor=custom?'text':'not-allowed';
+
+function agents(){
+  if(agentId)return agentProfile();
+  const list=S.agents.filter(a=>agentFilter==='all'||a.status===agentFilter).filter(a=>!query||[a.full_name,a.email,a.phone||''].join(' ').toLowerCase().includes(query.toLowerCase()));
+  return heading('Агенты','Управление агентами')+`<section class="panel"><div class="panelhead"><div class="controls"><input class="search" id="search" placeholder="Имя, email" value="${esc(query)}"><select class="filter" id="agentStatusFilter">${['all','pending','active','inactive','rejected'].map(s=>`<option value="${s}" ${s===agentFilter?'selected':''}>${s==='all'?'Все статусы':SL[s]}</option>`).join('')}</select></div></div>${table(['Агент','Email','Статус','Клиники','Админ',''],list.map(a=>`<tr><td><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td><td>${esc(a.email)}</td><td>${pill(SL[a.status]||a.status,SP[a.status]||'')}</td><td>${(a.clinic_ids||[]).map(cName).filter(Boolean).join(', ')||'—'}</td><td>${esc(aName(a.admin_id))}</td><td><button class="btn small" data-action="viewAgent" data-id="${a.id}">Профиль</button></td></tr>`))}</section>`;
+}
+
+function agentProfile(){
+  const a=S.agents.find(x=>x.id===Number(agentId));
+  if(!a)return heading('Не найден','','<button class="btn small" data-page="agents">← Назад</button>');
+  return `<button class="btn small back-link" data-page="agents">← Назад</button>`+heading(a.full_name,`#${a.id} · ${a.email}`,
+    `<div style="display:flex;gap:10px;flex-wrap:wrap">${a.status==='pending'?`<button class="btn primary" data-action="approve" data-id="${a.id}">Одобрить</button><button class="btn danger-access" data-action="reject" data-id="${a.id}">Отклонить</button>`:''}<button class="btn" data-action="editAgent" data-id="${a.id}">Редактировать</button><button class="btn danger-access" data-action="delAgent" data-id="${a.id}">Удалить</button></div>`)
+    +`<section class="panel profile-summary"><div><span class="meta-label">Статус</span>${pill(SL[a.status]||a.status,SP[a.status]||'')}</div><div><span class="meta-label">Телефон</span><strong>${esc(a.phone||'—')}</strong></div><div><span class="meta-label">Опыт</span><strong>${esc(a.experience||'—')}</strong></div><div><span class="meta-label">Админ</span><strong>${esc(aName(a.admin_id))}</strong></div><div style="grid-column:1/-1"><span class="meta-label">О себе</span><strong>${esc(a.about_myself||'—')}</strong></div></section>`
+    +`<section class="panel"><div class="panelhead"><h2>Клиники</h2></div><div style="padding:18px 22px">${(a.clinic_ids||[]).length?(a.clinic_ids||[]).map(id=>`<span class="multi-select-tag" style="margin:0 6px 6px 0">${esc(cName(id))}</span>`).join(''):'<span class="muted">Не привязан</span>'}</div></section>`
+    +`<section class="panel"><div class="panelhead"><h2>Специализации</h2></div><div style="padding:18px 22px">${(a.specialization_ids||[]).length?(a.specialization_ids||[]).map(id=>`<span class="multi-select-tag" style="margin:0 6px 6px 0">${esc(sName(id))}</span>`).join(''):'<span class="muted">Нет</span>'}</div></section>`;
+}
+
+function admins(){
+  if(adminId)return adminProfile();
+  const list=S.admins.filter(a=>!query||[a.full_name,a.email].join(' ').toLowerCase().includes(query.toLowerCase()));
+  return heading('Администраторы','',`<button class="btn primary" data-action="newAdmin">Добавить</button>`)+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Имя или email" value="${esc(query)}"></div>${table(['ФИО','Email','Клиники','Доступ',''],list.map(a=>`<tr><td><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td><td>${esc(a.email)}</td><td>${(a.clinic_ids||[]).map(cName).filter(Boolean).join(', ')||'—'}</td><td>${a.active?pill('Активен','approved'):pill('Отключён','rejected')}</td><td><button class="btn small" data-action="viewAdmin" data-id="${a.id}">Профиль</button></td></tr>`))}</section>`;
+}
+
+function adminProfile(){
+  const a=S.admins.find(x=>x.id===Number(adminId));
+  if(!a)return heading('Не найден','','<button class="btn small" data-page="admins">← Назад</button>');
+  const linked=S.agents.filter(x=>x.admin_id===a.id);
+  return `<button class="btn small back-link" data-page="admins">← Назад</button>`+heading(a.full_name,`#${a.id} · ${a.email}`,`<div style="display:flex;gap:10px"><button class="btn" data-action="editAdmin" data-id="${a.id}">Редактировать</button><button class="btn danger-access" data-action="delAdmin" data-id="${a.id}">Удалить</button></div>`)
+    +`<section class="panel profile-summary"><div><span class="meta-label">Телефон</span><strong>${esc(a.phone||'—')}</strong></div><div><span class="meta-label">Доступ</span>${a.active?pill('Активен','approved'):pill('Отключён','rejected')}</div><div><span class="meta-label">Регистрации</span>${a.permissions?.reviewRegistrations?pill('Разрешено','approved'):pill('Выключено','')}</div></section>`
+    +`<section class="panel"><div class="panelhead"><h2>Клиники</h2></div><div style="padding:18px 22px">${(a.clinic_ids||[]).length?(a.clinic_ids||[]).map(id=>`<span class="multi-select-tag" style="margin:0 6px 6px 0">${esc(cName(id))}</span>`).join(''):'<span class="muted">Нет клиник</span>'}</div></section>`
+    +`<section class="panel"><div class="panelhead"><h2>Агенты (${linked.length})</h2></div>${table(['Агент','Статус',''],linked.map(x=>`<tr><td><strong>${esc(x.full_name)}</strong><small>${esc(x.email)}</small></td><td>${pill(SL[x.status]||x.status,SP[x.status]||'')}</td><td><button class="btn small" data-action="viewAgent" data-id="${x.id}">Профиль</button></td></tr>`))}</section>`;
+}
+
+function clinics(){
+  if(clinicId)return clinicSettings();
+  const list=S.clinics.filter(c=>!query||[c.name,c.city,c.address||''].join(' ').toLowerCase().includes(query.toLowerCase()));
+  return heading('Клиники','',`<button class="btn primary" data-action="newClinic">Добавить</button>`)+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Название или город" value="${esc(query)}"></div>${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],list.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
+}
+
+function clinicSettings(){
+  const c=S.clinics.find(x=>x.id===Number(clinicId));
+  if(!c)return heading('Не найдена','','<button class="btn small" data-page="clinics">← Назад</button>');
+  return `<button class="btn small back-link" data-page="clinics">← Назад</button>`
+    +heading(c.name,`${c.city}${c.address?', '+c.address:''}`,`<button class="btn" data-action="editClinic" data-id="${c.id}">Редактировать</button>`)
+    +`<div id="clinicSpecsBlock"></div>`;
+}   
+
+async function clinicSpecsHtml(cid){
+  let list=[];
+  try{list=await api(`/clinics/${cid}/specialties`);}catch(e){return `<section class="panel"><div class="empty">Ошибка: ${esc(e.message)}</div></section>`;}
+  return `<section class="panel"><div class="panelhead"><div><h2>Специализации</h2><p>Ставки и активность</p></div></div>
+    ${table(['Специализация','Ставка','Статус',''],list.map(s=>`<tr><td class="specialty-cell"><strong>${esc(s.specialization_name)}</strong><small>#${s.specialization_id}</small></td><td>${s.default_rate===null||s.default_rate===undefined?'<span class="unset">Не задана</span>':s.default_rate+'%'}</td><td>${s.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td><button class="btn small" data-action="editSpec" data-clinic="${cid}" data-spec="${s.specialization_id}" data-rate="${s.default_rate??''}" data-active="${s.active}">Изменить</button></td></tr>`))}
+  </section>`;
+}
+
+function reports(){
+  const by={};['pending','active','inactive','rejected'].forEach(s=>by[s]=S.agents.filter(a=>a.status===s).length);
+  const byClinic=S.clinics.map(c=>({name:c.name,agents:S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length,admins:S.admins.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}));
+  const bySpec={};S.agents.forEach(a=>(a.specialization_ids||[]).forEach(id=>{bySpec[id]=(bySpec[id]||0)+1;}));
+  const specRows=Object.entries(bySpec).map(([id,cnt])=>({name:sName(id),count:cnt})).sort((a,b)=>b.count-a.count);
+  return heading('Отчёты','Аналитика')
+    +`<div class="grid">${Object.entries(by).map(([s,cnt])=>`<div class="stat"><span class="stat-lbl">${SL[s]||s}</span><strong>${cnt}</strong><em>агентов</em></div>`).join('')}</div>`
+    +`<div class="report-cards"><section class="panel" style="padding:24px"><span class="report-tag">01 · КЛИНИКИ</span><h2 style="font-size:21px;margin:0 0 15px">Агенты по клиникам</h2>${table(['Клиника','Агентов','Админов'],byClinic.map(c=>`<tr><td>${esc(c.name)}</td><td><strong>${c.agents}</strong></td><td>${c.admins}</td></tr>`))}</section><section class="panel" style="padding:24px"><span class="report-tag">02 · СПЕЦИАЛИЗАЦИИ</span><h2 style="font-size:21px;margin:0 0 15px">Агенты по специализациям</h2>${table(['Специализация','Агентов'],specRows.map(s=>`<tr><td>${esc(s.name)}</td><td><strong>${s.count}</strong></td></tr>`))}</section></div>`;
+}
+
+// ===== Формы =====
+let selClinicIds=[],selSpecIds=[],selAdminClinicIds=[];
+
+function multiSelectHtml(wrapId,dropId,items,initial){
+  return `<div class="multi-select" id="${wrapId}"><span class="muted" style="font-size:13px">Выберите...</span><div class="multi-select-dropdown" id="${dropId}"></div></div>`;
+}
+function setupMultiSelect(wrapId,dropId,items,initial,onChange){
+  const wrap=document.getElementById(wrapId),drop=document.getElementById(dropId);
+  if(!wrap||!drop)return;
+  const sel=new Set(initial||[]);
+  function render(){
+    wrap.querySelectorAll('.multi-select-tag').forEach(t=>t.remove());
+    const m=wrap.querySelector('span.muted');if(m)m.remove();
+    if(!sel.size)wrap.insertAdjacentHTML('afterbegin','<span class="muted" style="font-size:13px">Выберите...</span>');
+    [...sel].forEach(id=>{const it=items.find(x=>Number(x.id)===Number(id));wrap.insertAdjacentHTML('afterbegin',`<span class="multi-select-tag" data-id="${id}">${esc(it?.name||('#'+id))}<span class="x" data-remove="${id}">×</span></span>`);});
+    drop.innerHTML=items.map(it=>`<div class="multi-select-option ${sel.has(Number(it.id))?'selected':''}" data-add="${it.id}">${esc(it.name)}</div>`).join('');
   }
+  render();
+  wrap.addEventListener('click',e=>{const rm=e.target.closest('[data-remove]');if(rm){sel.delete(Number(rm.dataset.remove));render();onChange([...sel]);e.stopPropagation();return;}if(!e.target.closest('.multi-select-option'))drop.classList.toggle('show');});
+  drop.addEventListener('click',e=>{const o=e.target.closest('[data-add]');if(!o)return;const id=Number(o.dataset.add);if(sel.has(id))sel.delete(id);else sel.add(id);render();onChange([...sel]);drop.classList.add('show');e.stopPropagation();});
+  document.addEventListener('click',e=>{if(!wrap.contains(e.target))drop.classList.remove('show');});
 }
-function onChange(e){const el=e.target;
+
+function openApprove(id){
+  const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
+  selClinicIds=[];selSpecIds=[...(a.specialization_ids||[])];
+  openDrawer('Одобрить: '+a.full_name,
+    `<p class="muted">${esc(a.email)}</p><form id="approveForm" data-id="${a.id}">
+      <div class="field"><label>Клиники *</label>${multiSelectHtml('mcClinic','mdClinic',S.clinics,[])}</div>
+      <div class="field"><label>Специализации</label>${multiSelectHtml('mcSpec','mdSpec',S.specs,selSpecIds)}</div>
+      <div class="field"><label>Администратор</label><select name="admin_id"><option value="">Не назначен</option>${S.admins.filter(x=>x.active).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('')}</select></div>
+      <div class="actions"><button class="btn primary" type="submit">Одобрить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+  setTimeout(()=>{
+    setupMultiSelect('mcClinic','mdClinic',S.clinics.map(c=>({id:c.id,name:c.name})),selClinicIds,v=>{selClinicIds=v;});
+    setupMultiSelect('mcSpec','mdSpec',S.specs.map(s=>({id:s.id,name:s.name})),selSpecIds,v=>{selSpecIds=v;});
+  },0);
+}
+
+function openReject(id){
+  const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
+  openDrawer('Отклонить: '+a.full_name,
+    `<p class="muted">${esc(a.email)}</p><form id="rejectForm" data-id="${a.id}">
+      <div class="field"><label>Причина *</label><textarea name="decision_reason" rows="4" required></textarea></div>
+      <div class="actions"><button class="btn danger-access" type="submit">Отклонить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+}
+
+function openEditAgent(id){
+  const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
+  selClinicIds=[...(a.clinic_ids||[])];selSpecIds=[...(a.specialization_ids||[])];
+  openDrawer('Редактировать: '+a.full_name,
+    `<form id="editAgentForm" data-id="${a.id}">
+      <div class="field"><label>ФИО</label><input name="full_name" required value="${esc(a.full_name)}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" value="${esc(a.phone||'')}"></div>
+      <div class="field"><label>Статус</label><select name="status">${['pending','active','inactive','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${SL[s]}</option>`).join('')}</select></div>
+      <div class="field"><label>Клиники</label>${multiSelectHtml('mcClinic','mdClinic',S.clinics,selClinicIds)}</div>
+      <div class="field"><label>Специализации</label>${multiSelectHtml('mcSpec','mdSpec',S.specs,selSpecIds)}</div>
+      <div class="field"><label>Администратор</label><select name="admin_id"><option value="">Не назначен</option>${S.admins.filter(x=>x.active).map(x=>`<option value="${x.id}" ${a.admin_id===x.id?'selected':''}>${esc(x.full_name)}</option>`).join('')}</select></div>
+      <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+  setTimeout(()=>{
+    setupMultiSelect('mcClinic','mdClinic',S.clinics.map(c=>({id:c.id,name:c.name})),selClinicIds,v=>{selClinicIds=v;});
+    setupMultiSelect('mcSpec','mdSpec',S.specs.map(s=>({id:s.id,name:s.name})),selSpecIds,v=>{selSpecIds=v;});
+  },0);
+}
+
+function openAdminForm(id){
+  const a=id?S.admins.find(x=>x.id===Number(id)):null;
+  selAdminClinicIds=[...(a?.clinic_ids||[])];
+  openDrawer(id?'Редактировать администратора':'Новый администратор',
+    `<form id="adminForm" data-id="${id||''}">
+      <div class="field"><label>ФИО</label><input name="full_name" required value="${esc(a?.full_name||'')}"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" ${id?'disabled':''} value="${esc(a?.email||'')}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" value="${esc(a?.phone||'')}"></div>
+      ${id?'':`<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" required></div>`}
+      <div class="field"><label>Клиники</label>${multiSelectHtml('mcAdminClinic','mdAdminClinic',S.clinics,selAdminClinicIds)}</div>
+      <div class="field"><label>Доступ</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(a?.active!==false)===v?'selected':''}>${v==='true'?'Активен':'Отключён'}</option>`).join('')}</select></div>
+      <div class="field"><label><input type="checkbox" name="reviewRegistrations" ${a?.permissions?.reviewRegistrations?'checked':''} style="width:auto;margin-right:8px">Рассмотрение регистраций</label></div>
+      <div class="actions"><button class="btn primary" type="submit">${id?'Сохранить':'Создать'}</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+  setTimeout(()=>setupMultiSelect('mcAdminClinic','mdAdminClinic',S.clinics.map(c=>({id:c.id,name:c.name})),selAdminClinicIds,v=>{selAdminClinicIds=v;}),0);
+}
+
+function openClinicForm(id){
+  const c=id?S.clinics.find(x=>x.id===Number(id)):null;
+  openDrawer(id?'Редактировать клинику':'Новая клиника',
+    `<form id="clinicForm" data-id="${id||''}">
+      <div class="field"><label>Название</label><input name="name" required value="${esc(c?.name||'')}"></div>
+      <div class="field"><label>Город</label><input name="city" required value="${esc(c?.city||'')}"></div>
+      <div class="field"><label>Адрес</label><input name="address" value="${esc(c?.address||'')}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" value="${esc(c?.phone||'')}"></div>
+      <div class="field"><label>Статус</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(c?.active!==false)===v?'selected':''}>${v==='true'?'Активна':'Отключена'}</option>`).join('')}</select></div>
+      <div class="actions"><button class="btn primary" type="submit">${id?'Сохранить':'Создать'}</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+}
+
+function openEditSpec(clinic,sid,rate,active){
+  openDrawer('Ставка специализации',
+    `<form id="specForm" data-clinic="${clinic}" data-spec="${sid}">
+      <div class="field"><label>Ставка (%)</label><input name="default_rate" type="number" min="0" max="100" step="0.01" value="${rate}"></div>
+      <div class="field"><label>Статус</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(active)===v?'selected':''}>${v==='true'?'Активна':'Отключена'}</option>`).join('')}</select></div>
+      <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+    </form>`);
+}
+
+// ===== Обработчики =====
+document.addEventListener('click',async e=>{
+  const pg=e.target.closest('[data-page]');if(pg){navigate(pg.dataset.page);return;}
+  const a=e.target.closest('[data-action]');if(!a)return;
+  const id=Number(a.dataset.id);
   try{
-    if(el.id==='clinicSpecialtyStatus'){clinicSpecialtyStatus=el.value;$('#clinicSpecialtyResults').innerHTML=clinicSpecialtyTable(clinicSettingsId);return}
-    if(el.id==='registrationFilter'){registrationFilter=el.value;if($('#regResults'))$('#regResults').innerHTML=registrationTable();return}
-    if(el.id==='registrationClinicFilter'){registrationClinicFilter=el.value;if($('#regResults'))$('#regResults').innerHTML=registrationTable();return}
-    if(el.id==='adminStatusFilter'){adminStatusFilter=el.value;refreshTable();return}
-    if(el.id==='adminClinicFilter'){adminClinicFilter=el.value;refreshTable();return}
-    if(el.dataset.reportField){reportFilters[el.dataset.reportField]=el.value;refreshReports();return}
-    if(el.id==='filter'){filter=el.value;refreshTable();return}
-    if(el.id==='payoutFilter'){payoutFilter=el.value;refreshTable();return}
-    if(el.id==='specialtyFilter'){specialtyFilter=el.value;refreshTable();return}
-    if(el.id==='historyFilter'){profileHistoryFilter=el.value;$('#rateResults').innerHTML=rateHistory(profileId);return}
-    if(el.id==='clinicSpecialtySource'){const selected=SPECIALTIES.find(s=>s[0]===el.value);const nameEl=document.querySelector('[name="name"]');const detailEl=document.querySelector('[name="detail"]');if(nameEl)nameEl.value=selected?.[1]||'';if(detailEl)detailEl.value=selected?.[2]||'';return}
-  }catch(error){toast(error.message);render()}
-}
-function onInput(e){if(e.target.id==='clinicSpecialtySearch'){clinicSpecialtyQuery=e.target.value;$('#clinicSpecialtyResults').innerHTML=clinicSpecialtyTable(clinicSettingsId)}if(e.target.id==='search'){query=e.target.value;refreshTable()}if(e.target.id==='searchReg'){query=e.target.value;if($('#regResults'))$('#regResults').innerHTML=registrationTable()}if(e.target.id==='profileSearch'){profileQuery=e.target.value;$('#rateResults').innerHTML=rateTable(agentById(profileId))}}
-function onSubmit(e){
-  e.preventDefault();const f=e.target,v=Object.fromEntries(new FormData(f)),id=Number(f.dataset.id);
+    switch(a.dataset.action){
+      case 'viewAgent':agentId=id;page='agents';render();scrollTo(0,0);break;
+      case 'viewAdmin':adminId=id;page='admins';render();scrollTo(0,0);break;
+      case 'clinicSettings':clinicId=id;page='clinics';render();scrollTo(0,0);
+        document.getElementById('clinicSpecsBlock').innerHTML=await clinicSpecsHtml(id);break;
+      case 'approve':openApprove(id);break;
+      case 'reject':openReject(id);break;
+      case 'editAgent':openEditAgent(id);break;
+      case 'delAgent':
+        if(!confirm('Удалить агента?'))return;
+        await api(`/agents/${id}`,{method:'DELETE'});toast('Удалён');await loadAll();navigate('agents');break;
+      case 'editAdmin':openAdminForm(id);break;
+      case 'newAdmin':openAdminForm();break;
+      case 'delAdmin':
+        if(!confirm('Удалить администратора?'))return;
+        await api(`/admins/${id}`,{method:'DELETE'});toast('Удалён');await loadAll();navigate('admins');break;
+      case 'newClinic':openClinicForm();break;
+      case 'editClinic':openClinicForm(id);break;
+      case 'editSpec':openEditSpec(a.dataset.clinic,a.dataset.spec,a.dataset.rate,a.dataset.active);break;
+    }
+  }catch(err){toast('Ошибка: '+err.message);}
+});
+
+document.addEventListener('change',e=>{
+  if(e.target.id==='agentStatusFilter'){agentFilter=e.target.value;render();}
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='search'){query=e.target.value;render();}
+});
+
+document.addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target,fd=new FormData(f);
   try{
-    if(f.id==='requestForm'){const r=data.requests.find(x=>x.id===id);if(v.status!==r.status)setRequestStatus(id,v.status);if(v.payoutStatus!==r.payoutStatus)setPayout(id,v.payoutStatus,'','');succeed('Заявка обновлена')}
-    if(f.id==='rateModeForm'){setAgentRateMode(id,f.dataset.specialty,v.mode,v.customRate);succeed('Вознаграждение обновлено')}    
-    if(f.id==='clinicSpecialtyForm'){saveClinicSpecialty(id,f.dataset.specialty||null,v);succeed('Специализация сохранена')}
-    if(f.id==='agentForm'){const wrap=document.getElementById('agentClinicsSelect');const clinicIds=wrap?.clinicSelected?wrap.clinicSelected():[];saveAgentProfile(id,{...v,clinicIds});succeed(id?'Профиль агента обновлён':'Агент добавлен.')}
-    if(f.id==='adminForm'){const wrap=document.getElementById('adminClinicsSelect');const clinicIds=wrap?.clinicSelected?wrap.clinicSelected():[];saveAdminAccount(id,{...v,clinicIds});succeed(id?'Настройки администратора сохранены':'Администратор создан')}
-    if(f.id==='registrationDecisionForm'){const created=decideRegistration(id,v.decision,v.adminId,v.reason);succeed(created?'Регистрация одобрена. Агент создан.':'Регистрация отклонена.')}
-    if(f.id==='clinicForm'){saveClinic(id,v);succeed(id?'Клиника обновлена':'Клиника создана')}
-  }catch(error){toast(error.message)}
-}
-document.addEventListener('click',onRateChoice);
-document.addEventListener('click',onClick);
-document.addEventListener('change',onChange);document.addEventListener('input',onInput);document.addEventListener('submit',onSubmit);
-$('#close').onclick=close;
-$('#backdrop').addEventListener('click',e=>{if(e.target.id==='backdrop')close()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();$('#sidebar').classList.remove('open')}});
-window.addEventListener('hashchange',readRoute);readRoute();
+    if(f.id==='approveForm'){
+      const id=Number(f.dataset.id);
+      if(!selClinicIds.length)throw new Error('Выберите хотя бы одну клинику');
+      await api(`/agents/${id}/approve`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clinic_ids:selClinicIds,specialization_ids:selSpecIds,admin_id:fd.get('admin_id')?Number(fd.get('admin_id')):null})});
+      toast('Агент одобрен');closeDrawer();await loadAll();render();
+    }
+    if(f.id==='rejectForm'){
+      const id=Number(f.dataset.id);
+      const reason=String(fd.get('decision_reason')||'').trim();
+      if(!reason)throw new Error('Укажите причину');
+      await api(`/agents/${id}/reject`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision_reason:reason})});
+      toast('Агент отклонён');closeDrawer();await loadAll();render();
+    }
+    if(f.id==='editAgentForm'){
+      const id=Number(f.dataset.id);
+      await api(`/agents/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name:fd.get('full_name'),phone:fd.get('phone')||null,status:fd.get('status'),clinic_ids:selClinicIds,specialization_ids:selSpecIds,admin_id:fd.get('admin_id')?Number(fd.get('admin_id')):null})});
+      toast('Агент обновлён');closeDrawer();await loadAll();render();
+    }
+    if(f.id==='adminForm'){
+      const id=f.dataset.id?Number(f.dataset.id):null;
+      const permissions={reviewRegistrations:!!fd.get('reviewRegistrations')};
+      if(id){
+        await api(`/admins/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name:fd.get('full_name'),phone:fd.get('phone')||null,active:fd.get('active')==='true',permissions,clinic_ids:selAdminClinicIds})});
+        toast('Обновлён');
+      }else{
+        await api(`/admins`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:fd.get('email'),password:fd.get('password'),full_name:fd.get('full_name'),phone:fd.get('phone')||null,permissions,clinic_ids:selAdminClinicIds})});
+        toast('Создан');
+      }
+      closeDrawer();await loadAll();render();
+    }
+    if(f.id==='clinicForm'){
+      const id=f.dataset.id?Number(f.dataset.id):null;
+      const body={name:fd.get('name'),city:fd.get('city'),address:fd.get('address')||null,phone:fd.get('phone')||null,active:fd.get('active')==='true'};
+      if(id)await api(`/clinics/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      else await api(`/clinics`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      toast(id?'Обновлена':'Создана');closeDrawer();await loadAll();render();
+    }
+    if(f.id==='specForm'){
+      const cid=Number(f.dataset.clinic),sid=Number(f.dataset.spec);
+      const r=String(fd.get('default_rate')||'').trim();
+      await api(`/clinics/${cid}/specialties/${sid}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({default_rate:r===''?null:Number(r),active:fd.get('active')==='true'})});
+      toast('Сохранено');closeDrawer();
+      document.getElementById('clinicSpecsBlock').innerHTML=await clinicSpecsHtml(cid);
+    }
+  }catch(err){toast('Ошибка: '+err.message);}
+});
+
+$('#close').onclick=closeDrawer;
+$('#backdrop').addEventListener('click',e=>{if(e.target.id==='backdrop')closeDrawer();});
+$('#logoutBtn').onclick=async()=>{try{await api('/auth/logout',{method:'POST'});}catch{}location.href='/';};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#sidebar').classList.remove('open');}});
+
+(async function init(){
+  try{
+    S.user=await api('/auth/me');
+    if(!S.user||S.user.role!=='chef'){location.href='/';return;}
+    await loadAll();
+    const h=location.hash.replace('#','')||'overview';
+    page=Object.keys(NAME).includes(h)?h:'overview';
+    render();
+  }catch(e){location.href='/';}
+})();
 </script></body></html>
