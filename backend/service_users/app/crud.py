@@ -538,9 +538,24 @@ async def create_clinic(
     address: Optional[str] = None,
     phone: Optional[str] = None,
     active: bool = True,
+    default_rate: float = 10.0,
 ) -> Clinic:
     clinic = Clinic(name=name, city=city, address=address, phone=phone, active=active)
     db.add(clinic)
+    await db.flush()  # чтобы clinic.id появился, но транзакция ещё не закоммичена
+
+    # Автоматически создаём ClinicSpecialty для всех специализаций из справочника
+    specs = await db.execute(select(Specialization))
+    for spec in specs.scalars().all():
+        db.add(
+            ClinicSpecialty(
+                clinic_id=clinic.id,
+                specialization_id=spec.id,
+                default_rate=default_rate,
+                active=True,
+            )
+        )
+
     await db.commit()
     await db.refresh(clinic)
     return clinic

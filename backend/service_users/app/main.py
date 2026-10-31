@@ -1265,8 +1265,13 @@ async def create_clinic_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     clinic = await crud.create_clinic(
-        db=db, name=data.name, city=data.city,
-        address=data.address, phone=data.phone, active=data.active,
+        db=db,
+        name=data.name,
+        city=data.city,
+        address=data.address,
+        phone=data.phone,
+        active=data.active,
+        default_rate=data.default_rate if hasattr(data, "default_rate") and data.default_rate is not None else 10.0,
     )
     return clinic
 

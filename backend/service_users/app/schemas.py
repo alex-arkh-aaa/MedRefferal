@@ -423,6 +423,7 @@ class ClinicCreate(BaseModel):
     address: Optional[str] = None
     phone: Optional[str] = None
     active: bool = True
+    default_rate: Optional[float] = Field(10.0, ge=0, le=100, description="Ставка по умолчанию для всех специализаций (%, 0–100)")
 
 
 class ClinicUpdate(BaseModel):

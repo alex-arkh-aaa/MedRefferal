@@ -273,7 +273,7 @@ def upgrade() -> None:
     op.execute("""
         INSERT INTO admins (email, password_hash, full_name, role, active, permissions)
         VALUES (
-            'chef@medpoint.local',
+            'portaladmin@yandex.ru',
             '$argon2id$v=19$m=65536,t=3,p=4$H4Owtpay1ppzDiGEMCbE+A$tZtADgVzglJGQiYNYMG4jQWvZJcrz26BwZfkzRpbAXw',
             'Администратор портала',
             'chef',
