@@ -340,13 +340,14 @@ async def update_admin(
     admin.updated_at = datetime.utcnow()
     await db.commit()
 
-    if clinic_ids:
-        # Проверка, что клиники существуют
+    if clinic_ids is not None:
         result = await db.execute(select(Clinic.id).where(Clinic.id.in_(clinic_ids)))
         existing_ids = {r[0] for r in result.all()}
         missing = set(clinic_ids) - existing_ids
         if missing:
             raise ValueError(f"Клиники не найдены: {sorted(missing)}")
+        # удалить все старые привязки и создать заново
+        await db.execute(delete(AdminClinic).where(AdminClinic.admin_id == admin.id))
         for cid in clinic_ids:
             db.add(AdminClinic(admin_id=admin.id, clinic_id=cid))
         await db.commit()
@@ -512,8 +513,14 @@ async def upsert_clinic_specialty(
         cs.default_rate = default_rate
         cs.active = active
     await db.commit()
-    await db.refresh(cs)
-    return cs
+
+    # Перечитываем с selectinload, чтобы specialization был загружен
+    result = await db.execute(
+        select(ClinicSpecialty)
+        .options(selectinload(ClinicSpecialty.specialization))
+        .where(ClinicSpecialty.id == cs.id)
+    )
+    return result.scalar_one()
 
 
 # ==================== Clinics ====================

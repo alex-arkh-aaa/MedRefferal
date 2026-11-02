@@ -120,8 +120,53 @@ async function api(p,o={}){
   if(r.status===403)throw new Error('Нет доступа');
   const t=await r.text();let d=null;
   if(t){try{d=JSON.parse(t)}catch{d=t}}
-  if(!r.ok)throw new Error((d&&d.detail)||(d&&d.error)||('HTTP '+r.status));
+  if(!r.ok){
+    let msg = 'HTTP '+r.status;
+    if(d && d.detail){
+      if(Array.isArray(d.detail)){
+        msg = d.detail.map(e => {
+          const field = Array.isArray(e.loc) ? e.loc.filter(x=>x!=='body').join('.') : '';
+          return (field ? field+': ' : '') + (e.msg || 'ошибка');
+        }).join('; ');
+      } else if(typeof d.detail === 'string'){
+        msg = d.detail;
+      } else {
+        msg = JSON.stringify(d.detail);
+      }
+    } else if(d && d.error){
+      msg = d.error;
+    }
+    throw new Error(msg);
+  }
   return d;
+}
+function validateForm(form){
+  const errors = [];
+  form.querySelectorAll('input, select, textarea').forEach(el=>{
+    if(el.disabled || el.type==='hidden') return;
+    const v = (el.value||'').trim();
+    const label = el.dataset.label || el.getAttribute('aria-label') || el.name || 'Поле';
+    if(el.required && !v){ errors.push(`${label}: обязательно для заполнения`); return; }
+    if(!v) return;
+    if(el.type==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
+      errors.push(`${label}: некорректный email`);
+    }
+    if(el.type==='password' && el.minLength && v.length < el.minLength){
+      errors.push(`${label}: минимум ${el.minLength} символов`);
+    }
+    if(el.type==='tel'){
+      const digits = v.replace(/\D/g,'');
+      if(digits.length < 10 || digits.length > 15){
+        errors.push(`${label}: некорректный номер телефона`);
+      }
+    }
+    if(el.type==='number'){
+      const n = Number(v);
+      if(el.min!=='' && n < Number(el.min)) errors.push(`${label}: не меньше ${el.min}`);
+      if(el.max!=='' && n > Number(el.max)) errors.push(`${label}: не больше ${el.max}`);
+    }
+  });
+  return errors;
 }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),4000);}
 function openDrawer(title,body){$('#drawerTitle').textContent=title;$('#drawerBody').innerHTML=body;$('#backdrop').classList.add('open');document.body.style.overflow='hidden';}
@@ -207,6 +252,8 @@ function clinicSettings(){
 async function clinicSpecsHtml(cid){
   let list=[];
   try{list=await api(`/clinics/${cid}/specialties`);}catch(e){return `<section class="panel"><div class="empty">Ошибка: ${esc(e.message)}</div></section>`;}
+  list.sort((a,b)=>a.specialization_id-b.specialization_id);
+
   return `<section class="panel"><div class="panelhead"><div><h2>Специализации</h2><p>Ставки и активность</p></div></div>
     ${table(['Специализация','Ставка','Статус',''],list.map(s=>`<tr><td class="wrap"><strong>${esc(s.specialization_name)}</strong><small>#${s.specialization_id}</small></td><td>${s.default_rate===null||s.default_rate===undefined?'<span class="unset">Не задана</span>':s.default_rate+'%'}</td><td>${s.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td><button class="btn small" data-action="editSpec" data-clinic="${cid}" data-spec="${s.specialization_id}" data-rate="${s.default_rate??''}" data-active="${s.active}">Изменить</button></td></tr>`))}
   </section>`;
@@ -365,11 +412,26 @@ document.addEventListener('change',e=>{
   if(e.target.id==='agentStatusFilter'){agentFilter=e.target.value;render();}
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='search'){query=e.target.value;render();}
+  if(e.target.id==='search'){
+    query=e.target.value;
+    // вместо render() — перерисовываем ТОЛЬКО таблицу
+    const cont = document.querySelector('#content');
+    if(!cont) return;
+    // сохранить фокус
+    const inp = e.target;
+    const selStart = inp.selectionStart;
+    const selEnd = inp.selectionEnd;
+    render();  // перерисовка
+    // вернуть фокус и позицию курсора
+    const newInp = document.querySelector('#search');
+    if(newInp){ newInp.focus(); newInp.setSelectionRange(selStart, selEnd); }
+  }
 });
 
 document.addEventListener('submit',async e=>{
   e.preventDefault();const f=e.target,fd=new FormData(f);
+  const errs = validateForm(f);
+  if(errs.length){ toast(errs[0]); return; }
   try{
     if(f.id==='approveForm'){
       const id=Number(f.dataset.id);

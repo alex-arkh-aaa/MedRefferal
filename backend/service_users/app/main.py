@@ -67,12 +67,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
     
-# ==================== Dependencies ====================
+# ==================== Dependencies ==================
 
 async def get_current_agent(
     request: Request,
     db: AsyncSession = Depends(get_db),
- ) -> Agent:
+ ):
     """Только для агентских роутов. Если role != 'agent' — 403."""
     token = request.cookies.get("access_token")
     if not token:
@@ -107,7 +107,6 @@ async def get_current_agent(
 
     return agent
 
-
 async def get_current_admin(
     request: Request,
     db: AsyncSession = Depends(get_db),
@@ -140,7 +139,6 @@ async def get_current_admin(
 
     return admin
 
-
 async def get_current_chef(
     admin: Admin = Depends(get_current_admin),
 ) -> Admin:
@@ -151,9 +149,7 @@ async def get_current_chef(
 
 
 # Алиас для старых роутов
-get_current_doctor = get_current_agent
-
-
+#get_current_doctor = get_current_agent
 # ==================== Health ====================
 
 @app.get("/api/v1/health")
@@ -265,6 +261,8 @@ async def login(
 
     # 2. Пробуем как админа
     admin = await crud.get_admin_by_email(db, data.email)
+    print(admin.__dict__)
+    print(verify_password(data.password, admin.password_hash))
     if admin and verify_password(data.password, admin.password_hash):
         if not admin.active:
             raise HTTPException(status_code=403, detail="Администратор отключён")
@@ -291,6 +289,7 @@ async def login(
         )
         return TokenResponse(access_token=access_token)
 
+    print('--------------------')
     raise HTTPException(status_code=401, detail="Неверный email или пароль")
 
 
@@ -352,7 +351,6 @@ async def get_me(
         }
 
     raise HTTPException(status_code=403, detail="Неизвестная роль")
-
 
 # ==================== Agent profile ====================
 
@@ -519,8 +517,10 @@ async def update_column_order(
 # ==================== Clinics (public) ====================
 
 @app.get("/api/v1/clinics", response_model=List[ClinicResponse])
-async def get_clinics(db: AsyncSession = Depends(get_db)):
-    return await crud.get_all_clinics(db, only_active=True)
+async def get_clinics(
+    db: AsyncSession = Depends(get_db),
+):
+    return await crud.get_all_clinics(db, only_active=False)
 
 
 # ==================== Patients ====================

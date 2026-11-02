@@ -148,12 +148,12 @@ async def profile_page(request: Request):
 
 @app.get("/clinic-admin", response_class=HTMLResponse)
 async def clinic_admin_page():
-    return HTMLResponse(render_template("Medpoint_Clinic_Admin.html"))
+    return HTMLResponse(render_template("Clinic_Admin.html"))
 
 
 @app.get("/portal-admin", response_class=HTMLResponse)
 async def portal_admin_page():
-    return HTMLResponse(render_template("Medpoint_Portal_Admin.html"))
+    return HTMLResponse(render_template("Portal_Admin.html"))
 
 
 # ================== ПРОКСИРОВАНИЕ ==================

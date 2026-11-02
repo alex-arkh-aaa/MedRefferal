@@ -101,9 +101,19 @@ td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 .multi-select-option.selected{background:#eff7f6;color:#146a70;font-weight:700}
 .report-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .report-tag{font-size:11px;letter-spacing:.12em;color:#548487;font-weight:800;margin-bottom:13px}
+.permission-box{border:1px solid #cddfdd;border-radius:12px;margin:22px 0;padding:17px;background:#f5faf9}
+.permission-box legend{font-size:14px;font-weight:800;color:#32676b;padding:0 5px}
+.permission-choice{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.permission-choice input{width:19px;height:19px;accent-color:#146a70;flex-shrink:0;margin-top:2px}
+.permission-choice strong{font-size:14px;display:block;line-height:1.5}
+.permission-choice small{font-size:12px;display:block;color:#71888c;margin-top:5px;line-height:1.7}
+.top-brand{border:1px solid #dce7e7;border-radius:10px;padding:6px 14px 6px 10px;text-decoration:none;transition: background .15s,border-color .15s}
+.top-brand:hover{background:#f0f7f7;border-color:#42999c}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.app{grid-template-columns:180px 1fr}.content{padding:26px 22px}.top{padding:0 22px}}
 @media(max-width:700px){.app{display:block}.side{display:none;position:fixed;inset:0 auto 0 0;width:250px;z-index:4;height:100vh;overflow-y:auto}.side.open{display:flex}.mobilemenu{display:block}.top{height:66px;padding:0 15px}.content{padding:24px 15px}.grid{gap:9px}.split{grid-template-columns:1fr}.profile-summary{grid-template-columns:1fr}.report-cards{grid-template-columns:1fr}}
-</style></head><body><div class="app"><aside class="side" id="sidebar"><div><div class="brand"><span class="mark">+</span> Medpoint</div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Шеф</strong><span id="userSub">Управление сетью</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button><div class="top-brand"><span class="mark">+</span> Medpoint</div><div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
+</style></head><body><div class="app"><aside class="side" id="sidebar"><div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Шеф</strong><span id="userSub">Управление сетью</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<a href="#" class="top-brand" onclick="event.preventDefault();navigate('overview')" title="На главную"><span class="mark">+</span> Medpoint</a>
+<div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -124,8 +134,53 @@ async function api(p,o={}){
   if(r.status===403)throw new Error('Нет доступа');
   const t=await r.text();let d=null;
   if(t){try{d=JSON.parse(t)}catch{d=t}}
-  if(!r.ok)throw new Error((d&&d.detail)||(d&&d.error)||('HTTP '+r.status));
+  if(!r.ok){
+    let msg = 'HTTP '+r.status;
+    if(d && d.detail){
+      if(Array.isArray(d.detail)){
+        msg = d.detail.map(e => {
+          const field = Array.isArray(e.loc) ? e.loc.filter(x=>x!=='body').join('.') : '';
+          return (field ? field+': ' : '') + (e.msg || 'ошибка');
+        }).join('; ');
+      } else if(typeof d.detail === 'string'){
+        msg = d.detail;
+      } else {
+        msg = JSON.stringify(d.detail);
+      }
+    } else if(d && d.error){
+      msg = d.error;
+    }
+    throw new Error(msg);
+  }
   return d;
+}
+function validateForm(form){
+  const errors = [];
+  form.querySelectorAll('input, select, textarea').forEach(el=>{
+    if(el.disabled || el.type==='hidden') return;
+    const v = (el.value||'').trim();
+    const label = el.dataset.label || el.getAttribute('aria-label') || el.name || 'Поле';
+    if(el.required && !v){ errors.push(`${label}: обязательно для заполнения`); return; }
+    if(!v) return;
+    if(el.type==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
+      errors.push(`${label}: некорректный email`);
+    }
+    if(el.type==='password' && el.minLength && v.length < el.minLength){
+      errors.push(`${label}: минимум ${el.minLength} символов`);
+    }
+    if(el.type==='tel'){
+      const digits = v.replace(/\D/g,'');
+      if(digits.length < 10 || digits.length > 15){
+        errors.push(`${label}: некорректный номер телефона`);
+      }
+    }
+    if(el.type==='number'){
+      const n = Number(v);
+      if(el.min!=='' && n < Number(el.min)) errors.push(`${label}: не меньше ${el.min}`);
+      if(el.max!=='' && n > Number(el.max)) errors.push(`${label}: не больше ${el.max}`);
+    }
+  });
+  return errors;
 }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),4000);}
 function openDrawer(title,body){$('#drawerTitle').textContent=title;$('#drawerBody').innerHTML=body;$('#backdrop').classList.add('open');document.body.style.overflow='hidden';}
@@ -142,10 +197,19 @@ async function loadAll(){
   try{
     const [a,ad,c,s]=await Promise.all([api('/agents'),api('/admins'),api('/clinics'),api('/specializations')]);
     S.agents=a||[];S.admins=ad||[];S.clinics=c||[];S.specs=s||[];
-  }catch(e){toast('Ошибка загрузки: '+e.message);}
+  }catch(e){
+    console.error('loadAll error:', e);
+    toast('Ошибка загрузки: '+e.message);
+  }
 }
 function navigate(p){page=p;agentId=null;adminId=null;clinicId=null;query='';location.hash=p;render();scrollTo(0,0);}
-function render(){nav();const m={overview,requests,admins,agents,clinics,reports,pending:requests};$('#content').innerHTML=(m[page]||overview)();}
+function render(){
+  nav();
+  const m={overview,requests,admins,agents,clinics,reports};
+  const html = (m[page]||overview)();
+  const cont = document.querySelector('#content');
+  if(cont) cont.innerHTML = html;
+}
 function nav(){
   const pc=S.agents.filter(a=>a.status==='pending').length;
   $('#nav').innerHTML=NAV.map(t=>`<button class="${page===t?'active':''}" data-page="${t}">${NAME[t]}${t==='pending'&&pc?`<span class="nav-count">${pc}</span>`:''}</button>`).join('');
@@ -201,7 +265,7 @@ function adminProfile(){
 
 function clinics(){
   if(clinicId)return clinicSettings();
-  const list=S.clinics.filter(c=>!query||[c.name,c.city,c.address||''].join(' ').toLowerCase().includes(query.toLowerCase()));
+const list=S.clinics.filter(c=>!query||[c.name,c.city,c.address||'',c.phone||''].join(' ').toLowerCase().includes(query.toLowerCase()));
   return heading('Клиники','',`<button class="btn primary" data-action="newClinic">Добавить</button>`)+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Название или город" value="${esc(query)}"></div>${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],list.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
 }
 
@@ -216,6 +280,8 @@ function clinicSettings(){
 async function clinicSpecsHtml(cid){
   let list=[];
   try{list=await api(`/clinics/${cid}/specialties`);}catch(e){return `<section class="panel"><div class="empty">Ошибка: ${esc(e.message)}</div></section>`;}
+  list.sort((a,b)=>a.specialization_id-b.specialization_id);
+
   return `<section class="panel"><div class="panelhead"><div><h2>Специализации</h2><p>Ставки и активность</p></div></div>
     ${table(['Специализация','Ставка','Статус',''],list.map(s=>`<tr><td class="specialty-cell"><strong>${esc(s.specialization_name)}</strong><small>#${s.specialization_id}</small></td><td>${s.default_rate===null||s.default_rate===undefined?'<span class="unset">Не задана</span>':s.default_rate+'%'}</td><td>${s.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td><button class="btn small" data-action="editSpec" data-clinic="${cid}" data-spec="${s.specialization_id}" data-rate="${s.default_rate??''}" data-active="${s.active}">Изменить</button></td></tr>`))}
   </section>`;
@@ -303,13 +369,22 @@ function openAdminForm(id){
   selAdminClinicIds=[...(a?.clinic_ids||[])];
   openDrawer(id?'Редактировать администратора':'Новый администратор',
     `<form id="adminForm" data-id="${id||''}">
-      <div class="field"><label>ФИО</label><input name="full_name" required value="${esc(a?.full_name||'')}"></div>
-      <div class="field"><label>Email</label><input name="email" type="email" ${id?'disabled':''} value="${esc(a?.email||'')}"></div>
-      <div class="field"><label>Телефон</label><input name="phone" value="${esc(a?.phone||'')}"></div>
-      ${id?'':`<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" required></div>`}
+      <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" value="${esc(a?.full_name||'')}"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" autocomplete="off" required ${id?'disabled':''} value="${esc(a?.email||'')}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" value="${esc(a?.phone||'')}"></div>
+      ${id?'':`<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" data-label="Пароль" autocomplete="new-password" required minlength="8"></div>`}
       <div class="field"><label>Клиники</label>${multiSelectHtml('mcAdminClinic','mdAdminClinic',S.clinics,selAdminClinicIds)}</div>
       <div class="field"><label>Доступ</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(a?.active!==false)===v?'selected':''}>${v==='true'?'Активен':'Отключён'}</option>`).join('')}</select></div>
-      <div class="field"><label><input type="checkbox" name="reviewRegistrations" ${a?.permissions?.reviewRegistrations?'checked':''} style="width:auto;margin-right:8px">Рассмотрение регистраций</label></div>
+      <fieldset class="permission-box">
+        <legend>Дополнительные возможности</legend>
+        <label class="permission-choice">
+          <input type="checkbox" id="reviewRegistrations" name="reviewRegistrations" ${a?.permissions?.reviewRegistrations?'checked':''}>
+          <span>
+            <strong>Рассмотрение регистраций агентов</strong>
+            <small>Показывает вкладку «Регистрация агентов». Разрешает просматривать, одобрять и отклонять заявки своей клиники.</small>
+          </span>
+        </label>
+      </fieldset>
       <div class="actions"><button class="btn primary" type="submit">${id?'Сохранить':'Создать'}</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
   setTimeout(()=>setupMultiSelect('mcAdminClinic','mdAdminClinic',S.clinics.map(c=>({id:c.id,name:c.name})),selAdminClinicIds,v=>{selAdminClinicIds=v;}),0);
@@ -370,11 +445,26 @@ document.addEventListener('change',e=>{
   if(e.target.id==='agentStatusFilter'){agentFilter=e.target.value;render();}
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='search'){query=e.target.value;render();}
+  if(e.target.id==='search'){
+    query=e.target.value;
+    // вместо render() — перерисовываем ТОЛЬКО таблицу
+    const cont = document.querySelector('#content');
+    if(!cont) return;
+    // сохранить фокус
+    const inp = e.target;
+    const selStart = inp.selectionStart;
+    const selEnd = inp.selectionEnd;
+    render();  // перерисовка
+    // вернуть фокус и позицию курсора
+    const newInp = document.querySelector('#search');
+    if(newInp){ newInp.focus(); newInp.setSelectionRange(selStart, selEnd); }
+  }
 });
 
 document.addEventListener('submit',async e=>{
   e.preventDefault();const f=e.target,fd=new FormData(f);
+  const errs = validateForm(f);
+  if(errs.length){ toast(errs[0]); return; }
   try{
     if(f.id==='approveForm'){
       const id=Number(f.dataset.id);
