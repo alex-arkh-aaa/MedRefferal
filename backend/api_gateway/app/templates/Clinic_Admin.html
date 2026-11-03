@@ -97,9 +97,13 @@ td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 .rate-note{padding:15px 22px;color:#617d82;background:#f7faf9;font-size:13px;line-height:1.7;border-bottom:1px solid #eaf0ef}
 .clinic-rate-summary{display:flex;gap:24px;flex-wrap:wrap;background:#eaf3f1;border:1px solid #d1e3df;border-radius:12px;padding:18px 22px;margin-bottom:22px;font-size:14px;color:#4c6c70}
 .clinic-rate-summary strong{font-size:20px;color:#235c62;margin-right:6px}
+.top-brand{border:1px solid #dce7e7;border-radius:10px;padding:6px 14px 6px 10px;text-decoration:none;transition: background .15s,border-color .15s}
+.top-brand:hover{background:#f0f7f7;border-color:#42999c}
 @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.app{grid-template-columns:180px 1fr}.content{padding:26px 22px}.top{padding:0 22px}}
 @media(max-width:700px){.app{display:block}.side{display:none;position:fixed;inset:0 auto 0 0;width:250px;z-index:4;height:100vh;overflow-y:auto}.side.open{display:flex}.mobilemenu{display:block}.top{height:66px;padding:0 15px}.content{padding:24px 15px}.grid{gap:9px}.split{grid-template-columns:1fr}.profile-summary{grid-template-columns:1fr}.report-cards{grid-template-columns:1fr}}
-</style></head><body><div class="app"><aside class="side" id="sidebar"><div><div class="brand"><span class="mark">+</span> Medpoint</div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Администратор</strong><span id="userSub">Клиника</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button><div class="top-brand"><span class="mark">+</span> Medpoint</div><div class="topright"><span class="top-user" id="topUserName">Администратор</span><div class="avatar" id="topAvatar">А</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
+</style></head><body><div class="app"><aside class="side" id="sidebar"><div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Администратор</strong><span id="userSub">Клиника</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<a href="#" class="top-brand" onclick="event.preventDefault();navigate('overview')" title="На главную"><span class="mark">+</span> Medpoint</a>
+<div class="topright"><span class="top-user" id="topUserName">Администратор</span><div class="avatar" id="topAvatar">А</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -124,14 +128,41 @@ async function api(p,o={}){
     let msg = 'HTTP '+r.status;
     if(d && d.detail){
       if(Array.isArray(d.detail)){
-        msg = d.detail.map(e => {
-          const field = Array.isArray(e.loc) ? e.loc.filter(x=>x!=='body').join('.') : '';
-          return (field ? field+': ' : '') + (e.msg || 'ошибка');
-        }).join('; ');
+        const FIELD_RU = {
+          password: 'Пароль', email: 'Email', full_name: 'ФИО', phone: 'Телефон',
+          name: 'Название', city: 'Город', address: 'Адрес',
+          default_rate: 'Ставка', custom_rate: 'Личная ставка', mode: 'Режим',
+          clinic_ids: 'Клиники', specialization_ids: 'Специализации',
+          decision_reason: 'Причина', active: 'Статус', permissions: 'Права',
+        };
+        const MSG_RU = [
+          { re: /String should have at least (\d+) characters/i, fn: m => `минимум ${m[1]} символов` },
+          { re: /String should have at most (\d+) characters/i, fn: m => `максимум ${m[1]} символов` },
+          { re: /field required/i, fn: () => 'обязательное поле' },
+          { re: /value is not a valid email address/i, fn: () => 'некорректный email' },
+          { re: /Input should be a valid integer/i, fn: () => 'должно быть числом' },
+          { re: /Input should be a valid number/i, fn: () => 'должно быть числом' },
+          { re: /Input should be greater than or equal to (\d+)/i, fn: m => `не меньше ${m[1]}` },
+          { re: /Input should be less than or equal to (\d+)/i, fn: m => `не больше ${m[1]}` },
+          { re: /String should match pattern/i, fn: () => 'неверный формат' },
+          { re: /Input should be a valid boolean/i, fn: () => 'должно быть true/false' },
+          { re: /Input should be a valid list/i, fn: () => 'должен быть список' },
+        ];
+        const parts = d.detail.map(e => {
+          const key = Array.isArray(e.loc) ? e.loc.filter(x => x !== 'body' && x !== 'query' && x !== 'path').pop() : '';
+          const fieldRu = FIELD_RU[key] || key || 'Поле';
+          let msgRu = e.msg || 'ошибка';
+          for(const m of MSG_RU){
+            const match = msgRu.match(m.re);
+            if(match){ msgRu = m.fn(match); break; }
+          }
+          return `${fieldRu}: ${msgRu}`;
+        });
+        msg = parts.join('; ');
       } else if(typeof d.detail === 'string'){
         msg = d.detail;
       } else {
-        msg = JSON.stringify(d.detail);
+        msg = 'Ошибка валидации';
       }
     } else if(d && d.error){
       msg = d.error;
@@ -183,7 +214,7 @@ async function loadAll(){
   try{
     const [me,clinics,specs]=await Promise.all([api('/auth/me'),api('/clinics'),api('/specializations')]);
     S.user=me;S.clinics=clinics||[];S.specs=specs||[];
-    S.myClinics=S.clinics.filter(c=>myClinicIds().includes(c.id));
+    S.myClinics=S.clinics.filter(c=>myClinicIds().includes(c.id)).sort((a,b)=>a.id-b.id);
   }catch(e){toast('Ошибка загрузки базы: '+e.message);return;}
   try{
     const agents=await api('/agents');
@@ -212,7 +243,7 @@ function overview(){
   const specCount=S.myClinics.reduce((acc,c)=>acc+(c.specialties?.length||0),0);
   return heading('Обзор','Сводка по клиникам')
     +`<div class="grid">${[{l:'Заявки',v:pend.length,d:'Ожидают',p:'pending'},{l:'Агенты',v:act.length,d:'Активные',p:'agents'},{l:'Клиники',v:S.myClinics.length,d:'Ваши',p:'clinics'},{l:'Ставки',v:Object.values(S.agentsRates).reduce((a,r)=>a+(r?.length||0),0),d:'Всего',p:'rates'}].map(i=>`<button class="stat stat-action" data-page="${i.p}"><span class="stat-lbl">${i.l}</span><strong>${i.v}</strong><em>${i.d}</em></button>`).join('')}</div>`
-    +`<section class="panel"><div class="panelhead"><div><h2>Новые заявки</h2><p>Ожидают рассмотрения</p></div><button class="btn small" data-page="pending">Все</button></div>${pend.length?pend.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" data-action="viewAgent" data-id="${a.id}">Открыть</button></div>`).join(''):'<div class="empty">Заявок нет</div>'}</section>`;
+    +`<section class="panel"><div class="panelhead"><div><h2>Новые заявки</h2><p>Ожидают рассмотрения</p></div><button class="btn small" data-page="pending">Все</button></div>${pend.length?pend.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" style="margin-left:auto" data-action="viewAgent" data-id="${a.id}">Открыть</button></div>`).join(''):'<div class="empty">Заявок нет</div>'}</section>`;
 }
 
 function requests(){
@@ -239,7 +270,8 @@ function agentProfile(){
 
 function clinics(){
   if(clinicId)return clinicSettings();
-  return heading('Клиники','Ваши клиники')+`<section class="panel">${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],S.myClinics.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
+  const list=S.myClinics.slice().sort((a,b)=>a.id-b.id);
+  return heading('Клиники','Ваши клиники')+`<section class="panel">${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],list.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
 }
 
 function clinicSettings(){
@@ -319,7 +351,7 @@ function openApprove(id){
   selAgentClinicIds=(a.clinic_ids||[]).filter(c=>myClinicIds().includes(c));
   selAgentSpecIds=[...(a.specialization_ids||[])];
   openDrawer('Одобрить: '+a.full_name,
-    `<p class="muted">${esc(a.email)}</p><form id="approveForm" data-id="${a.id}">
+    `<p class="muted">${esc(a.email)}</p><form id="approveForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>Клиники *</label>${multiSelectHtml('mcClinic','mdClinic')}</div>
       <div class="field"><label>Специализации</label>${multiSelectHtml('mcSpec','mdSpec')}</div>
       <div class="actions"><button class="btn primary" type="submit">Одобрить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
@@ -333,7 +365,7 @@ function openApprove(id){
 function openReject(id){
   const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
   openDrawer('Отклонить: '+a.full_name,
-    `<p class="muted">${esc(a.email)}</p><form id="rejectForm" data-id="${a.id}">
+    `<p class="muted">${esc(a.email)}</p><form id="rejectForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>Причина *</label><textarea name="decision_reason" rows="4" required></textarea></div>
       <div class="actions"><button class="btn danger-access" type="submit">Отклонить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
@@ -344,7 +376,7 @@ function openEditAgent(id){
   selAgentClinicIds=(a.clinic_ids||[]).filter(c=>myClinicIds().includes(c));
   selAgentSpecIds=[...(a.specialization_ids||[])];
   openDrawer('Редактировать: '+a.full_name,
-    `<form id="editAgentForm" data-id="${a.id}">
+    `<form id="editAgentForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>ФИО</label><input name="full_name" required value="${esc(a.full_name)}"></div>
       <div class="field"><label>Телефон</label><input name="phone" value="${esc(a.phone||'')}"></div>
       <div class="field"><label>Статус</label><select name="status">${['pending','active','inactive','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${SL[s]}</option>`).join('')}</select></div>
@@ -361,7 +393,7 @@ function openEditAgent(id){
 function openEditClinic(id){
   const c=S.myClinics.find(x=>x.id===Number(id));if(!c)return;
   openDrawer('Редактировать клинику',
-    `<form id="clinicForm" data-id="${c.id}">
+    `<form id="clinicForm" data-id="${c.id}" autocomplete="off">
       <div class="field"><label>Название</label><input name="name" required value="${esc(c.name)}"></div>
       <div class="field"><label>Город</label><input name="city" required value="${esc(c.city)}"></div>
       <div class="field"><label>Адрес</label><input name="address" value="${esc(c.address||'')}"></div>
@@ -372,7 +404,7 @@ function openEditClinic(id){
 
 function openEditSpec(clinic,sid,rate,active){
   openDrawer('Ставка специализации',
-    `<form id="specForm" data-clinic="${clinic}" data-spec="${sid}">
+    `<form id="specForm" data-clinic="${clinic}" data-spec="${sid}" autocomplete="off">
       <div class="field"><label>Ставка (%)</label><input name="default_rate" type="number" min="0" max="100" step="0.01" value="${rate}"></div>
       <div class="field"><label>Статус</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(active)===v?'selected':''}>${v==='true'?'Активна':'Отключена'}</option>`).join('')}</select></div>
       <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
@@ -381,7 +413,7 @@ function openEditSpec(clinic,sid,rate,active){
 
 function openEditRate(agentId,specId,mode,custom){
   openDrawer('Ставка агента',
-    `<form id="rateForm" data-agent="${agentId}" data-spec="${specId}">
+    `<form id="rateForm" data-agent="${agentId}" data-spec="${specId}" autocomplete="off">
       <div class="field"><label>Режим</label><select name="mode">${['clinic','custom'].map(m=>`<option value="${m}" ${m===mode?'selected':''}>${m==='clinic'?'По клинике':'Личная ставка'}</option>`).join('')}</select></div>
       <div class="field"><label>Личная ставка (%) — только для режима «Личная»</label><input name="custom_rate" type="number" min="0" max="100" step="0.01" value="${custom}"></div>
       <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
@@ -413,18 +445,18 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('input',e=>{
   if(e.target.id==='search'){
-    query=e.target.value;
-    // вместо render() — перерисовываем ТОЛЬКО таблицу
-    const cont = document.querySelector('#content');
-    if(!cont) return;
-    // сохранить фокус
     const inp = e.target;
     const selStart = inp.selectionStart;
     const selEnd = inp.selectionEnd;
-    render();  // перерисовка
-    // вернуть фокус и позицию курсора
-    const newInp = document.querySelector('#search');
-    if(newInp){ newInp.focus(); newInp.setSelectionRange(selStart, selEnd); }
+    query = inp.value;
+    render();
+    requestAnimationFrame(()=>{
+      const newInp = document.querySelector('#search');
+      if(newInp){
+        newInp.focus();
+        try { newInp.setSelectionRange(selStart, selEnd); } catch(_){}
+      }
+    });
   }
 });
 
@@ -454,7 +486,7 @@ document.addEventListener('submit',async e=>{
     if(f.id==='clinicForm'){
       const id=Number(f.dataset.id);
       await api(`/clinics/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),city:fd.get('city'),address:fd.get('address')||null,phone:fd.get('phone')||null})});
-      toast('Клиника обновлена');closeDrawer();await loadAll();render();
+      toast('Клиника обновлена');closeDrawer();clinicId=null;await loadAll();render();
     }
     if(f.id==='specForm'){
       const cid=Number(f.dataset.clinic),sid=Number(f.dataset.spec);
@@ -493,8 +525,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#s
     console.error(e);
     toast('Ошибка входа: '+e.message);
   }
-  console.log('USER',S.user);
-console.log('MY_CLINICS',S.myClinics);
-console.log('AGENTS',S.agents);
 })();
 </script></body></html>

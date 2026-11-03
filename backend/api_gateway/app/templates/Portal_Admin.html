@@ -113,7 +113,7 @@ td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
 @media(max-width:700px){.app{display:block}.side{display:none;position:fixed;inset:0 auto 0 0;width:250px;z-index:4;height:100vh;overflow-y:auto}.side.open{display:flex}.mobilemenu{display:block}.top{height:66px;padding:0 15px}.content{padding:24px 15px}.grid{gap:9px}.split{grid-template-columns:1fr}.profile-summary{grid-template-columns:1fr}.report-cards{grid-template-columns:1fr}}
 </style></head><body><div class="app"><aside class="side" id="sidebar"><div><nav class="nav" id="nav"></nav></div><div class="sidefoot"><strong id="userLabel">Шеф</strong><span id="userSub">Управление сетью</span></div></aside><main class="main"><div class="top"><button class="mobilemenu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
 <a href="#" class="top-brand" onclick="event.preventDefault();navigate('overview')" title="На главную"><span class="mark">+</span> Medpoint</a>
-<div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="toast" id="toast"></div>
+<div class="topright"><span class="top-user" id="topUserName">Шеф</span><div class="avatar" id="topAvatar">Ш</div><button class="btn small" id="logoutBtn">Выйти</button></div></div><div class="content" id="content"></div></main></div><div class="backdrop" id="backdrop"><div class="drawer"><header><h2 id="drawerTitle"></h2><button id="close">×</button></header><div id="drawerBody"></div></div></div><div class="backdrop" id="historyModal"><div class="drawer" style="width:min(720px,100%)"><header><h2>История изменений</h2><button onclick="document.getElementById('historyModal').classList.remove('open')">×</button></header><div id="historyModalBody"></div></div></div><div class="toast" id="toast"></div>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -138,14 +138,41 @@ async function api(p,o={}){
     let msg = 'HTTP '+r.status;
     if(d && d.detail){
       if(Array.isArray(d.detail)){
-        msg = d.detail.map(e => {
-          const field = Array.isArray(e.loc) ? e.loc.filter(x=>x!=='body').join('.') : '';
-          return (field ? field+': ' : '') + (e.msg || 'ошибка');
-        }).join('; ');
+        const FIELD_RU = {
+          password: 'Пароль', email: 'Email', full_name: 'ФИО', phone: 'Телефон',
+          name: 'Название', city: 'Город', address: 'Адрес',
+          default_rate: 'Ставка', custom_rate: 'Личная ставка', mode: 'Режим',
+          clinic_ids: 'Клиники', specialization_ids: 'Специализации',
+          decision_reason: 'Причина', active: 'Статус', permissions: 'Права',
+        };
+        const MSG_RU = [
+          { re: /String should have at least (\d+) characters/i, fn: m => `минимум ${m[1]} символов` },
+          { re: /String should have at most (\d+) characters/i, fn: m => `максимум ${m[1]} символов` },
+          { re: /field required/i, fn: () => 'обязательное поле' },
+          { re: /value is not a valid email address/i, fn: () => 'некорректный email' },
+          { re: /Input should be a valid integer/i, fn: () => 'должно быть числом' },
+          { re: /Input should be a valid number/i, fn: () => 'должно быть числом' },
+          { re: /Input should be greater than or equal to (\d+)/i, fn: m => `не меньше ${m[1]}` },
+          { re: /Input should be less than or equal to (\d+)/i, fn: m => `не больше ${m[1]}` },
+          { re: /String should match pattern/i, fn: () => 'неверный формат' },
+          { re: /Input should be a valid boolean/i, fn: () => 'должно быть true/false' },
+          { re: /Input should be a valid list/i, fn: () => 'должен быть список' },
+        ];
+        const parts = d.detail.map(e => {
+          const key = Array.isArray(e.loc) ? e.loc.filter(x => x !== 'body' && x !== 'query' && x !== 'path').pop() : '';
+          const fieldRu = FIELD_RU[key] || key || 'Поле';
+          let msgRu = e.msg || 'ошибка';
+          for(const m of MSG_RU){
+            const match = msgRu.match(m.re);
+            if(match){ msgRu = m.fn(match); break; }
+          }
+          return `${fieldRu}: ${msgRu}`;
+        });
+        msg = parts.join('; ');
       } else if(typeof d.detail === 'string'){
         msg = d.detail;
       } else {
-        msg = JSON.stringify(d.detail);
+        msg = 'Ошибка валидации';
       }
     } else if(d && d.error){
       msg = d.error;
@@ -201,6 +228,10 @@ async function loadAll(){
     console.error('loadAll error:', e);
     toast('Ошибка загрузки: '+e.message);
   }
+  try{
+    const hist = await api('/history?limit=5');
+    window.__historyCache = hist;
+  }catch(e){ window.__historyCache = []; }
 }
 function navigate(p){page=p;agentId=null;adminId=null;clinicId=null;query='';location.hash=p;render();scrollTo(0,0);}
 function render(){
@@ -209,6 +240,14 @@ function render(){
   const html = (m[page]||overview)();
   const cont = document.querySelector('#content');
   if(cont) cont.innerHTML = html;
+  if(page==='overview' && window.__historyCache){
+    const el = document.getElementById('historyList');
+    if(el){
+      el.innerHTML = window.__historyCache.length
+        ? window.__historyCache.map(h => `<div class="change-item"><div class="change-item-body"><strong>${esc(h.label)}</strong><small>${esc(h.text)}</small></div><div class="change-item-time">${dt(h.created_at)}</div></div>`).join('')
+        : '<div class="empty">История пуста</div>';
+    }
+  }
 }
 function nav(){
   const pc=S.agents.filter(a=>a.status==='pending').length;
@@ -223,7 +262,8 @@ function overview(){
   const pend=S.agents.filter(a=>a.status==='pending'),act=S.agents.filter(a=>a.status==='active');
   return heading('Обзор','Сводная информация по порталу')
     +`<div class="grid">${[{l:'Заявки',v:pend.length,d:'Новые агенты',p:'pending'},{l:'Администраторы',v:S.admins.length,d:'Всего',p:'admins'},{l:'Агенты',v:act.length,d:'Активные',p:'agents'},{l:'Клиники',v:S.clinics.length,d:'Всего',p:'clinics'}].map(i=>`<button class="stat stat-action" data-page="${i.p}"><span class="stat-lbl">${i.l}</span><strong>${i.v}</strong><em>${i.d}</em></button>`).join('')}</div>`
-    +`<div class="split"><section class="panel"><div class="panelhead"><div><h2>Новые заявки</h2><p>Ожидают рассмотрения</p></div><button class="btn small" data-page="pending">Все</button></div>${pend.length?pend.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" data-action="viewAgent" data-id="${a.id}">Открыть</button></div>`).join(''):'<div class="empty">Заявок нет</div>'}</section><section class="panel"><div class="panelhead"><div><h2>Администраторы</h2></div><button class="btn small" data-page="admins">Все</button></div>${S.admins.length?S.admins.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" data-action="viewAdmin" data-id="${a.id}">Профиль</button></div>`).join(''):'<div class="empty">Администраторов нет</div>'}</section></div>`;
+    +`<div class="split"><section class="panel"><div class="panelhead"><div><h2>Новые заявки</h2><p>Ожидают рассмотрения</p></div><button class="btn small" data-page="pending">Все</button></div>${pend.length?pend.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" style="margin-left:auto" data-action="viewAgent" data-id="${a.id}">Открыть</button></div>`).join(''):'<div class="empty">Заявок нет</div>'}</section><section class="panel"><div class="panelhead"><div><h2>Администраторы</h2></div><button class="btn small" data-page="admins">Все</button></div>${S.admins.length?S.admins.slice(0,5).map(a=>`<div class="agent-overview"><span class="initials">${esc((a.full_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2))}</span><span class="agent-overview-info"><strong>${esc(a.full_name)}</strong><small>${esc(a.email)}</small></span><button class="btn small" style="margin-left:auto" data-action="viewAdmin" data-id="${a.id}">Профиль</button></div>`).join(''):'<div class="empty">Администраторов нет</div>'}</section></div>`
+    +`<section class="panel" style="margin-top:20px"><div class="panelhead"><div><h2>История изменений</h2><p>Последние 5 действий</p></div><button class="btn small" data-action="viewAllHistory">Показать всю историю</button></div><div id="historyList"><div class="empty">Загрузка...</div></div></section>`;
 }
 
 function requests(){
@@ -258,15 +298,17 @@ function adminProfile(){
   if(!a)return heading('Не найден','','<button class="btn small" data-page="admins">← Назад</button>');
   const linked=S.agents.filter(x=>x.admin_id===a.id);
   return `<button class="btn small back-link" data-page="admins">← Назад</button>`+heading(a.full_name,`#${a.id} · ${a.email}`,`<div style="display:flex;gap:10px"><button class="btn" data-action="editAdmin" data-id="${a.id}">Редактировать</button><button class="btn danger-access" data-action="delAdmin" data-id="${a.id}">Удалить</button></div>`)
-    +`<section class="panel profile-summary"><div><span class="meta-label">Телефон</span><strong>${esc(a.phone||'—')}</strong></div><div><span class="meta-label">Доступ</span>${a.active?pill('Активен','approved'):pill('Отключён','rejected')}</div><div><span class="meta-label">Регистрации</span>${a.permissions?.reviewRegistrations?pill('Разрешено','approved'):pill('Выключено','')}</div></section>`
+    +`<section class="panel profile-summary"><div><span class="meta-label">Телефон</span><strong>${esc(a.phone||'—')}</strong></div><div><span class="meta-label">Доступ</span>${a.active?pill('Активен','approved'):pill('Отключён','rejected')}</div><div><span class="meta-label">Регистрации агентов</span>${a.permissions?.reviewRegistrations?pill('Разрешено','approved'):pill('Выключено','')}</div></section>`
     +`<section class="panel"><div class="panelhead"><h2>Клиники</h2></div><div style="padding:18px 22px">${(a.clinic_ids||[]).length?(a.clinic_ids||[]).map(id=>`<span class="multi-select-tag" style="margin:0 6px 6px 0">${esc(cName(id))}</span>`).join(''):'<span class="muted">Нет клиник</span>'}</div></section>`
     +`<section class="panel"><div class="panelhead"><h2>Агенты (${linked.length})</h2></div>${table(['Агент','Статус',''],linked.map(x=>`<tr><td><strong>${esc(x.full_name)}</strong><small>${esc(x.email)}</small></td><td>${pill(SL[x.status]||x.status,SP[x.status]||'')}</td><td><button class="btn small" data-action="viewAgent" data-id="${x.id}">Профиль</button></td></tr>`))}</section>`;
 }
 
 function clinics(){
   if(clinicId)return clinicSettings();
-const list=S.clinics.filter(c=>!query||[c.name,c.city,c.address||'',c.phone||''].join(' ').toLowerCase().includes(query.toLowerCase()));
-  return heading('Клиники','',`<button class="btn primary" data-action="newClinic">Добавить</button>`)+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Название или город" value="${esc(query)}"></div>${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],list.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
+  const list=S.clinics
+    .filter(c=>!query||[c.name,c.city,c.address||'',c.phone||''].join(' ').toLowerCase().includes(query.toLowerCase()))
+    .sort((a,b)=>a.id-b.id);
+  return heading('Клиники','',`<button class="btn primary" data-action="newClinic">Добавить</button>`)+`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Название, город или адрес" value="${esc(query)}"></div>${table(['Клиника','Город','Адрес','Телефон','Статус','Агентов',''],list.map(c=>`<tr><td><strong>${esc(c.name)}</strong><small>#${c.id}</small></td><td>${esc(c.city)}</td><td class="wrap">${esc(c.address||'—')}</td><td>${esc(c.phone||'—')}</td><td>${c.active?pill('Активна','approved'):pill('Отключена','rejected')}</td><td>${S.agents.filter(a=>(a.clinic_ids||[]).includes(c.id)).length}</td><td><button class="btn small" data-action="clinicSettings" data-id="${c.id}">Настроить</button></td></tr>`))}</section>`;
 }
 
 function clinicSettings(){
@@ -324,7 +366,7 @@ function openApprove(id){
   const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
   selClinicIds=[];selSpecIds=[...(a.specialization_ids||[])];
   openDrawer('Одобрить: '+a.full_name,
-    `<p class="muted">${esc(a.email)}</p><form id="approveForm" data-id="${a.id}">
+    `<p class="muted">${esc(a.email)}</p><form id="approveForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>Клиники *</label>${multiSelectHtml('mcClinic','mdClinic',S.clinics,[])}</div>
       <div class="field"><label>Специализации</label>${multiSelectHtml('mcSpec','mdSpec',S.specs,selSpecIds)}</div>
       <div class="field"><label>Администратор</label><select name="admin_id"><option value="">Не назначен</option>${S.admins.filter(x=>x.active).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('')}</select></div>
@@ -339,7 +381,7 @@ function openApprove(id){
 function openReject(id){
   const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
   openDrawer('Отклонить: '+a.full_name,
-    `<p class="muted">${esc(a.email)}</p><form id="rejectForm" data-id="${a.id}">
+    `<p class="muted">${esc(a.email)}</p><form id="rejectForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>Причина *</label><textarea name="decision_reason" rows="4" required></textarea></div>
       <div class="actions"><button class="btn danger-access" type="submit">Отклонить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
@@ -349,7 +391,7 @@ function openEditAgent(id){
   const a=S.agents.find(x=>x.id===Number(id));if(!a)return;
   selClinicIds=[...(a.clinic_ids||[])];selSpecIds=[...(a.specialization_ids||[])];
   openDrawer('Редактировать: '+a.full_name,
-    `<form id="editAgentForm" data-id="${a.id}">
+    `<form id="editAgentForm" data-id="${a.id}" autocomplete="off">
       <div class="field"><label>ФИО</label><input name="full_name" required value="${esc(a.full_name)}"></div>
       <div class="field"><label>Телефон</label><input name="phone" value="${esc(a.phone||'')}"></div>
       <div class="field"><label>Статус</label><select name="status">${['pending','active','inactive','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${SL[s]}</option>`).join('')}</select></div>
@@ -368,9 +410,9 @@ function openAdminForm(id){
   const a=id?S.admins.find(x=>x.id===Number(id)):null;
   selAdminClinicIds=[...(a?.clinic_ids||[])];
   openDrawer(id?'Редактировать администратора':'Новый администратор',
-    `<form id="adminForm" data-id="${id||''}">
+    `<form id="adminForm" data-id="${id||''}" autocomplete="off">
       <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" value="${esc(a?.full_name||'')}"></div>
-      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" autocomplete="off" required ${id?'disabled':''} value="${esc(a?.email||'')}"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" autocomplete="new-email" required ${id?'disabled':''} value="${esc(a?.email||'')}"></div>
       <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" value="${esc(a?.phone||'')}"></div>
       ${id?'':`<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" data-label="Пароль" autocomplete="new-password" required minlength="8"></div>`}
       <div class="field"><label>Клиники</label>${multiSelectHtml('mcAdminClinic','mdAdminClinic',S.clinics,selAdminClinicIds)}</div>
@@ -387,13 +429,13 @@ function openAdminForm(id){
       </fieldset>
       <div class="actions"><button class="btn primary" type="submit">${id?'Сохранить':'Создать'}</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
-  setTimeout(()=>setupMultiSelect('mcAdminClinic','mdAdminClinic',S.clinics.map(c=>({id:c.id,name:c.name})),selAdminClinicIds,v=>{selAdminClinicIds=v;}),0);
+  setTimeout(()=>setupMultiSelect('mcAdminClinic','mdAdminClinic',S.clinics.filter(c=>c.active).map(c=>({id:c.id,name:c.name})),selAdminClinicIds,v=>{selAdminClinicIds=v;}),0);
 }
 
 function openClinicForm(id){
   const c=id?S.clinics.find(x=>x.id===Number(id)):null;
   openDrawer(id?'Редактировать клинику':'Новая клиника',
-    `<form id="clinicForm" data-id="${id||''}">
+    `<form id="clinicForm" data-id="${id||''}" autocomplete="off">
       <div class="field"><label>Название</label><input name="name" required value="${esc(c?.name||'')}"></div>
       <div class="field"><label>Город</label><input name="city" required value="${esc(c?.city||'')}"></div>
       <div class="field"><label>Адрес</label><input name="address" value="${esc(c?.address||'')}"></div>
@@ -405,7 +447,7 @@ function openClinicForm(id){
 
 function openEditSpec(clinic,sid,rate,active){
   openDrawer('Ставка специализации',
-    `<form id="specForm" data-clinic="${clinic}" data-spec="${sid}">
+    `<form id="specForm" data-clinic="${clinic}" data-spec="${sid}" autocomplete="off">
       <div class="field"><label>Ставка (%)</label><input name="default_rate" type="number" min="0" max="100" step="0.01" value="${rate}"></div>
       <div class="field"><label>Статус</label><select name="active">${['true','false'].map(v=>`<option value="${v}" ${String(active)===v?'selected':''}>${v==='true'?'Активна':'Отключена'}</option>`).join('')}</select></div>
       <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
@@ -437,6 +479,18 @@ document.addEventListener('click',async e=>{
       case 'newClinic':openClinicForm();break;
       case 'editClinic':openClinicForm(id);break;
       case 'editSpec':openEditSpec(a.dataset.clinic,a.dataset.spec,a.dataset.rate,a.dataset.active);break;
+      case 'viewAllHistory':
+        document.getElementById('historyModal').classList.add('open');
+        document.getElementById('historyModalBody').innerHTML = `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            <button class="btn small" data-hist-filter="all">Все</button>
+            <button class="btn small" data-hist-filter="chef">Мои</button>
+            <button class="btn small" data-hist-filter="admin">Администраторы</button>
+            <button class="btn small" data-hist-filter="agent">Агенты</button>
+          </div>
+          <div id="historyFilteredList"><div class="empty">Загрузка...</div></div>`;
+        loadHistoryModal('all');
+        break;
     }
   }catch(err){toast('Ошибка: '+err.message);}
 });
@@ -446,18 +500,18 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('input',e=>{
   if(e.target.id==='search'){
-    query=e.target.value;
-    // вместо render() — перерисовываем ТОЛЬКО таблицу
-    const cont = document.querySelector('#content');
-    if(!cont) return;
-    // сохранить фокус
     const inp = e.target;
     const selStart = inp.selectionStart;
     const selEnd = inp.selectionEnd;
-    render();  // перерисовка
-    // вернуть фокус и позицию курсора
-    const newInp = document.querySelector('#search');
-    if(newInp){ newInp.focus(); newInp.setSelectionRange(selStart, selEnd); }
+    query = inp.value;
+    render();
+    requestAnimationFrame(()=>{
+      const newInp = document.querySelector('#search');
+      if(newInp){
+        newInp.focus();
+        try { newInp.setSelectionRange(selStart, selEnd); } catch(_){}
+      }
+    });
   }
 });
 
@@ -501,7 +555,7 @@ document.addEventListener('submit',async e=>{
       const body={name:fd.get('name'),city:fd.get('city'),address:fd.get('address')||null,phone:fd.get('phone')||null,active:fd.get('active')==='true'};
       if(id)await api(`/clinics/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       else await api(`/clinics`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      toast(id?'Обновлена':'Создана');closeDrawer();await loadAll();render();
+      toast(id?'Обновлена':'Создана');closeDrawer();clinicId=null;await loadAll();render();
     }
     if(f.id==='specForm'){
       const cid=Number(f.dataset.clinic),sid=Number(f.dataset.spec);
@@ -515,8 +569,26 @@ document.addEventListener('submit',async e=>{
 
 $('#close').onclick=closeDrawer;
 $('#backdrop').addEventListener('click',e=>{if(e.target.id==='backdrop')closeDrawer();});
+$('#historyModal').addEventListener('click',e=>{if(e.target.id==='historyModal')document.getElementById('historyModal').classList.remove('open');});
 $('#logoutBtn').onclick=async()=>{try{await api('/auth/logout',{method:'POST'});}catch{}location.href='/';};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#sidebar').classList.remove('open');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();document.getElementById('historyModal').classList.remove('open');$('#sidebar').classList.remove('open');}});
+
+async function loadHistoryModal(filter){
+  const el = document.getElementById('historyFilteredList');
+  if(!el) return;
+  try{
+    const url = filter==='all' ? '/history?limit=200' : `/history?limit=200&actor_type=${filter}`;
+    const items = await api(url);
+    el.innerHTML = items.length
+      ? items.map(h => `<div class="change-item"><div class="change-item-body"><strong>${esc(h.label)}</strong><small>${esc(h.text)}</small><small style="color:#8da1a4;margin-top:2px">${esc(h.actor_type)}${h.actor_name?': '+esc(h.actor_name):''}</small></div><div class="change-item-time">${dt(h.created_at)}</div></div>`).join('')
+      : '<div class="empty">Нет записей</div>';
+  }catch(e){ el.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`; }
+}
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-hist-filter]');
+  if(b){ loadHistoryModal(b.dataset.histFilter); }
+});
 
 (async function init(){
   try{

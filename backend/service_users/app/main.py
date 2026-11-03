@@ -518,9 +518,35 @@ async def update_column_order(
 
 @app.get("/api/v1/clinics", response_model=List[ClinicResponse])
 async def get_clinics(
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.get_all_clinics(db, only_active=False)
+    """Список клиник. Агент/админ — только свои. Шеф — все. Без токена — все активные."""
+    token = request.cookies.get("access_token")
+    if not token:
+        return await crud.get_all_clinics(db, only_active=True)
+
+    payload = decode_token(token)
+    if not payload:
+        return await crud.get_all_clinics(db, only_active=True)
+
+    role = payload.get("role")
+    user_id = payload.get("user_id")
+
+    if role == "chef":
+        return await crud.get_all_clinics(db, only_active=False)
+
+    if role == "admin":
+        clinic_ids = await crud.get_admin_clinic_ids(db, user_id)
+        all_clinics = await crud.get_all_clinics(db, only_active=False)
+        return [c for c in all_clinics if c.id in clinic_ids]
+
+    if role == "agent":
+        clinic_ids = await crud.get_agent_clinic_ids(db, user_id)
+        all_clinics = await crud.get_all_clinics(db, only_active=False)
+        return [c for c in all_clinics if c.id in clinic_ids]
+
+    return await crud.get_all_clinics(db, only_active=True)
 
 
 # ==================== Patients ====================
@@ -1140,6 +1166,33 @@ async def delete_agent_endpoint(
     return MessageResponse(message="Агент удалён")
 
 
+
+
+
+# ==================== History ====================
+
+@app.get("/api/v1/history")
+async def get_history_endpoint(
+    actor_type: Optional[str] = None,
+    limit: int = 100,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    items = await crud.get_history(db, actor_type=actor_type, actor_id=None, limit=limit)
+    return [
+        {
+            "id": h.id,
+            "label": h.label,
+            "text": h.text,
+            "actor_type": h.actor_type,
+            "actor_id": h.actor_id,
+            "actor_name": h.actor_name,
+            "created_at": h.created_at,
+        }
+        for h in items
+    ]
+
+
 # ==================== Admin: Agents helper ====================
 
 async def _build_agent_response(db: AsyncSession, agent: Agent) -> AgentResponse:
@@ -1229,7 +1282,10 @@ async def update_admin_endpoint(
     if update_data:
         await crud.update_admin(db, admin_id, **update_data)
     if clinic_ids is not None:
-        await crud.update_admin(db, admin_id, clinic_ids=clinic_ids)
+        try:
+            await crud.update_admin(db, admin_id, clinic_ids=clinic_ids)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
     admin = await crud.get_admin(db, admin_id)
     clinic_ids = await crud.get_admin_clinic_ids(db, admin_id)
