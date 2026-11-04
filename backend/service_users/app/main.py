@@ -25,16 +25,13 @@ broker = RabbitBroker("amqp://guest:guest@rabbitmq:5672/")
 # ==================== Lifespan ====================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #print("🔄 Подключение к RabbitMQ...", file=sys.stderr)
     try:
         max_retries = 30
         for attempt in range(max_retries):
             try:
                 await broker.connect()
-                #print("✅ Брокер подключен", file=sys.stderr)
                 break
             except Exception as e:
-                #print(f"❌ Попытка {attempt + 1}/{max_retries} не удалась: {e}", file=sys.stderr)
                 if attempt < max_retries - 1:
                     await asyncio.sleep(2)
                 else:
@@ -42,7 +39,6 @@ async def lifespan(app: FastAPI):
 
         from faststream.rabbit import RabbitQueue
         await broker.declare_queue(RabbitQueue("email_queue"))
-        #print("✅ Очередь email_queue объявлена", file=sys.stderr)
     except Exception as e:
         print(f"❌ Ошибка: {e}", file=sys.stderr)
         import traceback
@@ -261,8 +257,6 @@ async def login(
 
     # 2. Пробуем как админа
     admin = await crud.get_admin_by_email(db, data.email)
-    print(admin.__dict__)
-    print(verify_password(data.password, admin.password_hash))
     if admin and verify_password(data.password, admin.password_hash):
         if not admin.active:
             raise HTTPException(status_code=403, detail="Администратор отключён")
@@ -289,7 +283,6 @@ async def login(
         )
         return TokenResponse(access_token=access_token)
 
-    print('--------------------')
     raise HTTPException(status_code=401, detail="Неверный email или пароль")
 
 
@@ -453,7 +446,6 @@ async def change_email_send_code(
     code = f"{random.randint(100000, 999999)}"
     await crud.create_email_verification(db, new_email, code)
 
-    print(f"📧 Код для смены email на {new_email}: {code}")
     email_data = {
         "email": new_email,
         "subject": "Подтверждение смены email в Medpoint",
@@ -1178,7 +1170,14 @@ async def get_history_endpoint(
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    items = await crud.get_history(db, actor_type=actor_type, actor_id=None, limit=limit)
+    # Шеф видит всё, админ — только свои действия
+    actor_id_filter = None if admin.role == "chef" else admin.id
+    items = await crud.get_history(
+        db,
+        actor_type=actor_type,
+        actor_id=actor_id_filter,
+        limit=limit,
+    )
     return [
         {
             "id": h.id,
@@ -1288,11 +1287,11 @@ async def update_admin_endpoint(
             raise HTTPException(status_code=400, detail=str(e))
 
     admin = await crud.get_admin(db, admin_id)
-    clinic_ids = await crud.get_admin_clinic_ids(db, admin_id)
+    clinic_ids_now = await crud.get_admin_clinic_ids(db, admin_id)
     return AdminResponse(
         id=admin.id, email=admin.email, full_name=admin.full_name, phone=admin.phone,
         role=admin.role, active=admin.active, permissions=admin.permissions or {},
-        clinic_ids=clinic_ids,
+        clinic_ids=clinic_ids_now,
     )
 
 
@@ -1336,18 +1335,13 @@ async def create_clinic_endpoint(
 async def update_clinic_endpoint(
     clinic_id: int,
     data: ClinicUpdate,
-    admin: Admin = Depends(get_current_admin),
+    chef: Admin = Depends(get_current_chef),
     db: AsyncSession = Depends(get_db),
 ):
     clinic = await crud.get_clinic(db, clinic_id)
     if not clinic:
         raise HTTPException(status_code=404, detail="Клиника не найдена")
-
-    if admin.role != "chef":
-        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
-        if clinic_id not in admin_clinic_ids:
-            raise HTTPException(status_code=403, detail="Нет доступа")
-
+    
     update_data = data.dict(exclude_unset=True)
     clinic = await crud.update_clinic(db, clinic_id, **update_data)
     return clinic
@@ -1464,3 +1458,76 @@ async def set_agent_rate_endpoint(
         mode=rate.mode,
         custom_rate=float(rate.custom_rate) if rate.custom_rate is not None else None,
     )
+
+
+
+# ==================== Admin: Referrals ====================
+
+@app.get("/api/v1/admin/referrals")
+async def admin_list_referrals(
+    status: Optional[str] = None,
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if admin.role == "chef":
+        clinic_ids = None
+    else:
+        clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if not clinic_ids:
+            return []
+    q = select(Referral).options(
+        selectinload(Referral.patient),
+        selectinload(Referral.clinic),
+        selectinload(Referral.specialization),
+    )
+    if clinic_ids is not None:
+        q = q.where(Referral.clinic_id.in_(clinic_ids))
+    if status:
+        q = q.where(Referral.status == status)
+    q = q.order_by(Referral.created_at.desc()).limit(200)
+    result = await db.execute(q)
+    return [
+        {
+            "id": r.id,
+            "patient_full_name": r.patient.full_name if r.patient else None,
+            "patient_phone": r.patient.phone if r.patient else None,
+            "clinic_name": r.clinic.name if r.clinic else None,
+            "specialization_name": r.specialization.name if r.specialization else None,
+            "expected_visit_start": r.expected_visit_start,
+            "expected_visit_end": r.expected_visit_end,
+            "med_indications": r.med_indications,
+            "status": r.status,
+            "created_at": r.created_at,
+        }
+        for r in result.scalars().all()
+    ]
+
+
+@app.put("/api/v1/admin/referrals/{referral_id}")
+async def admin_update_referral_status(
+
+    referral_id: int,
+    data: dict = Body(...),
+    admin: Admin = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    new_status = data.get("status")
+    if new_status not in ("approved", "rejected"):
+        raise HTTPException(status_code=400, detail="status должен быть approved или rejected")
+    result = await db.execute(select(Referral).where(Referral.id == referral_id))
+    r = result.scalar_one_or_none()
+    if not r:
+        raise HTTPException(status_code=404, detail="Направление не найдено")
+    if admin.role != "chef":
+        admin_clinics = await crud.get_admin_clinic_ids(db, admin.id)
+        if r.clinic_id not in admin_clinics:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+    r.status = new_status
+    r.status_changed_at = datetime.utcnow()
+    await db.commit()
+    return {"ok": True}
+
+
+
+
+

@@ -19,6 +19,12 @@ def render_template(template_name: str):
         return f.read()
 
 
+from fastapi.staticfiles import StaticFiles
+
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "templates", "static")
+os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -148,12 +154,16 @@ async def profile_page(request: Request):
 
 @app.get("/clinic-admin", response_class=HTMLResponse)
 async def clinic_admin_page():
-    return HTMLResponse(render_template("Clinic_Admin.html"))
+    return HTMLResponse(render_template("admin_panel.html"))
 
 
 @app.get("/portal-admin", response_class=HTMLResponse)
 async def portal_admin_page():
-    return HTMLResponse(render_template("Portal_Admin.html"))
+    return HTMLResponse(render_template("admin_panel.html"))
+
+@app.get("/admin_panel", response_class=HTMLResponse)
+async def admin_panel_page():
+    return HTMLResponse(render_template("admin_panel.html"))
 
 
 # ================== ПРОКСИРОВАНИЕ ==================
