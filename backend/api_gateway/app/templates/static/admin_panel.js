@@ -70,6 +70,13 @@ function validateForm(form) {
     const label = el.dataset.label || el.getAttribute('aria-label') || el.name || 'Поле';
     if (el.required && !v) { errors.push(`${label}: обязательно для заполнения`); return; }
     if (!v) return;
+
+    // Проверка максимальной длины (если задан maxlength)
+    const maxLen = el.maxLength;
+    if (maxLen && maxLen > 0 && v.length > maxLen) {
+      errors.push(`${label}: максимум ${maxLen} символов`);
+    }
+
     if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) errors.push(`${label}: некорректный email`);
     if (el.type === 'password' && el.minLength && v.length < el.minLength) errors.push(`${label}: минимум ${el.minLength} символов`);
     if (el.type === 'tel') {
@@ -345,10 +352,10 @@ function agents() {
     ? ['Агент', 'Email', 'Статус', 'Клиники', 'Админ', '']
     : ['Агент', 'Email', 'Статус', 'Клиники', ''];
   const rows = list.map(a => {
-    const tds = `<td><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td>
-      <td>${esc(a.email)}</td>
+    const tds = `<td class="wrap"><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td>
+      <td class="wrap">${esc(a.email)}</td>
       <td>${pill(SL[a.status] || a.status, SP[a.status] || '')}</td>
-      <td>${(a.clinic_ids || []).filter(c => isChef() || myClinicIds().includes(c)).map(cName).filter(Boolean).join(', ') || '—'}</td>`;
+      <td class="wrap">${(a.clinic_ids || []).filter(c => isChef() || myClinicIds().includes(c)).map(cName).filter(Boolean).join(', ') || '—'}</td>`;
     const adminTd = isChef() ? `<td>${esc(aName(a.admin_id))}</td>` : '';
     const actionTd = `<td><button class="btn small" data-action="viewAgent" data-id="${a.id}">Профиль</button></td>`;
     return `<tr>${tds}${adminTd}${actionTd}</tr>`;
@@ -399,8 +406,7 @@ function admins() {
   if (adminId) return adminProfile();
   const list = S.admins.filter(a => !query || [a.full_name, a.email].join(' ').toLowerCase().includes(query.toLowerCase()));
   return heading('Администраторы', '', `<button class="btn primary" data-action="newAdmin">Добавить</button>`)
-    + `<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Имя или email" value="${esc(query)}"></div>${table(['ФИО','Email','Клиники','Доступ',''], list.map(a => `<tr><td><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td><td>${esc(a.email)}</td><td>${(a.clinic_ids || []).map(cName).filter(Boolean).join(', ') || '—'}</td><td>${a.active ? pill('Активен', 'approved') : pill('Отключён', 'rejected')}</td><td><button class="btn small" data-action="viewAdmin" data-id="${a.id}">Профиль</button></td></tr>`))}</section>`;
-}
++`<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Имя или email" value="${esc(query)}"></div>${table(['ФИО','Email','Клиники','Доступ',''], list.map(a => `<tr><td class="wrap"><strong>${esc(a.full_name)}</strong><small>#${a.id}</small></td><td class="wrap">${esc(a.email)}</td><td class="wrap">${(a.clinic_ids || []).map(cName).filter(Boolean).join(', ') || '—'}</td><td>${a.active ? pill('Активен', 'approved') : pill('Отключён', 'rejected')}</td><td><button class="btn small" data-action="viewAdmin" data-id="${a.id}">Профиль</button></td></tr>`))}</section>`;}
 
 function adminProfile() {
   const a = S.admins.find(x => x.id === Number(adminId));
@@ -545,8 +551,7 @@ function openPendingAgent(id) {
       <div class="field"><label>Клиники *</label>${multiSelectHtml('pClinic','pClinicD')}</div>
       <div class="field"><label>Специализации</label>${multiSelectHtml('pSpec','pSpecD')}</div>
       ${isChef() ? `<div class="field"><label>Администратор</label><select name="admin_id"><option value="">Не назначать</option>${admins.map(x => `<option value="${x.id}">${esc(x.full_name)}</option>`).join('')}</select></div>` : ''}
-      <div class="field"><label>Комментарий / причина отклонения</label><textarea name="decision_reason" data-label="Причина" rows="3"></textarea></div>
-      <div class="actions"><button class="btn primary" type="submit">Сохранить решение</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+<div class="field"><label>Комментарий / причина отклонения</label><textarea name="decision_reason" data-label="Причина" rows="3" maxlength="500"></textarea></div>      <div class="actions"><button class="btn primary" type="submit">Сохранить решение</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
   setTimeout(() => {
     window.__selPendingClinic = [];
@@ -587,8 +592,8 @@ function openEditAgent(id) {
   const clinicsPool = isChef() ? S.clinics : S.myClinics;
   openDrawer('Редактировать: ' + a.full_name,
     `<form id="editAgentForm" data-id="${a.id}" autocomplete="off">
-      <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" value="${esc(a.full_name)}"></div>
-      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" value="${esc(a.phone||'')}"></div>
+      <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" maxlength="40" value="${esc(a.full_name)}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" maxlength="20" value="${esc(a.phone||'')}"></div>
       <div class="field"><label>Статус</label><select name="status">${['pending','active','inactive','rejected'].map(s => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${SL[s]}</option>`).join('')}</select></div>
       <div class="field"><label>Клиники</label>${multiSelectHtml('mcClinic','mdClinic')}</div>
       <div class="field"><label>Специализации</label>${multiSelectHtml('mcSpec','mdSpec')}</div>
@@ -624,27 +629,130 @@ function renderAgentRates() {
   if (!el) return;
   const rates = window.__agentRates || [];
   const specs = window.__agentSpecs || [];
+  const agent = S.agents.find(a => a.id === Number(window.__agentCurrentId));
   const q = (document.getElementById('profileSearch')?.value || '').toLowerCase();
   const filtered = rates.filter(r => {
     const name = r.specialization_name || (specs.find(s => s.id === r.specialization_id)?.name) || '';
     return !q || name.toLowerCase().includes(q);
   });
   if (!filtered.length) { el.innerHTML = '<div class="empty">Нет ставок. Одобрите специализации агента.</div>'; return; }
-  el.innerHTML = `<div class="tablewrap"><table><thead><tr><th>Специализация</th><th>Режим</th><th>Ставка</th><th></th></tr></thead><tbody>${filtered.map(r => {
-    const name = r.specialization_name || (specs.find(s => s.id === r.specialization_id)?.name) || ('#' + r.specialization_id);
-    const modeLabel = r.mode === 'custom' ? 'Личная' : 'По клинике';
-    const rateLabel = (r.mode === 'custom' && r.custom_rate != null) ? r.custom_rate + '%' : '— (из клиники)';
-    return `<tr><td><strong>${esc(name)}</strong></td><td>${pill(modeLabel, r.mode === 'custom' ? 'approved' : 'work')}</td><td>${rateLabel}</td><td><button class="btn small" data-action="editAgentRate" data-agent="${window.__agentCurrentId}" data-spec="${r.specialization_id}" data-mode="${r.mode}" data-custom="${r.custom_rate ?? ''}">Изменить</button></td></tr>`;
-  }).join('')}</tbody></table></div>`;
+
+  el.innerHTML = `<div class="tablewrap"><table>
+    <thead><tr><th>Специализация</th><th>Клиники</th><th>Применяется</th><th></th></tr></thead>
+    <tbody>${filtered.map(r => {
+      const name = r.specialization_name || (specs.find(s => s.id === r.specialization_id)?.name) || ('#' + r.specialization_id);
+      const isCustom = r.mode === 'custom' && r.custom_rate != null;
+      const clinicsList = (agent?.clinic_ids || []).map(cid => {
+        const cs = S.clinicSpecialties?.find?.(cs => cs.clinic_id === cid && cs.specialization_id === r.specialization_id);
+        return cs ? cs : null;
+      }).filter(Boolean);
+      const uniqueRates = [...new Set((agent?.clinic_ids || []).map(cid => {
+        const cs = (window.__agentClinicSpecialties || []).find(cs => cs.clinic_id === cid && cs.specialization_id === r.specialization_id);
+        return cs?.active ? cs.default_rate : null;
+      }).filter(v => v !== null && v !== undefined))];
+      const applies = isCustom
+        ? `${r.custom_rate}% (личная)`
+        : uniqueRates.length === 1
+          ? `${uniqueRates[0]}% (по клиникам)`
+          : 'По клиникам';
+
+      return `<tr>
+        <td class="specialty-cell"><strong>${esc(name)}</strong></td>
+        <td><button class="btn small" data-action="agentClinicsRates" data-agent="${window.__agentCurrentId}" data-spec="${r.specialization_id}" data-mode="${r.mode}" data-custom="${r.custom_rate ?? ''}">Посмотреть</button></td>
+        <td><strong>${applies}</strong></td>
+        <td><button class="btn small" data-action="editAgentRate" data-agent="${window.__agentCurrentId}" data-spec="${r.specialization_id}" data-mode="${r.mode}" data-custom="${r.custom_rate ?? ''}">Изменить</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
 }
-function openEditAgentRate(agentIdArg, specId, mode, custom) {
+
+async function showAgentClinicsRates(agentId, specId, mode, custom) {
+  const el = document.getElementById('drawerBody');
+  // Загружаем ставки клиник для этой специализации
+  let clinicRates = [];
+  try {
+    const agent = S.agents.find(a => a.id === Number(agentId));
+    const clinicIds = agent?.clinic_ids || [];
+    const all = await Promise.all(clinicIds.map(async cid => {
+      try {
+        const list = await api(`/clinics/${cid}/specialties`);
+        const found = list.find(cs => cs.specialization_id === Number(specId));
+        return { cid, clinic: S.clinics.find(c => c.id === Number(cid)), cs: found };
+      } catch {
+        return { cid, clinic: S.clinics.find(c => c.id === Number(cid)), cs: null };
+      }
+    }));
+    clinicRates = all;
+  } catch (e) {
+    toast('Ошибка загрузки: ' + e.message);
+    return;
+  }
+  const agent = S.agents.find(a => a.id === Number(agentId));
+  const specs = window.__agentSpecs || [];
+  const spec = specs.find(s => s.id === Number(specId));
+  const specName = spec?.name || ('#' + specId);
+
+  const rows = clinicRates.map(({ cid, clinic, cs }) => {
+    const rate = cs?.active ? cs.default_rate : null;
+    const isCustom = mode === 'custom';
+    return `<tr>
+      <td><strong>${esc(clinic?.name || '—')}</strong></td>
+      <td>${rate === null || rate === undefined ? '—' : rate + '%'}</td>
+      <td>${cs?.active ? pill('Действует', 'approved') : pill('Отключена', 'rejected')}</td>
+    </tr>`;
+  }).join('');
+  const customRow = mode === 'custom' ? `<tr style="background:#eff7f6"><td><strong>Личная ставка</strong> <small style="color:#146a70">(выбрано)</small></td><td><strong>${custom}%</strong></td><td>${pill('Применяется', 'approved')}</td></tr>` : '';
+
+  openDrawer('Проценты по клиникам',
+    `<p class="muted">${esc(agent?.full_name || '')} · ${esc(specName)}</p>
+          ${table(['Клиника','Процент','Статус'], (rows + customRow) ? [rows + customRow] : ['<tr><td colspan="3" class="empty">Нет клиник</td></tr>'])}`
+  );
+}
+
+async function openEditAgentRate(agentIdArg, specId, mode, custom) {
   const specs = window.__agentSpecs || [];
   const name = specs.find(s => s.id === Number(specId))?.name || ('#' + specId);
-  openDrawer('Ставка: ' + name,
-    `<form id="editAgentRateForm" data-agent="${agentIdArg}" data-spec="${specId}" autocomplete="off">
-      <div class="field"><label>Режим</label><select name="mode"><option value="clinic" ${mode === 'clinic' ? 'selected' : ''}>По клинике</option><option value="custom" ${mode === 'custom' ? 'selected' : ''}>Личная ставка</option></select></div>
-<div class="field"><label>Личная ставка (%)</label><input name="custom_rate" type="number" data-label="Личная ставка" min="0" max="100" step="0.01" value="${custom}"></div>      <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
-   </form>`);
+  const agent = S.agents.find(a => a.id === Number(agentIdArg));
+  const clinicIds = agent?.clinic_ids || [];
+
+  // Загружаем ставки клиник, чтобы показать в карточке «По клиникам»
+  let clinicsHtml = '';
+  try {
+    const all = await Promise.all(clinicIds.map(async cid => {
+      try {
+        const list = await api(`/clinics/${cid}/specialties`);
+        const cs = list.find(c => c.specialization_id === Number(specId));
+        return { clinic: S.clinics.find(c => c.id === Number(cid)), cs };
+      } catch {
+        return { clinic: S.clinics.find(c => c.id === Number(cid)), cs: null };
+      }
+    }));
+    clinicsHtml = all.map(({ clinic, cs }) =>
+      `<div><dt>${esc(clinic?.name || '—')}</dt><dd>${cs?.active && cs.default_rate != null ? cs.default_rate + '%' : 'Не задана'}</dd></div>`
+    ).join('');
+  } catch {}
+  if (!clinicsHtml) clinicsHtml = '<div><dt>Клиники</dt><dd>Не выбраны</dd></div>';
+
+  const customActive = mode === 'custom';
+
+  openDrawer('Вознаграждение: ' + name,
+    `<dl class="details">${clinicsHtml}</dl>
+     <form id="editAgentRateForm" data-agent="${agentIdArg}" data-spec="${specId}" autocomplete="off">
+       <input type="hidden" name="mode" value="${mode}">
+       <button type="button" class="rate-choice ${mode === 'clinic' ? 'active' : ''}" data-mode-choice="clinic" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${mode === 'clinic' ? '#146a70' : '#d8e5e5'};border-radius:12px;background:${mode === 'clinic' ? '#eff7f6' : 'white'};text-align:left;cursor:pointer;font:inherit">
+         <strong style="display:block;color:#146a70;font-size:15px">По клиникам</strong>
+         <small style="display:block;color:#71888c;margin-top:4px">Процент берётся из клиники, куда направлен пациент</small>
+       </button>
+       <div class="rate-choice ${customActive ? 'active' : ''}" data-mode-choice="custom" style="width:100%;margin:8px 0;padding:16px;border:2px solid ${customActive ? '#146a70' : '#d8e5e5'};border-radius:12px;background:${customActive ? '#eff7f6' : 'white'};cursor:pointer;font:inherit">
+         <strong style="display:block;color:#146a70;font-size:15px">Личная ставка (для всех клиник)</strong>
+         <small style="display:block;color:#71888c;margin-top:4px">Один процент на все клиники агента</small>
+         <div class="field" id="customRateField" style="margin:12px 0 0">
+           <label>Процент</label>
+           <input type="number" name="custom_rate" data-label="Личная ставка" min="0" max="100" step="0.01" value="${custom ?? ''}" ${customActive ? '' : 'disabled'} onclick="event.stopPropagation()" style="cursor:${customActive ? 'text' : 'not-allowed'}">
+         </div>
+       </div>
+       <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
+     </form>`
+  );
 }
 async function handleEditAgentRate(f) {
   const agentIdArg = Number(f.dataset.agent);
@@ -652,9 +760,40 @@ async function handleEditAgentRate(f) {
   const fd = new FormData(f);
   const mode = fd.get('mode');
   const custom = String(fd.get('custom_rate') || '').trim();
-  if (mode === 'custom' && custom === '') { toast('Укажите личную ставку'); return; }
-  await api(`/agents/${agentIdArg}/rates/${specId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode, custom_rate: mode === 'custom' ? Number(custom) : null }) });
-  toast('Сохранено'); closeDrawer(); await loadAgentRates(agentIdArg);
+
+  if (mode === 'custom' && custom === '') {
+    toast('Укажите личную ставку');
+    return;
+  }
+
+  // Имя специализации — для тоста
+  const specs = window.__agentSpecs || [];
+  const specName = specs.find(s => s.id === Number(specId))?.name || ('#' + specId);
+
+  try {
+    await api(`/agents/${agentIdArg}/rates/${specId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode,
+        custom_rate: mode === 'custom' ? Number(custom) : null,
+      }),
+    });
+
+    // 1. Закрываем модалку
+    closeDrawer();
+
+    // 2. Показываем тост с понятным текстом
+    const msg = mode === 'custom'
+      ? `Ставка «${specName}» изменена: ${custom}% (личная)`
+      : `Ставка «${specName}» изменена: по клиникам`;
+    toast(msg);
+
+    // 3. Перезагружаем данные (иначе в таблице — старые значения)
+    await loadAgentRates(agentIdArg);
+  } catch (err) {
+    toast('Ошибка: ' + err.message);
+  }
 }
 
 // ===== Администратор =====
@@ -664,10 +803,10 @@ function openAdminForm(id) {
   const clinicIds = [...(a?.clinic_ids || [])];
   openDrawer(id ? 'Редактировать администратора' : 'Новый администратор',
     `<form id="adminForm" data-id="${id || ''}" autocomplete="off">
-      <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" value="${esc(a?.full_name || '')}"></div>
-      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" autocomplete="new-email" required ${id ? 'disabled' : ''} value="${esc(a?.email || '')}"></div>
-      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" value="${esc(a?.phone || '')}"></div>
-      ${id ? '' : `<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" data-label="Пароль" autocomplete="new-password" required minlength="8"></div>`}
+      <div class="field"><label>ФИО</label><input name="full_name" data-label="ФИО" required minlength="2" maxlength="40" value="${esc(a?.full_name || '')}"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" autocomplete="new-email" required maxlength="40" ${id ? 'disabled' : ''} value="${esc(a?.email || '')}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" maxlength="20" value="${esc(a?.phone || '')}"></div>
+      ${id ? '' : `<div class="field"><label>Пароль (мин. 8)</label><input name="password" type="password" data-label="Пароль" autocomplete="new-password" required minlength="8" maxlength="128"></div>`}
       <div class="field"><label>Клиники</label>${multiSelectHtml('mcAdminClinic','mdAdminClinic')}</div>
       <div class="field"><label>Доступ</label><select name="active">${['true','false'].map(v => `<option value="${v}" ${String(a?.active !== false) === v ? 'selected' : ''}>${v === 'true' ? 'Активен' : 'Отключён'}</option>`).join('')}</select></div>
       <fieldset class="permission-box">
@@ -710,10 +849,10 @@ function openClinicForm(id) {
   const c = id ? S.clinics.find(x => x.id === Number(id)) : null;
   openDrawer(id ? 'Редактировать клинику' : 'Новая клиника',
     `<form id="clinicForm" data-id="${id || ''}" autocomplete="off">
-      <div class="field"><label>Название</label><input name="name" data-label="Название" required minlength="2" value="${esc(c?.name||'')}"></div>
-      <div class="field"><label>Город</label><input name="city" data-label="Город" required minlength="2" value="${esc(c?.city||'')}"></div>
-      <div class="field"><label>Адрес</label><input name="address" data-label="Адрес" value="${esc(c?.address||'')}"></div>
-      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" value="${esc(c?.phone||'')}"></div>
+      <div class="field"><label>Название</label><input name="name" data-label="Название" required minlength="2" maxlength="100" value="${esc(c?.name||'')}"></div>
+      <div class="field"><label>Город</label><input name="city" data-label="Город" required minlength="2" maxlength="100" value="${esc(c?.city||'')}"></div>
+      <div class="field"><label>Адрес</label><input name="address" data-label="Адрес" maxlength="255" value="${esc(c?.address||'')}"></div>
+      <div class="field"><label>Телефон</label><input name="phone" type="tel" data-label="Телефон" maxlength="20" value="${esc(c?.phone||'')}"></div>
       <div class="field"><label>Статус</label><select name="active">${['true','false'].map(v => `<option value="${v}" ${String(c?.active !== false) === v ? 'selected' : ''}>${v === 'true' ? 'Активна' : 'Отключена'}</option>`).join('')}</select></div>
       <div class="actions"><button class="btn primary" type="submit">${id ? 'Сохранить' : 'Создать'}</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
@@ -775,6 +914,31 @@ async function handleReferralDecision(f) {
 // ============================================================
 // 9. ОБРАБОТЧИКИ
 // ============================================================
+
+// Переключение карточек «По клиникам / Личная ставка» в модалке rate
+document.addEventListener('click', e => {
+  if (e.target.closest('#customRateField')) return;
+  const b = e.target.closest('[data-mode-choice]');
+  if (!b) return;
+  const form = b.closest('form');
+  if (!form || form.id !== 'editAgentRateForm') return;
+  const mode = b.dataset.modeChoice;
+  form.querySelector('input[name="mode"]').value = mode;
+  form.querySelectorAll('.rate-choice').forEach(el => {
+    const active = el.dataset.modeChoice === mode;
+    el.classList.toggle('active', active);
+    el.style.borderColor = active ? '#146a70' : '#d8e5e5';
+    el.style.background = active ? '#eff7f6' : 'white';
+  });
+  const input = form.querySelector('#customRateField input[name="custom_rate"]');
+  if (input) {
+    const custom = mode === 'custom';
+    input.disabled = !custom;
+    input.style.cursor = custom ? 'text' : 'not-allowed';
+  }
+});
+
+
 document.addEventListener('click', async e => {
   const pg = e.target.closest('[data-page]');
   if (pg) { navigate(pg.dataset.page); return; }
@@ -798,6 +962,9 @@ document.addEventListener('click', async e => {
   const id = Number(a.dataset.id);
   try {
     switch (a.dataset.action) {
+      case 'agentClinicsRates':
+        await showAgentClinicsRates(a.dataset.agent, a.dataset.spec, a.dataset.mode, a.dataset.custom);
+        break;
       case 'viewAgent': agentId = id; page = 'agents'; render(); scrollTo(0, 0); break;
       case 'viewAdmin': if (isChef()) { adminId = id; page = 'admins'; render(); scrollTo(0, 0); } break;
       case 'viewReferral': viewReferral(id); break;

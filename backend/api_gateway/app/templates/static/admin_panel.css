@@ -53,7 +53,7 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#8a9fa2;ba
 td{padding:15px 22px;border-top:1px solid #eff3f3;font-size:14px;vertical-align:middle}
 td strong{display:block;color:#1d3d42}
 td small{color:#8da1a4;font-size:12px;display:block;margin-top:4px;line-height:1.5}
-td.wrap{white-space:normal;min-width:170px;max-width:260px;line-height:1.5}
+td.wrap{white-space:normal;min-width:140px;max-width:320px;line-height:1.5;word-break:break-word;overflow-wrap:anywhere}
 .pill{display:inline-block;border-radius:50px;padding:6px 10px;font-size:12px;font-weight:800;background:#edf3f3;color:#547078}
 .pill.new{background:#fff1dc;color:#a16a17}
 .pill.work{background:#e7f1ff;color:#3266a7}

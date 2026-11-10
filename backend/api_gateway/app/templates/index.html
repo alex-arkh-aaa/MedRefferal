@@ -164,17 +164,20 @@
             </ul>
 
             <div class="nav-buttons" id="authButtons">
-                <button class="btn btn-outline" id="loginOpenBtn">
-                    <i class="fas fa-sign-in-alt"></i> Вход
-                </button>
                 <button class="btn btn-primary" id="applyOpenBtn">
                     <i class="fas fa-paper-plane"></i> Подать заявку
+                </button>
+                <button class="btn btn-outline" id="loginOpenBtn">
+                    <i class="fas fa-sign-in-alt"></i> Вход
                 </button>
             </div>
 
             <div id="userPanel">
                 <span id="userName" style="font-weight: 500;"></span>
                 <div id="userAvatar"></div>
+                <button class="btn btn-primary" id="goToWorkBtn">
+                    <i class="fas fa-arrow-right"></i> К работе
+                </button>
                 <button class="btn btn-outline" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i> Выйти
                 </button>
@@ -399,7 +402,7 @@
             <p class="step-hint">Шаг 1 из 2 — подтвердите email</p>
             <div class="form-group">
                 <label for="applyEmail">Email</label>
-                <input type="email" id="applyEmail" placeholder="your@email.com" required>
+                <input type="email" id="applyEmail" placeholder="your@email.com" required maxlength="100">
             </div>
             <button type="button" class="btn btn-primary" style="width: 100%;" id="applySendCodeBtn">
                 <i class="fas fa-paper-plane"></i> Получить код
@@ -420,19 +423,19 @@
             </div>
             <div class="form-group">
                 <label for="applyPhone">Телефон</label>
-                <input type="tel" id="applyPhone" placeholder="+7 (999) 123-45-67">
+                <input type="tel" id="applyPhone" placeholder="+7 (999) 123-45-67" maxlength="20">
             </div>
             <div class="form-group">
                 <label for="applyPassword">Пароль</label>
-                <input type="password" id="applyPassword" placeholder="Не менее 8 символов">
+                <input type="password" id="applyPassword" placeholder="Не менее 8 символов" minlength="8" maxlength="128">
             </div>
             <div class="form-group">
                 <label for="applyConfirmPassword">Подтвердите пароль</label>
-                <input type="password" id="applyConfirmPassword" placeholder="Повторите пароль">
+                <input type="password" id="applyConfirmPassword" placeholder="Повторите пароль" minlength="8" maxlength="128">
             </div>
             <div class="form-group">
                 <label for="applyComment">О себе / пожелания</label>
-                <textarea id="applyComment" rows="4" placeholder="Опыт работы, желаемая специализация, клиники — всё, что хотите сообщить администратору"></textarea>
+                <textarea id="applyComment" rows="4" maxlength="1000" placeholder="Опыт работы, желаемая специализация, клиники — всё, что хотите сообщить администратору"></textarea>
             </div>
 
             <label style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
@@ -605,7 +608,7 @@
                 showToast('✅ Добро пожаловать!', 'success');
                 closeAllModals();
                 const user = await checkAuth();
-                setTimeout(() => redirectByRole(user), 500);
+                setTimeout(() => redirectByRole(user));
             } else {
                 showToast('❌ ' + (data.detail || 'Неверный email или пароль'), 'error');
             }
@@ -780,6 +783,25 @@
             this.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить';
         }
     });
+
+    // Кнопка «К работе» — редирект по роли
+    const goToWorkBtn = document.getElementById('goToWorkBtn');
+    if (goToWorkBtn) {
+        goToWorkBtn.addEventListener('click', async () => {
+            try {
+                const user = await checkAuth();
+                if (user) {
+                    redirectByRole(user);
+                } else {
+                    showToast('⚠️ Не удалось определить роль. Войдите заново.', 'error');
+                }
+            } catch (err) {
+                showToast('⚠️ Ошибка соединения', 'error');
+            }
+        });
+    }
+
+
 
     logoutBtn.addEventListener('click', async () => {
         try {

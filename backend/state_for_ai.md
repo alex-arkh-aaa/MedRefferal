@@ -1,10 +1,10 @@
-# Medpoint — STATE (снимок на 2026-11-04, после итерации с admin_panel)
+# Medpoint — STATE (снимок на 2026-11-04, после переключения на admin_panel)
 
 ## Проект
 Платформа медицинских агентов. Backend: FastAPI + PostgreSQL + RabbitMQ + Redis, Docker Compose. Frontend: HTML+JS (без сборщика).
 
 ## Архитектура
-- `api_gateway` (порт 80) — JWT, rate limiting, HTML-роуты, проксирование в `service_users`.
+- `api_gateway` (порт 80) — JWT, rate limiting, HTML-роуты, проксирование в `service_users`, раздача `/static/`.
 - `service_users` (порт 8000) — вся бизнес-логика.
 - `service_notify` (порт 8003) — email через RabbitMQ (`email_queue`).
 - `postgres` — БД `med_referral_db`.
@@ -12,15 +12,15 @@
 ## Роли (в JWT: `sub`, `user_id`, `full_name`, `role`)
 - `agent` — агент.
 - `admin` — админ клиники (видит только свои клиники).
-- `chef` — шеф (один, `portaladmin@yandex.ru`). **Логин шефа починен** (была проблема 422 — исправлено).
+- `chef` — шеф (один, `portaladmin@yandex.ru`).
 
 ## Модели (`service_users/app/models.py`)
 - **`Agent`** (`agents`): email, password_hash, full_name, phone, date_of_birth, experience, education, about_myself, column_order (JSON), **status** (`pending/active/inactive/rejected`), deleted_at, **admin_id** (FK→Admins).
 - **`Admin`** (`admins`): email, password_hash, full_name, phone, **role** (`chef/admin`), active, permissions (JSON), deleted_at. Partial unique index на `role='chef'`.
 - **`AdminClinic`** — M2M admin↔clinic.
 - **`Clinic`** (`clinics`): name, city, address, phone, active.
-- **`Specialization`** — справочник.
-- **`AgentSpecialization`** — M2M + active. **Инвариант: каждой `AgentSpecialization` соответствует `AgentRate`.**
+- **`Specialization`** — справочник (21 запись после `add_specializations`).
+- **`AgentSpecialization`** — M2M + `active`. **Инвариант (не поддерживается кодом): каждой `AgentSpecialization` должна соответствовать `AgentRate`.**
 - **`AgentClinic`** — M2M agent↔clinic.
 - **`AgentRate`** — agent_id, specialization_id, **mode** (`clinic/custom`), **custom_rate**.
 - **`ClinicSpecialty`** — clinic_id, specialization_id, default_rate, active.
@@ -33,80 +33,89 @@
 ## Миграции (применены)
 `a799a240a7e2_init` → `6e7f57f74f06_add_seed_data` → `eeb75508a0e2_education` → `7eef4b5fae5c_patient_status` → `af67ab719462_gender` → `eb3997ec001d_remove_email_unique` → `4e349b2b7f44_clinics_coordinates` → `a9c8667245f8_fix_bugs` → `4e372c0c78b5_chef_and_admins` → `393ba10550f8_clinic_timestamps` → `3ed86b9cb8dc_1_try_of_the_final_db` → `add_specializations`.
 
-**Не применена:** `backfill_agent_rates_01` — **нужно создать** (бэкфилл `AgentRate` для существующих `AgentSpecialization`).
+**Не применена:** `backfill_agent_rates_01` — не создана. Нужен бэкфилл `AgentRate` для существующих `AgentSpecialization`.
 
-## Что сделано (итерации 1–4)
+## Frontend
 
-### Backend auth
-- `/auth/login` для всех (agent/admin/chef), `role` в JWT.
-- `/auth/me` возвращает разное по роли.
-- `/auth/register` создаёт `Agent(status='pending')`.
-- Зависимости `get_current_agent`, `get_current_admin`, `get_current_chef`.
+### Удалено
+`Portal_Admin.html` и `Clinic_Admin.html` — **удалены** (в структуре проекта их нет). Остался единый `admin_panel.html`.
 
-### Фильтрация по роли
-- `GET /api/v1/clinics` — шеф: все, админ: свои, агент: свои, без токена: только активные.
+### `api_gateway/app/templates/` (актуальный список)
+- `404.html`, `admin_panel.html`, `clinics.html`, `create_referral.html`, `dashboard.html`, `earnings.html`, `index.html`, `patients.html`, `profile.html`, `referrals.html`, `reports.html`, `terms_and_privacy.html`.
+- **Старые `old/login.html`, `old/orders.html`, `old/profile.html`, `old/register.html`** — тоже удалены из структуры.
+
+### `api_gateway/app/templates/static/`
+- `admin_panel.css` — все стили единой панели. **Подсветка меню есть** (`.nav button:hover,.nav button.active{background:#28545d;color:white}`), иконки Font Awesome есть (`.nav button i{...}`).
+- `admin_panel.js` — вся логика (секции 1–10).
+
+### `admin_panel.html`
+- Подключён Font Awesome 6.4.0 CDN.
+- `<link rel="stylesheet" href="/static/admin_panel.css">`, `<script src="/static/admin_panel.js">`.
+- Роуты `/portal-admin`, `/clinic-admin`, `/admin_panel` **все** рендерят `admin_panel.html`.
+
+### `admin_panel.js` — фичи
+- `isChef()` — определяет роль через `S.user.role`.
+- `NAV` у шефа: 6 разделов. У админа: 5 (без `admins`).
+- Иконки: `fa-house`, `fa-file-medical`, `fa-user-shield`, `fa-user-doctor`, `fa-hospital`, `fa-chart-bar`.
+- **Регистрация агентов** — внизу раздела «Агенты» (`#registrationsBlock`, `#regResults`), кнопка «Новые ↓ N» сверху.
+- Модалка «Одобрить регистрацию» — как в `Medpoint_Portal_Admin`: `registration-person` с инициалами, `dl.details` (Подана, Почта, Телефон, Статус), `p.note` (комментарий), форма `approvePendingForm` с `decision`, `clinic_ids`, `specialization_ids`, `admin_id` (только шеф), `decision_reason`.
+- **Вознаграждение агента** — в профиле агента (`#rateResults`), табы «Вознаграждение / История агента», таблица ставок.
+- **Новые направления** — `#refResults`, `referralTable`, модалка `viewReferral` → `PUT /admin/referrals/{id}`.
+- Профиль администратора — ФИО, Телефон, Email, Доступ, Регистрации агентов.
+- **Поиск** — через `input` event, `requestAnimationFrame` + `setSelectionRange` (фокус не теряется).
+- **Клиники** — сортируются по `id` (`sort((a,b)=>a.id-b.id)`).
+- **Валидация форм** — `validateForm`, атрибуты `data-label`, `type`, `minlength`, `min`, `max`.
+- **Ошибки Pydantic → на русском** — `FIELD_RU`, `MSG_RU` в `api()`.
+
+## Backend — что сделано
+
+### `api_gateway/app/main.py`
+- `app.mount("/static", StaticFiles(directory="app/templates/static"))`.
+- `GET /portal-admin`, `GET /clinic-admin`, `GET /admin_panel` — все рендерят `admin_panel.html`.
+- `auth_middleware` — `public_paths` включает `/clinic-admin`, `/portal-admin`.
+- `proxy_request` — передаёт `X-User-ID`, `X-User-Email`, `X-User-Role`.
+
+### `service_users/app/main.py`
+- `/auth/login`, `/auth/me`, `/auth/logout`, `/auth/register`, `/auth/send_code` — есть.
+- `get_current_agent`, `get_current_admin`, `get_current_chef` — есть.
+- `GET /api/v1/clinics` — фильтр по роли (шеф: все, админ: свои, агент: свои, без токена: активные).
 - `GET /api/v1/agents` — шеф: все, админ: агенты своих клиник.
 - `GET /api/v1/admins` — только шеф.
-
-### Админские эндпоинты (есть)
-- `GET/PUT/DELETE /api/v1/agents` (с учётом роли).
 - `POST /api/v1/agents/{id}/approve` — pending → active + clinic_ids + specialization_ids + admin_id (для шефа).
 - `POST /api/v1/agents/{id}/reject` — pending → rejected + decision_reason.
-- `GET/POST/PUT/DELETE /api/v1/admins` — только шеф.
-- `GET/POST/PUT /api/v1/clinics` — **`PUT /clinics/{id}` теперь только шеф** (админ клиники не может редактировать клинику).
+- `PUT /api/v1/clinics/{id}` — **только шеф** (`Depends(get_current_chef)`).
 - `GET/PUT /api/v1/clinics/{id}/specialties` — админ клиники — свои, шеф — все.
 - `GET/PUT /api/v1/agents/{id}/rates` — ставки агента.
-- `GET /api/v1/history` — шеф: все, админ: только свои действия (`actor_id=admin.id`).
-- `GET/PUT /api/v1/admin/referrals` — **добавлено** (список новых направлений; шеф — все, админ — своих клиник).
+- `GET /api/v1/history` — **вариант А**: шеф видит всё, админ — только `actor_id=admin.id`.
+- `GET/PUT /api/v1/admin/referrals` — новые направления; шеф — все, админ — своих клиник.
 
-### `crud.py`
-- `set_agent_specializations` — **добавлено** (создаёт `AgentRate` при добавлении специализации, удаляет при удалении).
-- `set_agent_rate` — upsert ставки.
-- `get_agent_rates` — select.
-
-### api_gateway (`api_gateway/app/main.py`)
-- `app.mount("/static", StaticFiles(directory="app/templates/static"))` — **добавлено**.
-- `GET /admin_panel` — отдаёт `admin_panel.html` (новый единый файл).
-- `/portal-admin` и `/clinic-admin` — **пока рендерят старые** `Portal_Admin.html` / `Clinic_Admin.html` (переключение на `admin_panel.html` — в плане).
-
-### Новый единый файл `admin_panel`
-- `api_gateway/app/templates/admin_panel.html` — скелет (80 строк).
-- `api_gateway/app/templates/static/admin_panel.css` — все стили.
-- `api_gateway/app/templates/static/admin_panel.js` — вся логика, секции 1–10.
-- **Роль определяется через `S.user.role`** (`isChef()`).
-- У шефа: 6 разделов (Обзор, Новые направления, Администраторы, Агенты, Клиники, Отчёты).
-- У админа: 5 разделов (без Администраторы).
-- Иконки Font Awesome (`fa-house`, `fa-file-medical`, `fa-user-shield`, `fa-user-doctor`, `fa-hospital`, `fa-chart-bar`).
-- Блок «Регистрация агентов» внизу раздела «Агенты» (pending-агенты).
-- Блок «Вознаграждение агента» в профиле агента (табы «Вознаграждение / История агента»).
-- «Новые направления» — таблица referrals со статусом `new`, модалка «Подтвердить / Отклонить».
-- Профиль администратора — с Email рядом с телефоном.
-- Валидация форм на фронте (`validateForm`, `data-label`, `type`, `minlength`, `min`/`max`).
-- Ошибки Pydantic → на русском (`FIELD_RU`, `MSG_RU`).
-
-### Баги, которые починили
-- Цикл `render() → loadReferrals() → render()` — убран (`loadReferrals` пишет только в `refResults`, не вызывает `render`).
-- `pending: requests` → `pending: referrals` (раздел «Заявки» был недоступен).
-- Поиск в клиниках терял фокус — `requestAnimationFrame` + `setSelectionRange`.
-- Клиники сортируются по `id`.
-- Белый экран после сохранения клиники — `clinicId=null` перед `render`.
-- Модалка «Новый администратор» — отключённые клиники скрыты, `autocomplete="off"` + `new-password` на полях.
-- Галочка «Рассмотрение регистраций» — `fieldset.permission-box`, сохраняется в `permissions.reviewRegistrations`.
+### `service_users/app/crud.py`
+- `set_agent_specializations` — **есть**, но **НЕ создаёт `AgentRate`** при добавлении специализации. Только `AgentSpecialization`. ⚠️ **Главная причина пустого «Вознаграждения».**
+- `set_agent_rate` — upsert `AgentRate`.
+- `get_agent_rates` — `select(AgentRate)`.
+- `get_agent_specializations` — `select(AgentSpecialization).options(selectinload(specialization))`.
 
 ## Что НЕ работает / открытые вопросы (на 2026-11-04)
 
 ### 🔴 Срочно
-1. **В профиле агента → «Вознаграждение» пусто.** `GET /agents/{id}/rates` возвращает `[]`. Причины:
-   - В `crud.py` **нет** `set_agent_specializations` (или она не вызывается из `approve_agent_endpoint` / `update_agent_endpoint`).
-   - В БД нет `AgentRate` для существующих `AgentSpecialization` (нужен бэкфилл).
-   - **Проверить:** есть ли `crud.set_agent_specializations`; вызывается ли из `main.py`; SQL `SELECT COUNT(*) FROM agent_specializations;` vs `agent_rates`.
-2. **Подсветка активного пункта меню пропала.** В `admin_panel.css` **нет** строки `.nav button:hover,.nav button.active{background:#28545d;color:white}` — добавить.
+1. **В профиле агента → «Вознаграждение» пусто.** `GET /agents/{id}/rates` возвращает `[]`. Причина: `crud.set_agent_specializations` **не создаёт** `AgentRate` при добавлении специализации. Инвариант `AgentSpecialization ⇒ AgentRate` **не поддерживается**.
+   - **Фикс 1 (backend):** в `crud.set_agent_specializations` при добавлении новой специализации создавать `AgentRate(agent_id, specialization_id, mode='clinic', custom_rate=None)`.
+   - **Фикс 2 (data):** бэкфилл для старых `agent_specializations` — SQL или миграция.
+2. **У старых агентов нет `AgentSpecialization`** вообще (до появления `set_agent_specializations`). Значит в профиле «Специализации — Нет», в «Вознаграждении» — пусто. Лечится только перезаливкой через UI (редактировать агента → добавить специализации).
 
 ### 🟡 В плане
-3. Переключить `/portal-admin` и `/clinic-admin` на `admin_panel.html` (сейчас рендерят старые файлы).
-4. Миграция `backfill_agent_rates_01` — создать и применить.
-5. История агента (таб «История агента») — **на бэке нет** `AgentRateHistory`, пока заглушка. Если нужно — отдельная задача.
-6. Удаление агента админом клиники — сейчас разрешено (только своих). Если запретить — правка `delete_agent_endpoint`.
+3. Миграция `backfill_agent_rates_01` — создать и применить.
+4. История агента (таб «История агента») — заглушка. `AgentRateHistory` на бэке нет. Если нужно — отдельная задача.
+5. `/api/v1/admin/referrals` — `specialization_name` берётся из `r.specialization.name`. Если специализация удалена (а её не удаляют), ок.
+
+### 🟢 Проверено, всё ок
+- Подсветка меню есть (`.nav button:hover,.nav button.active{background:#28545d;color:white}`).
+- Иконки Font Awesome есть (CDN + `<i class="fas ${ICONS[t]}">`).
+- Переключение `/portal-admin`, `/clinic-admin` на `admin_panel.html` — **сделано**.
+- `GET /history` — вариант А (админ — только свои).
+- `PUT /clinics/{id}` — только шеф.
+- Старые `Portal_Admin.html`, `Clinic_Admin.html` — **удалены**.
+- Старые `old/*.html` — **удалены**.
 
 ## Правила работы
 - **Backend — источник правды.** Фронт подстраивается.
@@ -122,15 +131,14 @@
 ## Известные баги (не критичные)
 - `crud.get_patient_by_email` — при `patient_id=None` работает.
 - `crud.get_user_by_email_including_inactive` — то же, что `get_user_by_email`.
-- `ReferralCreate.amount` — в `schemas.py` есть, в `main.py` используется.
 - `crud.create_referral` — `commission_rate` может быть `None`.
+- `ReferralDetailResponse.is_paid` — в `schemas.py` есть, но `ReferralDetailResponse` в `main.py` для `GET /referrals` его не передаёт. Мелочь.
 
 ## Тестирование
 Пользователь тестирует сайт и присылает ошибки. Каждое сообщение — набор пунктов (1, 2, 3...). Задача: точечно чинить, не ломая остальное. Если непонятно — задавать уточняющие вопросы. Если правка затрагивает несколько файлов — присылать полные файлы или блоки с уникальными якорями для Ctrl+F.
 
 ## Что делать в первую очередь (следующая итерация)
-1. Проверить `crud.set_agent_specializations` и вызов из `main.py` — починить «Вознаграждение».
-2. Бэкфилл `AgentRate` для старых данных (SQL или миграция).
-3. Вернуть подсветку меню в `admin_panel.css`.
-4. После — переключить `/portal-admin` и `/clinic-admin` на `admin_panel.html`.
-5. Дальше — по ошибкам от пользователя.
+1. **Починить `crud.set_agent_specializations`** — создавать `AgentRate` при добавлении специализации.
+2. **Бэкфилл `AgentRate`** для существующих `AgentSpecialization` (SQL или миграция `backfill_agent_rates_01`).
+3. **У старых агентов нет `AgentSpecialization`** — если нужно, перезалить через UI (редактировать → добавить специализации) или SQL-бэкфилл (если знаем, какие специализации у них были).
+4. Дальше — по ошибкам от пользователя.

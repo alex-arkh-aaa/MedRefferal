@@ -1338,28 +1338,25 @@
         // Загрузка направлений
         async function loadReferrals() {
             try {
-                const response = await fetch(`${API_BASE}/referrals?limit=100`, {
-                    credentials: 'include'
-                });
-                
-                if (!response.ok) throw new Error('Ошибка загрузки');
-                
-                allReferrals = await response.json();
+                const response = await fetch(`${API_BASE}/referrals?limit=100`, {credentials: 'include'});
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                allReferrals = Array.isArray(data) ? data : [];
                 filteredReferrals = [...allReferrals];
                 updateStats();
                 renderTableHeader();
                 renderCurrentPage();
-                
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка загрузки направлений:', error);
                 const tableBody = document.getElementById('referralsTableBody');
+                const totalColumns = currentColumnOrder.length + 1;
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10">
+                        <td colspan="${totalColumns}">
                             <div class="empty-state">
                                 <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
                                 <h3>Ошибка загрузки</h3>
-                                <p>Не удалось загрузить список направлений</p>
+                                <p>${esc(error.message || 'Не удалось загрузить список направлений')}</p>
                                 <button class="btn btn-primary" onclick="loadReferrals()">
                                     <i class="fas fa-redo"></i> Повторить
                                 </button>

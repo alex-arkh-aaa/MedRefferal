@@ -21,12 +21,12 @@ class PartnerRequestStatus(str, Enum):
 # ==================== Auth Schemas ====================
 
 class DoctorRegister(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
-    full_name: str = Field(..., min_length=1)
-    phone: str = Field(...)
+    email: EmailStr = Field(..., max_length=40)
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: str = Field(..., min_length=1, max_length=40)
+    phone: str = Field(..., max_length=20)
     code: int = Field(...)
-    comment: Optional[str] = None
+    comment: Optional[str] = Field(None, max_length=1000)
 
 
 class UserRegisterPartner(BaseModel):
@@ -38,8 +38,8 @@ class UserRegisterPartner(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+    email: EmailStr = Field(..., max_length=40)
+    password: str = Field(..., min_length=1, max_length=128)
     remember_me: Optional[bool] = False
 
 
@@ -86,12 +86,12 @@ class UserUpdate(BaseModel):
 # ==================== Doctor Update Schemas ====================
 
 class DoctorUpdate(BaseModel):
-    full_name: Optional[str] = None
-    phone: Optional[str] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=40)
+    phone: Optional[str] = Field(None, max_length=20)
     date_of_birth: Optional[date] = None
-    experience: Optional[str] = None
-    about_myself: Optional[str] = None
-    education: Optional[str] = None
+    experience: Optional[str] = Field(None, max_length=20)
+    about_myself: Optional[str] = Field(None, max_length=2000)
+    education: Optional[str] = Field(None, max_length=50)
     specialization_ids: Optional[List[int]] = None
 
 
@@ -106,14 +106,13 @@ class DoctorSpecializationResponse(BaseModel):
 # ==================== Change Email & Password ====================
 
 class ChangeEmail(BaseModel):
-    new_email: EmailStr
+    new_email: EmailStr = Field(..., max_length=40)
     code: str = Field(..., min_length=6, max_length=6)
 
-
 class ChangePassword(BaseModel):
-    current_password: str
-    new_password: str = Field(..., min_length=8)
-    confirm_password: str = Field(..., min_length=8)
+    current_password: str = Field(..., min_length=1, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
+    confirm_password: str = Field(..., min_length=8, max_length=128)
 
 
 # ==================== Clinic Schemas ====================
@@ -133,21 +132,21 @@ class ClinicResponse(BaseModel):
 # ==================== Patient Schemas ====================
 
 class PatientCreate(BaseModel):
-    full_name: str = Field(..., min_length=1, description="ФИО обязательно")
-    phone: str = Field(..., min_length=1, description="Телефон обязателен")
+    full_name: str = Field(..., min_length=1, max_length=40, description="ФИО обязательно")
+    phone: str = Field(..., min_length=1, max_length=20, description="Телефон обязателен")
     date_of_birth: date = Field(..., description="Дата рождения обязательна")
-    email: Optional[EmailStr] = None
+    email: Optional[EmailStr] = Field(None, max_length=255)
     gender: str = Field(..., pattern="^(male|female)$", description="Пол обязателен (male/female)")
-    info: Optional[str] = None
+    info: Optional[str] = Field(None, max_length=2000)
 
 
 class PatientUpdate(BaseModel):
-    full_name: Optional[str] = Field(None, min_length=1)
-    phone: Optional[str] = Field(None, min_length=1)
+    full_name: Optional[str] = Field(None, min_length=1, max_length=40)
+    phone: Optional[str] = Field(None, min_length=1, max_length=20)
     date_of_birth: Optional[date] = None
-    email: Optional[EmailStr] = None
+    email: Optional[EmailStr] = Field(None, max_length=255)
     gender: Optional[str] = Field(None, pattern="^(male|female)$")
-    info: Optional[str] = None
+    info: Optional[str] = Field(None, max_length=2000)
     status: Optional[str] = Field(None, pattern="^(active|inactive|new)$")
 
 
@@ -193,8 +192,16 @@ class ReferralCreate(BaseModel):
     amount: Optional[int] = Field(0, ge=0, description="Стоимость услуги")
     expected_visit_start: date = Field(..., description="Начало ожидаемого периода визита")
     expected_visit_end: date = Field(..., description="Конец ожидаемого периода визита")
-    med_indications: str = Field(..., min_length=1, description="Медицинские показания/жалобы")
-    special_wishes: Optional[str] = Field(None, description="Особые пожелания")
+    med_indications: str = Field(..., min_length=1, max_length=2000, description="Медицинские показания/жалобы")
+    special_wishes: Optional[str] = Field(None, max_length=1000, description="Особые пожелания")
+
+
+class ReferralUpdate(BaseModel):
+    status: Optional[str] = Field(None, pattern="^(new|approved|rejected)$")
+    expected_visit_start: Optional[date] = None
+    expected_visit_end: Optional[date] = None
+    med_indications: Optional[str] = Field(None, max_length=2000)
+    special_wishes: Optional[str] = Field(None, max_length=1000)
 
 
 class ReferralResponse(BaseModel):
@@ -222,12 +229,7 @@ class ReferralResponse(BaseModel):
         from_attributes = True
 
 
-class ReferralUpdate(BaseModel):
-    status: Optional[str] = Field(None, pattern="^(new|approved|rejected)$")
-    expected_visit_start: Optional[date] = None
-    expected_visit_end: Optional[date] = None
-    med_indications: Optional[str] = None
-    special_wishes: Optional[str] = None
+
 
 
 class ReferralDetailResponse(BaseModel):
@@ -351,16 +353,16 @@ class AdminResponse(BaseModel):
 
 
 class AdminCreate(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=8)
-    full_name: str = Field(..., min_length=1)
-    phone: Optional[str] = None
+    email: EmailStr = Field(..., max_length=40)
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: str = Field(..., min_length=1, max_length=40)
+    phone: Optional[str] = Field(None, max_length=20)
     clinic_ids: List[int] = []
 
 
 class AdminUpdate(BaseModel):
-    full_name: Optional[str] = None
-    phone: Optional[str] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=40)
+    phone: Optional[str] = Field(None, max_length=20)
     active: Optional[bool] = None
     permissions: Optional[dict] = None
     clinic_ids: Optional[List[int]] = None
@@ -392,13 +394,13 @@ class AgentResponse(BaseModel):
 
 
 class AgentUpdate(BaseModel):
-    full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=40)
+    email: Optional[EmailStr] = Field(None, max_length=40)
+    phone: Optional[str] = Field(None, max_length=20)
     date_of_birth: Optional[date] = None
-    experience: Optional[str] = None
-    education: Optional[str] = None
-    about_myself: Optional[str] = None
+    experience: Optional[str] = Field(None, max_length=20)
+    education: Optional[str] = Field(None, max_length=50)
+    about_myself: Optional[str] = Field(None, max_length=2000)
     status: Optional[str] = Field(None, pattern="^(pending|active|inactive|rejected)$")
     admin_id: Optional[int] = None
     clinic_ids: Optional[List[int]] = None
@@ -412,25 +414,25 @@ class AgentApprove(BaseModel):
 
 
 class AgentReject(BaseModel):
-    decision_reason: str = Field(..., min_length=1)
+    decision_reason: str = Field(..., min_length=1, max_length=500)
 
 
 # ==================== Clinic (admin) Schemas ====================
 
 class ClinicCreate(BaseModel):
-    name: str = Field(..., min_length=1)
-    city: str = Field(..., min_length=1)
-    address: Optional[str] = None
-    phone: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    city: str = Field(..., min_length=1, max_length=100)
+    address: Optional[str] = Field(None, max_length=255)
+    phone: Optional[str] = Field(None, max_length=20)
     active: bool = True
     default_rate: Optional[float] = Field(10.0, ge=0, le=100, description="Ставка по умолчанию для всех специализаций (%, 0–100)")
 
 
 class ClinicUpdate(BaseModel):
-    name: Optional[str] = None
-    city: Optional[str] = None
-    address: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    city: Optional[str] = Field(None, min_length=1, max_length=100)
+    address: Optional[str] = Field(None, max_length=255)
+    phone: Optional[str] = Field(None, max_length=20)
     active: Optional[bool] = None
 
 
@@ -456,7 +458,7 @@ class ClinicSpecialtyUpdate(BaseModel):
 # ==================== AgentRate Schemas ====================
 
 class AgentRateResponse(BaseModel):
-    id: int
+    id: Optional[int] = None
     agent_id: int
     specialization_id: int
     specialization_name: str

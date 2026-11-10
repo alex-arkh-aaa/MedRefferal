@@ -449,20 +449,40 @@ async def set_agent_rate(
     custom_rate: Optional[float] = None,
 ) -> AgentRate:
     rate = await get_agent_rate(db, agent_id, specialization_id)
+
+    if mode == "clinic":
+        if rate:
+            await db.delete(rate)
+            await db.commit()
+        # виртуальный объект (не из БД) для ответа эндпоинта
+        return AgentRate(
+            id=None,
+            agent_id=agent_id,
+            specialization_id=specialization_id,
+            mode="clinic",
+            custom_rate=None,
+        )
+
     if not rate:
         rate = AgentRate(
             agent_id=agent_id,
             specialization_id=specialization_id,
-            mode=mode,
+            mode="custom",
             custom_rate=custom_rate,
         )
         db.add(rate)
     else:
-        rate.mode = mode
+        rate.mode = "custom"
         rate.custom_rate = custom_rate
     await db.commit()
-    await db.refresh(rate)
-    return rate
+
+    # Перезагружаем с selectinload, чтобы не было lazy load при обращении к .specialization
+    result = await db.execute(
+        select(AgentRate)
+        .options(selectinload(AgentRate.specialization))
+        .where(AgentRate.id == rate.id)
+    )
+    return result.scalar_one()
 
 
 # ==================== ClinicSpecialties ====================

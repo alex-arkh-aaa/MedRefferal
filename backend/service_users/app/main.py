@@ -1415,18 +1415,51 @@ async def get_agent_rates_endpoint(
         if not set(admin_clinic_ids) & set(agent_clinic_ids):
             raise HTTPException(status_code=403, detail="Нет доступа")
 
+    # 1. Явно заданные личные ставки (в agent_rates только mode='custom')
     rates = await crud.get_agent_rates(db, agent_id)
-    return [
-        AgentRateResponse(
-            id=r.id,
-            agent_id=r.agent_id,
-            specialization_id=r.specialization_id,
-            specialization_name=r.specialization.name if r.specialization else "",
-            mode=r.mode,
-            custom_rate=float(r.custom_rate) if r.custom_rate is not None else None,
-        )
-        for r in rates
-    ]
+    rates_by_spec = {r.specialization_id: r for r in rates}
+
+    # 2. Все специализации агента
+    specializations = await crud.get_agent_specializations(db, agent_id)
+
+    # 3. Синтез: для каждой специализации — реальная ставка или виртуальная (mode='clinic')
+    result: List[AgentRateResponse] = []
+    for spec in specializations:
+        sid = spec.specialization_id
+        if sid in rates_by_spec:
+            r = rates_by_spec[sid]
+            result.append(AgentRateResponse(
+                id=r.id,
+                agent_id=r.agent_id,
+                specialization_id=r.specialization_id,
+                specialization_name=r.specialization.name if r.specialization else (spec.specialization.name if spec.specialization else ""),
+                mode=r.mode,
+                custom_rate=float(r.custom_rate) if r.custom_rate is not None else None,
+            ))
+        else:
+            result.append(AgentRateResponse(
+                id=None,
+                agent_id=agent_id,
+                specialization_id=sid,
+                specialization_name=spec.specialization.name if spec.specialization else "",
+                mode="clinic",
+                custom_rate=None,
+            ))
+
+    # 4. Защита от рассинхрона: ставки, которых нет в специализациях
+    spec_ids = {s.specialization_id for s in specializations}
+    for r in rates:
+        if r.specialization_id not in spec_ids:
+            result.append(AgentRateResponse(
+                id=r.id,
+                agent_id=r.agent_id,
+                specialization_id=r.specialization_id,
+                specialization_name=r.specialization.name if r.specialization else "",
+                mode=r.mode,
+                custom_rate=float(r.custom_rate) if r.custom_rate is not None else None,
+            ))
+
+    return result
 
 
 @app.put("/api/v1/agents/{agent_id}/rates/{spec_id}", response_model=AgentRateResponse)
@@ -1450,15 +1483,19 @@ async def set_agent_rate_endpoint(
         db=db, agent_id=agent_id, specialization_id=spec_id,
         mode=data.mode, custom_rate=data.custom_rate,
     )
+
+    # Имя специализации — из БД по spec_id (не через rate.specialization)
+    spec = await db.get(Specialization, spec_id)
+    spec_name = spec.name if spec else ""
+
     return AgentRateResponse(
         id=rate.id,
         agent_id=rate.agent_id,
         specialization_id=rate.specialization_id,
-        specialization_name=rate.specialization.name if rate.specialization else "",
+        specialization_name=spec_name,
         mode=rate.mode,
         custom_rate=float(rate.custom_rate) if rate.custom_rate is not None else None,
     )
-
 
 
 # ==================== Admin: Referrals ====================
