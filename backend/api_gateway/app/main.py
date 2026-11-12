@@ -111,9 +111,8 @@ async def root_page(request: Request):
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard_page(request: Request):
-    html_content = render_template("dashboard.html")
-    return HTMLResponse(content=html_content)
+async def agent_panel_page():
+    return HTMLResponse(render_template("agent_panel.html"))
 
 
 @app.get("/create_referral", response_class=HTMLResponse)
@@ -164,6 +163,10 @@ async def portal_admin_page():
 @app.get("/admin_panel", response_class=HTMLResponse)
 async def admin_panel_page():
     return HTMLResponse(render_template("admin_panel.html"))
+
+@app.get("/agent_panel", response_class=HTMLResponse)
+async def agent_panel_page():
+    return HTMLResponse(render_template("agent_panel.html"))
 
 
 # ================== ПРОКСИРОВАНИЕ ==================

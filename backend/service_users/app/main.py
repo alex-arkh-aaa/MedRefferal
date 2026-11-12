@@ -417,6 +417,126 @@ async def get_my_specializations(
     return await crud.get_doctor_specializations(db, current_agent.id)
 
 
+@app.get("/api/v1/agents/me/rates")
+async def get_my_rates(
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Ставки текущего агента по всем его специализациям.
+    - mode='custom' → custom_rate (личная)
+    - mode='clinic' → by_clinic[] с default_rate для каждой клиники агента
+    """
+    # 1. Личные ставки (только mode='custom')
+    rates_raw = await crud.get_agent_rates(db, current_agent.id)
+    rates_by_spec = {r.specialization_id: r for r in rates_raw}
+
+    # 2. Специализации агента
+    specializations_raw = await crud.get_agent_specializations(db, current_agent.id)
+
+    # 3. Клиники агента
+    agent_clinic_ids = await crud.get_agent_clinic_ids(db, current_agent.id)
+
+    # 4. Ставки клиник по специализациям (default_rate)
+    clinic_specialties = []
+    for cid in agent_clinic_ids:
+        items = await crud.get_clinic_specialties(db, cid, include_inactive=True)
+        for cs in items:
+            clinic_specialties.append({
+                "clinic_id": cid,
+                "specialization_id": cs.specialization_id,
+                "default_rate": float(cs.default_rate) if cs.default_rate is not None else None,
+                "active": cs.active,
+            })
+
+    # 5. Собираем итог
+    result = []
+    for spec in specializations_raw:
+        if not spec.active:
+            continue
+        sid = spec.specialization_id
+        personal = rates_by_spec.get(sid)
+
+        if personal and personal.mode == "custom" and personal.custom_rate is not None:
+            result.append({
+                "specialization_id": sid,
+                "specialization_name": spec.specialization.name if spec.specialization else "",
+                "mode": "custom",
+                "custom_rate": float(personal.custom_rate),
+                "by_clinic": [],
+            })
+        else:
+            by_clinic = []
+            for cid in agent_clinic_ids:
+                cs = next(
+                    (x for x in clinic_specialties
+                     if x["clinic_id"] == cid and x["specialization_id"] == sid),
+                    None,
+                )
+                by_clinic.append({
+                    "clinic_id": cid,
+                    "default_rate": cs["default_rate"] if cs else None,
+                    "active": cs["active"] if cs else False,
+                })
+            result.append({
+                "specialization_id": sid,
+                "specialization_name": spec.specialization.name if spec.specialization else "",
+                "mode": "clinic",
+                "custom_rate": None,
+                "by_clinic": by_clinic,
+            })
+
+    return result
+
+
+@app.get("/api/v1/clinics/{clinic_id}/specialties", response_model=List[ClinicSpecialtyResponse])
+async def get_clinic_specialties_endpoint(
+    clinic_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    token = request.cookies.get("access_token")
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if not token:
+        raise HTTPException(status_code=401, detail="Не предоставлен токен")
+
+    payload = decode_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Невалидный или истёкший токен")
+
+    role = payload.get("role")
+    user_id = payload.get("user_id")
+
+    if role == "chef":
+        pass
+    elif role == "admin":
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, user_id)
+        if clinic_id not in admin_clinic_ids:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+    elif role == "agent":
+        agent_clinic_ids = await crud.get_agent_clinic_ids(db, user_id)
+        if clinic_id not in agent_clinic_ids:
+            raise HTTPException(status_code=403, detail="Нет доступа")
+    else:
+        raise HTTPException(status_code=403, detail="Неизвестная роль")
+
+    items = await crud.get_clinic_specialties(db, clinic_id, include_inactive=True)
+    return [
+        ClinicSpecialtyResponse(
+            id=cs.id,
+            clinic_id=cs.clinic_id,
+            specialization_id=cs.specialization_id,
+            specialization_name=cs.specialization.name if cs.specialization else "",
+            default_rate=float(cs.default_rate) if cs.default_rate is not None else None,
+            active=cs.active,
+        )
+        for cs in items
+    ]
+
+
 @app.get("/api/v1/specializations", response_model=List[DoctorSpecializationResponse])
 async def get_all_specializations(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Specialization).order_by(Specialization.name))

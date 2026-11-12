@@ -188,21 +188,36 @@ async function loadAll() {
 
 
 async function loadReferrals() {
-  try {
-    const list = await api('/admin/referrals?status=new');
-    window.__referrals = Array.isArray(list) ? list : [];
-  } catch (e) {
-    window.__referrals = [];
-    const el = document.getElementById('refResults');
-    if (el) el.innerHTML = `<div class="empty">Ошибка загрузки: ${esc(e.message)}</div>`;
-    return;
-  }
-  // Обновляем ТОЛЬКО таблицу, не всю страницу
-  const el = document.getElementById('refResults');
-  if (el) {
-    const list = window.__referrals.filter(r => !query || [r.patient_full_name, r.clinic_name].join(' ').toLowerCase().includes(query.toLowerCase()));
-    el.innerHTML = referralTable(list);
-  }
+    try {
+        const response = await fetch(`${API_BASE}/referrals?limit=100`, {
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        allReferrals = Array.isArray(data) ? data : [];
+        filteredReferrals = [...allReferrals];
+        updateStats();
+        renderTableHeader();
+        renderCurrentPage();
+    } catch (error) {
+        console.error('Ошибка загрузки направлений:', error);
+        const tableBody = document.getElementById('referralsTableBody');
+        const totalColumns = currentColumnOrder.length + 1;
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="${totalColumns}">
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <h3>Ошибка загрузки</h3>
+                        <p>${esc(error.message || 'Не удалось загрузить список направлений')}</p>
+                        <button class="btn btn-primary" onclick="loadReferrals()">
+                            <i class="fas fa-redo"></i> Повторить
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
 }
 
 async function loadPendingAgents() {
