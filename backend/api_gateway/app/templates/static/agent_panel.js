@@ -387,7 +387,11 @@ function render() {
 
 function afterRender() {
   if (page === 'dashboard') {
-    loadDashboard().then(() => { const c = $('#content'); if (c && page === 'dashboard') c.innerHTML = pageDashboard(); });
+    loadDashboard().then(() => {
+      const c = $('#content');
+      if (c && page === 'dashboard') c.innerHTML = pageDashboard();
+      if (window.loadAgentRecentHistory) window.loadAgentRecentHistory();
+    });
   } else if (page === 'referrals') {
     loadReferrals().then(() => { const c = $('#content'); if (c && page === 'referrals') c.innerHTML = pageReferrals(); });
   } else if (page === 'patients') {
@@ -424,18 +428,10 @@ function pageDashboard() {
             </div>`).join('')}
         </div>
       </section>`
-    + `<div class="grid-2">
+        + `<div class="grid-2">
         <section class="panel">
-          <div class="panelhead"><div><h2>Последние действия</h2></div><button class="btn small" data-page="referrals">Все</button></div>
-          <div>${activity.length ? activity.map(a => `
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:14px 22px;border-bottom:1px solid var(--border)">
-              <div style="width:36px;height:36px;border-radius:50%;background:#eff6ff;color:var(--primary);display:grid;place-items:center;flex-shrink:0"><i class="fas fa-bell"></i></div>
-              <div style="flex:1;min-width:0">
-                <div style="font-weight:600;font-size:.9rem">${esc(a.label||'')}</div>
-                <div style="font-size:.85rem;color:var(--gray)">${esc(a.text||'')}</div>
-              </div>
-              <div style="font-size:.75rem;color:var(--gray);white-space:nowrap">${dt(a.created_at)}</div>
-            </div>`).join('') : '<div class="empty"><i class="fas fa-inbox"></i><div>Действий пока нет</div></div>'}</div>
+        <div class="panelhead"><div><h2>Последние действия</h2></div><button class="btn small" data-action="viewAllAgentHistory">Все</button></div>
+        <div id="agentRecentHistory"><div class="empty"><i class="fas fa-inbox"></i><div>Загрузка...</div></div></div>
         </section>
         <section class="panel">
           <div class="panelhead"><div><h2>Ближайшие визиты</h2></div><button class="btn small" data-page="referrals">Все</button></div>
@@ -1062,19 +1058,21 @@ function calcCreateReferralCommission() {
 // ================== 8. МОДАЛКИ ==================
 
 // --- Пациент: добавить ---
-function openPatientForm(id = null) {
+function openPatientForm(id = null, prefill = null) {
   const p = id ? S.patients.find(x => x.id === Number(id)) : null;
+  const src = p || prefill || {};
+  const val = k => esc(src[k] || '');
   openDrawer(id ? 'Редактировать пациента' : 'Новый пациент',
     `<form id="patientForm" data-id="${id || ''}" autocomplete="off">
-      <div class="field"><label>ФИО <span class="required">*</span></label><input name="full_name" data-label="ФИО" required maxlength="40" value="${esc(p?.full_name || '')}"></div>
-      <div class="field"><label>Телефон <span class="required">*</span></label><input name="phone" type="tel" data-label="Телефон" required maxlength="20" value="${esc(p?.phone || '')}"></div>
-      <div class="field"><label>Дата рождения <span class="required">*</span></label><input name="date_of_birth" type="date" required value="${esc(p?.date_of_birth || '')}"></div>
-      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" maxlength="255" value="${esc(p?.email || '')}"></div>
+      <div class="field"><label>ФИО <span class="required">*</span></label><input name="full_name" data-label="ФИО" required maxlength="40" value="${val('full_name')}"></div>
+      <div class="field"><label>Телефон <span class="required">*</span></label><input name="phone" type="tel" data-label="Телефон" required maxlength="20" value="${val('phone')}"></div>
+      <div class="field"><label>Дата рождения <span class="required">*</span></label><input name="date_of_birth" type="date" required value="${val('date_of_birth')}"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" data-label="Email" maxlength="255" value="${val('email')}"></div>
       <div class="field"><label>Пол <span class="required">*</span></label>
         <select name="gender" required>
           <option value="">Выберите</option>
-          <option value="male" ${p?.gender === 'male' ? 'selected' : ''}>Мужской</option>
-          <option value="female" ${p?.gender === 'female' ? 'selected' : ''}>Женский</option>
+          <option value="male" ${src.gender === 'male' ? 'selected' : ''}>Мужской</option>
+          <option value="female" ${src.gender === 'female' ? 'selected' : ''}>Женский</option>
         </select>
       </div>
       <div class="actions"><button class="btn primary" type="submit">${id ? 'Сохранить' : 'Добавить'}</button><button class="btn" type="button" data-action="close">Отмена</button></div>
@@ -1150,7 +1148,6 @@ document.addEventListener('click', async e => {
     switch (action) {
       case 'createAnotherReferral': closeDrawer(); navigate('create_referral'); break;
       case 'goToReferrals': closeDrawer(); navigate('referrals'); break;
-      case 'addPatientInline': openPatientForm(); break;
       case 'close': closeDrawer(); break;
       case 'newPatient': openPatientForm(); break;
       case 'editPatient': openPatientForm(id); break;
@@ -1163,7 +1160,17 @@ document.addEventListener('click', async e => {
         break;
       }
       case 'columns': openColumns(); break;
-      case 'addPatientInline': openPatientForm(); break;
+      case 'addPatientInline': {
+        const prefill = {
+            full_name: $('#patientFullName')?.value?.trim() || '',
+            phone: $('#patientPhone')?.value?.trim() || '',
+            date_of_birth: $('#patientBirthDate')?.value || '',
+            email: $('#patientEmail')?.value?.trim() || '',
+            gender: $('#patientGender')?.value || '',
+        };
+        openPatientForm(null, prefill);
+        break;
+        }
       case 'resetColumns': {
         referralsColumnOrder = [...DEFAULT_REFERRAL_COLUMNS];
         closeDrawer();
@@ -1419,4 +1426,95 @@ window.addEventListener('hashchange', () => {
     if (e.message !== '401') console.error('init:', e);
     location.href = '/';
   }
+})();
+
+
+
+// ============================================================
+// ИСТОРИЯ АГЕНТА — главная (последние 5) + модалка с пагинацией
+// ============================================================
+(function () {
+  const HISTORY_API = '/agents/me/history';
+  const PAGE_LIMIT = 20;
+  let agentHistoryPage = 1;
+
+  function historyItemHtml(h) {
+    return `<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 22px;border-bottom:1px solid var(--border)">
+      <div style="width:36px;height:36px;border-radius:50%;background:#eff6ff;color:var(--primary);display:grid;place-items:center;flex-shrink:0"><i class="fas fa-bell"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:.9rem">${esc(h.label)}</div>
+        <div style="font-size:.85rem;color:var(--gray)">${esc(h.text)}</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--gray);white-space:nowrap">${dt(h.created_at)}</div>
+    </div>`;
+  }
+
+  window.loadAgentRecentHistory = async function () {
+    const el = document.getElementById('agentRecentHistory');
+    if (!el) return;
+    el.innerHTML = '<div class="empty"><i class="fas fa-spinner fa-spin"></i><div>Загрузка...</div></div>';
+    try {
+      const data = await api(`${HISTORY_API}?page=1&limit=5`);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      el.innerHTML = items.length
+        ? items.map(historyItemHtml).join('')
+        : '<div class="empty"><i class="fas fa-inbox"></i><div>Действий пока нет</div></div>';
+    } catch (e) {
+      el.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`;
+    }
+  };
+
+  function renderAgentHistoryPagination(page, pages, total) {
+    const el = document.getElementById('agentHistoryPagination');
+    if (!el) return;
+    if (!total) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <button class="btn small" data-agent-history-page="${page - 1}" ${page <= 1 ? 'disabled' : ''}>← Назад</button>
+      <span style="font-size:13px;color:#5c787c;font-weight:600">Стр. ${page} / ${pages} · всего ${total}</span>
+      <button class="btn small" data-agent-history-page="${page + 1}" ${page >= pages ? 'disabled' : ''}>Вперёд →</button>
+    `;
+  }
+
+  async function loadAgentHistoryModal(page) {
+    agentHistoryPage = page || 1;
+    if (agentHistoryPage < 1) agentHistoryPage = 1;
+    const el = document.getElementById('agentHistoryBody');
+    if (!el) return;
+    el.innerHTML = '<div class="empty">Загрузка...</div>';
+    renderAgentHistoryPagination(1, 1, 0);
+    try {
+      const data = await api(`${HISTORY_API}?page=${agentHistoryPage}&limit=${PAGE_LIMIT}`);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const total = data?.total || 0;
+      const pages = data?.pages || 1;
+      el.innerHTML = items.length
+        ? items.map(historyItemHtml).join('')
+        : '<div class="empty"><i class="fas fa-inbox"></i><div>Нет записей</div></div>';
+      renderAgentHistoryPagination(agentHistoryPage, pages, total);
+    } catch (e) {
+      el.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`;
+      renderAgentHistoryPagination(1, 1, 0);
+    }
+  }
+
+  window.openAgentHistoryModal = function () {
+    document.getElementById('agentHistoryModal').classList.add('open');
+    loadAgentHistoryModal(1);
+  };
+
+  document.addEventListener('click', function (e) {
+    const pageBtn = e.target.closest('[data-agent-history-page]');
+    if (pageBtn && !pageBtn.disabled) {
+      loadAgentHistoryModal(Number(pageBtn.dataset.agentHistoryPage));
+      return;
+    }
+    const openBtn = e.target.closest('[data-action="viewAllAgentHistory"]');
+    if (openBtn) {
+      window.openAgentHistoryModal();
+      return;
+    }
+    if (e.target.id === 'agentHistoryModal') {
+      document.getElementById('agentHistoryModal').classList.remove('open');
+    }
+  });
 })();

@@ -1222,28 +1222,6 @@ async def count_admin_history(
     return total
 
 
-async def count_admin_history(
-    db: AsyncSession,
-    *,
-    admin_id: Optional[int] = None,
-    actor_role: Optional[str] = None,
-    agent_ids: Optional[List[int]] = None,
-) -> int:
-    total = 0
-    if agent_ids is None:
-        q = select(func.count()).select_from(AdminHistory)
-        if admin_id is not None:
-            q = q.where(AdminHistory.admin_id == admin_id)
-        if actor_role == 'admins':
-            q = q.where(AdminHistory.actor_role == 'admin')
-        elif actor_role == 'chef':
-            q = q.where(AdminHistory.actor_role == 'chef')
-        total += (await db.execute(q)).scalar() or 0
-    if agent_ids is not None and len(agent_ids) > 0:
-        q = select(func.count()).select_from(AgentHistory).where(AgentHistory.agent_id.in_(agent_ids))
-        total += (await db.execute(q)).scalar() or 0
-    return total
-
 
 # ==================== Reports ====================
 

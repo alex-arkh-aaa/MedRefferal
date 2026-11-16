@@ -42,12 +42,14 @@
 </div>
 
 <div class="backdrop" id="historyModal">
-  <div class="drawer" style="width:min(720px,100%)">
+  <div class="drawer" style="width:min(780px,100%)">
     <header>
       <h2>История изменений</h2>
       <button onclick="document.getElementById('historyModal').classList.remove('open')">×</button>
     </header>
+    <div id="historyFilterBar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div id="historyModalBody"></div>
+    <div id="historyPagination" style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid #edf2f2"></div>
   </div>
 </div>
 

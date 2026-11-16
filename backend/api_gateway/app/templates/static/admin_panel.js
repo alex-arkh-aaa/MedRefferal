@@ -256,18 +256,118 @@ async function loadAgentRates(agentIdArg) {
   }
 }
 
-async function loadHistoryModal(filter) {
-  const el = document.getElementById('historyFilteredList');
+// ============================================================
+// ИСТОРИЯ — модалка с фильтрами и пагинацией
+// ============================================================
+let historyFilter = 'all';
+let historyPage = 1;
+const HISTORY_LIMIT = 20;
+
+const HISTORY_FILTERS = {
+  chef:  [
+    { key: 'all',    label: 'Все' },
+    { key: 'mine',   label: 'Мои' },
+    { key: 'admins', label: 'Администраторы' },
+    { key: 'agents', label: 'Агенты' },
+  ],
+  admin: [
+    { key: 'all',    label: 'Все' },
+    { key: 'mine',   label: 'Мои' },
+    { key: 'agents', label: 'Мои агенты' },
+  ],
+};
+
+function historyActorLabel(item) {
+  if (item.source === 'agent') return 'Агент';
+  if (item.actor_role === 'chef') return 'Шеф';
+  if (item.actor_role === 'admin') return 'Админ';
+  return item.actor_role || '';
+}
+
+function renderHistoryFilterBar() {
+  const bar = document.getElementById('historyFilterBar');
+  if (!bar) return;
+  const role = isChef() ? 'chef' : 'admin';
+  const filters = HISTORY_FILTERS[role] || HISTORY_FILTERS.admin;
+  bar.innerHTML = filters.map(f =>
+    `<button class="btn small ${historyFilter === f.key ? 'primary' : ''}" data-action="historyFilter" data-filter="${f.key}">${f.label}</button>`
+  ).join('');
+}
+
+function renderHistoryPagination(page, pages, total) {
+  const el = document.getElementById('historyPagination');
+  if (!el) return;
+  if (!total) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <button class="btn small" data-action="historyPage" data-page="${page - 1}" ${page <= 1 ? 'disabled' : ''}>← Назад</button>
+    <span style="font-size:13px;color:#5c787c;font-weight:600">Стр. ${page} / ${pages} · всего ${total}</span>
+    <button class="btn small" data-action="historyPage" data-page="${page + 1}" ${page >= pages ? 'disabled' : ''}>Вперёд →</button>
+  `;
+}
+
+async function loadHistoryModal(filter, page) {
+  if (filter) historyFilter = filter;
+  if (page) historyPage = page;
+  if (historyPage < 1) historyPage = 1;
+
+  renderHistoryFilterBar();
+
+  const el = document.getElementById('historyModalBody');
+  if (!el) return;
+  el.innerHTML = '<div class="empty">Загрузка...</div>';
+  renderHistoryPagination(1, 1, 0);
+
+  try {
+    const url = `/admin/history?filter=${encodeURIComponent(historyFilter)}&page=${historyPage}&limit=${HISTORY_LIMIT}`;
+    const data = await api(url);
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const total = data?.total || 0;
+    const pages = data?.pages || 1;
+
+    el.innerHTML = items.length
+      ? items.map(h => `<div class="change-item">
+          <div class="change-item-body">
+            <strong>${esc(h.label)}</strong>
+            <small>${esc(h.text)}</small>
+            <small style="color:#8da1a4;margin-top:2px">${esc(historyActorLabel(h))}${h.actor_id ? ' #' + esc(h.actor_id) : ''}</small>
+          </div>
+          <div class="change-item-time">${dt(h.created_at)}</div>
+        </div>`).join('')
+      : '<div class="empty">Нет записей</div>';
+
+    renderHistoryPagination(historyPage, pages, total);
+  } catch (e) {
+    el.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`;
+    renderHistoryPagination(1, 1, 0);
+  }
+}
+
+async function loadOverviewHistory() {
+  const el = document.getElementById('historyList');
   if (!el) return;
   try {
-    const url = filter === 'all' ? '/history?limit=200' : `/history?limit=200&actor_type=${filter}`;
-    const items = await api(url);
+    const data = await api('/admin/history?filter=all&page=1&limit=5');
+    const items = Array.isArray(data?.items) ? data.items : [];
     el.innerHTML = items.length
-      ? items.map(h => `<div class="change-item"><div class="change-item-body"><strong>${esc(h.label)}</strong><small>${esc(h.text)}</small><small style="color:#8da1a4;margin-top:2px">${esc(h.actor_type)}${h.actor_name ? ': ' + esc(h.actor_name) : ''}</small></div><div class="change-item-time">${dt(h.created_at)}</div></div>`).join('')
+      ? items.map(h => `<div class="change-item">
+          <div class="change-item-body">
+            <strong>${esc(h.label)}</strong>
+            <small>${esc(h.text)}</small>
+            <small style="color:#8da1a4;margin-top:2px">${esc(historyActorLabel(h))}</small>
+          </div>
+          <div class="change-item-time">${dt(h.created_at)}</div>
+        </div>`).join('')
       : '<div class="empty">Нет записей</div>';
   } catch (e) {
     el.innerHTML = `<div class="empty">Ошибка: ${esc(e.message)}</div>`;
   }
+}
+
+function openHistoryModal(filter) {
+  historyFilter = filter || 'all';
+  historyPage = 1;
+  document.getElementById('historyModal').classList.add('open');
+  loadHistoryModal(historyFilter, 1);
 }
 
 // ============================================================
@@ -295,7 +395,8 @@ function render() {
   const html = (m[page] || overview)();
   const cont = document.querySelector('#content');
   if (cont) cont.innerHTML = html;
-  setTimeout(() => {
+    setTimeout(() => {
+    if (page === 'overview') loadOverviewHistory();
     if (page === 'pending') loadReferrals();
     if (page === 'agents' && !agentId) loadPendingAgents();
     if (page === 'agents' && agentId) loadAgentRates(agentId);
@@ -1065,16 +1166,13 @@ document.addEventListener('click', async e => {
         render();
         break;
       case 'viewAllHistory':
-        document.getElementById('historyModal').classList.add('open');
-        document.getElementById('historyModalBody').innerHTML = `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-            <button class="btn small" data-hist-filter="all">Все</button>
-            ${isChef() ? `<button class="btn small" data-hist-filter="chef">Мои</button>` : ''}
-            <button class="btn small" data-hist-filter="admin">Администраторы</button>
-            <button class="btn small" data-hist-filter="agent">Агенты</button>
-          </div>
-          <div id="historyFilteredList"><div class="empty">Загрузка...</div></div>`;
-        loadHistoryModal('all');
+        openHistoryModal('all');
+        break;
+      case 'historyFilter':
+        loadHistoryModal(a.dataset.filter, 1);
+        break;
+      case 'historyPage':
+        if (!a.disabled) loadHistoryModal(historyFilter, Number(a.dataset.page));
         break;
     }
   } catch (err) { toast('Ошибка: ' + err.message); }
@@ -1144,18 +1242,6 @@ window.addEventListener('hashchange', () => {
     const h = location.hash.replace('#','') || 'overview';
     page = Object.keys(NAME).includes(h) ? h : 'overview';
     render();
-    // История в обзоре
-    try {
-      const hist = await api('/history?limit=5');
-      window.__historyCache = hist;
-      if (page === 'overview') {
-        const el = document.getElementById('historyList');
-        if (el) {
-          el.innerHTML = hist.length
-            ? hist.map(h => `<div class="change-item"><div class="change-item-body"><strong>${esc(h.label)}</strong><small>${esc(h.text)}</small></div><div class="change-item-time">${dt(h.created_at)}</div></div>`).join('')
-            : '<div class="empty">История пуста</div>';
-        }
-      }
-    } catch (_) {}
+    
   } catch (e) { location.href = '/'; }
 })();

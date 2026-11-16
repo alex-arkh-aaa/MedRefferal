@@ -49,6 +49,17 @@
   </div>
 </div>
 
+<div class="backdrop" id="agentHistoryModal">
+  <div class="drawer" style="width:min(720px,100%)">
+    <header>
+      <h2>Вся история</h2>
+      <button onclick="document.getElementById('agentHistoryModal').classList.remove('open')">×</button>
+    </header>
+    <div id="agentHistoryBody"></div>
+    <div id="agentHistoryPagination" style="display:flex;justify-content:center;align-items:center;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="/static/agent_panel.js"></script>
