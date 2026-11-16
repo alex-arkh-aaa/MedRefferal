@@ -262,18 +262,33 @@ class Goal(Base):
     agent = relationship("Agent", back_populates="goals")
 
 
-# ==================== HISTORY (единая) ====================
+# ==================== AGENT HISTORY ====================
 
-class History(Base):
-    __tablename__ = "history"
+class AgentHistory(Base):
+    __tablename__ = "agent_history"
 
     id = Column(Integer, primary_key=True, index=True)
-    label = Column(String(100), nullable=False)
-    text = Column(Text, nullable=False)
-    actor_type = Column(String(20), nullable=False, index=True)  # 'agent' | 'admin' | 'chef' | 'system'
-    actor_id = Column(Integer, nullable=True, index=True)
-    actor_name = Column(String(100), nullable=True)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"), nullable=False, index=True)
+    label = Column(String(200), nullable=False)  # «Добавлен пациент», «Обновлён профиль»
+    text = Column(Text, nullable=False)           # «Иванов Иван»
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False, index=True)
+
+    agent = relationship("Agent", foreign_keys=[agent_id])
+
+
+# ==================== ADMIN HISTORY ====================
+
+class AdminHistory(Base):
+    __tablename__ = "admin_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("admins.id", ondelete="CASCADE"), nullable=False, index=True)
+    actor_role = Column(String(20), nullable=False, index=True)  # 'admin' | 'chef'
+    label = Column(String(200), nullable=False)  # «Агент одобрен», «Клиника обновлена»
+    text = Column(Text, nullable=False)           # «Иванов Иван», «Клиника на Тверской»
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False, index=True)
+
+    admin = relationship("Admin", foreign_keys=[admin_id])
 
 
 # ==================== EMAIL VERIFICATION ====================

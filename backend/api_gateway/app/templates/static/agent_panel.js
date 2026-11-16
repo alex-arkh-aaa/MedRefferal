@@ -559,7 +559,6 @@ function renderReferralCell(col, r) {
     case 'status_changed_at': return `<span style="font-size:.85rem">${dt(r.status_changed_at)}</span>`;
     case 'commission_amount': return `<strong style="color:var(--success)">${money(r.commission_amount)}</strong>`;
     case 'payout_status': return pill(PAYOUT_STATUS[r.payout_status] || r.payout_status, PAYOUT_STATUS_COLOR[r.payout_status] || '');
-    case 'actions': return `<button class="btn small" data-action="deleteReferral" data-id="${r.id}" title="Удалить"><i class="fas fa-trash"></i></button>`;
     default: return '—';
   }
 }
@@ -1160,14 +1159,6 @@ document.addEventListener('click', async e => {
         await api(`/patients/${id}`, {method: 'DELETE'});
         toast('Пациент удалён', 'success');
         await loadPatients();
-        render();
-        break;
-      }
-      case 'deleteReferral': {
-        if (!confirm('Удалить направление?')) return;
-        await api(`/referrals/${id}`, {method: 'DELETE'});
-        toast('Направление удалено', 'success');
-        await loadReferrals();
         render();
         break;
       }

@@ -723,7 +723,7 @@ async def create_patient(
             age -= 1
         patient.age = age
 
-    await add_history(db, "agent", doctor_id, "Добавлен пациент", full_name)
+    await add_agent_history(db, doctor_id, "Добавлен пациент", full_name)
     return patient
 
 
@@ -757,7 +757,7 @@ async def update_patient(
             age -= 1
         patient.age = age
 
-    await add_history(db, "agent", doctor_id, "Обновлен пациент", patient.full_name)
+    await add_agent_history(db, doctor_id, "Обновлён пациент", patient.full_name)
     return patient
 
 
@@ -773,7 +773,7 @@ async def delete_patient(db: AsyncSession, patient_id: int, doctor_id: int) -> b
     await db.commit()
 
     if result.rowcount > 0:
-        await add_history(db, "agent", doctor_id, "Удален пациент", patient_name)
+        await add_agent_history(db, doctor_id, "Удалён пациент", patient_name)
         return True
     return False
 
@@ -851,12 +851,11 @@ async def create_referral(
 
     patient = await get_patient_by_id(db, patient_id, doctor_id)
     clinic = await get_clinic(db, clinic_id)
-    await add_history(
+    await add_agent_history(
         db,
-        "agent",
         doctor_id,
         "Создано направление",
-        f"Для пациента {patient.full_name} в {clinic.name}",
+        f"Пациент: {patient.full_name} · Клиника: {clinic.name}",
     )
     return referral
 
@@ -938,12 +937,11 @@ async def delete_referral(db: AsyncSession, referral_id: int, doctor_id: int) ->
         delete(Referral).where(Referral.id == referral_id, Referral.agent_id == doctor_id)
     )
     await db.commit()
-    await add_history(
+    await add_agent_history(
         db,
-        "agent",
         doctor_id,
         "Удалено направление",
-        f"Направление #{referral_id} для пациента {patient.full_name if patient else '—'}",
+        f"#{referral_id} · Пациент: {patient.full_name if patient else '—'}",
     )
     return True
 
@@ -987,11 +985,11 @@ async def get_dashboard_stats(db: AsyncSession, doctor_id: int) -> dict:
     }
 
 
-async def get_recent_activity(db: AsyncSession, doctor_id: int, limit: int = 5) -> List[History]:
+async def get_recent_activity(db: AsyncSession, doctor_id: int, limit: int = 5) -> List[AgentHistory]:
     result = await db.execute(
-        select(History)
-        .where(History.actor_type == "agent", History.actor_id == doctor_id)
-        .order_by(History.created_at.desc())
+        select(AgentHistory)
+        .where(AgentHistory.agent_id == doctor_id)
+        .order_by(AgentHistory.created_at.desc())
         .limit(limit)
     )
     return result.scalars().all()
@@ -1082,43 +1080,169 @@ async def soft_delete_agent(db: AsyncSession, agent_id: int) -> Optional[Agent]:
     return agent
 
 
-# ==================== History ====================
+# ==================== AgentHistory ====================
 
-async def add_history(
+async def add_agent_history(
     db: AsyncSession,
-    actor_type: str,
-    actor_id: int,
+    agent_id: int,
     label: str,
     text: str,
-    actor_name: Optional[str] = None,
-) -> History:
-    history = History(
+) -> AgentHistory:
+    h = AgentHistory(agent_id=agent_id, label=label, text=text)
+    db.add(h)
+    await db.commit()
+    await db.refresh(h)
+    return h
+
+
+async def get_agent_history(
+    db: AsyncSession,
+    agent_id: int,
+    skip: int = 0,
+    limit: int = 20,
+) -> List[AgentHistory]:
+    q = (
+        select(AgentHistory)
+        .where(AgentHistory.agent_id == agent_id)
+        .order_by(AgentHistory.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await db.execute(q)
+    return result.scalars().all()
+
+
+async def count_agent_history(db: AsyncSession, agent_id: int) -> int:
+    q = select(func.count()).where(AgentHistory.agent_id == agent_id)
+    return (await db.execute(q)).scalar() or 0
+
+
+# ==================== AdminHistory ====================
+
+async def add_admin_history(
+    db: AsyncSession,
+    admin_id: int,
+    actor_role: str,
+    label: str,
+    text: str,
+) -> AdminHistory:
+    h = AdminHistory(
+        admin_id=admin_id,
+        actor_role=actor_role,
         label=label,
         text=text,
-        actor_type=actor_type,
-        actor_id=actor_id,
-        actor_name=actor_name,
     )
-    db.add(history)
+    db.add(h)
     await db.commit()
-    await db.refresh(history)
-    return history
+    await db.refresh(h)
+    return h
 
 
-async def get_history(
+async def get_admin_history(
     db: AsyncSession,
-    actor_type: Optional[str] = None,
-    actor_id: Optional[int] = None,
-    limit: int = 100,
-) -> List[History]:
-    query = select(History)
-    if actor_type:
-        query = query.where(History.actor_type == actor_type)
-    if actor_id is not None:
-        query = query.where(History.actor_id == actor_id)
-    query = query.order_by(History.created_at.desc()).limit(limit)
-    result = await db.execute(query)
-    return result.scalars().all()
+    *,
+    admin_id: Optional[int] = None,
+    actor_role: Optional[str] = None,
+    agent_ids: Optional[List[int]] = None,
+    include_admin: bool = True,
+    skip: int = 0,
+    limit: int = 20,
+) -> List[dict]:
+    """
+    Объединённая история (админская + агентская).
+
+    Параметры:
+    - include_admin: грузить ли AdminHistory (по умолчанию True).
+    - admin_id: если задан — только действия этого админа.
+    - actor_role: 'admins' — только role='admin', 'chef' — только role='chef'.
+    - agent_ids: список ID агентов, чью историю грузить (None или [] — не грузить).
+    """
+    results = []
+
+    if include_admin:
+        q = select(AdminHistory)
+        if admin_id is not None:
+            q = q.where(AdminHistory.admin_id == admin_id)
+        if actor_role == 'admins':
+            q = q.where(AdminHistory.actor_role == 'admin')
+        elif actor_role == 'chef':
+            q = q.where(AdminHistory.actor_role == 'chef')
+        q = q.order_by(AdminHistory.created_at.desc())
+        admin_rows = (await db.execute(q)).scalars().all()
+        for h in admin_rows:
+            results.append({
+                "id": f"a{h.id}",
+                "actor_role": h.actor_role,
+                "actor_id": h.admin_id,
+                "label": h.label,
+                "text": h.text,
+                "created_at": h.created_at,
+                "source": "admin",
+            })
+
+    if agent_ids:
+        q = select(AgentHistory).where(AgentHistory.agent_id.in_(agent_ids)).order_by(AgentHistory.created_at.desc())
+        agent_rows = (await db.execute(q)).scalars().all()
+        for h in agent_rows:
+            results.append({
+                "id": f"g{h.id}",
+                "actor_role": "agent",
+                "actor_id": h.agent_id,
+                "label": h.label,
+                "text": h.text,
+                "created_at": h.created_at,
+                "source": "agent",
+            })
+
+    results.sort(key=lambda x: x["created_at"], reverse=True)
+    return results[skip:skip + limit]
+
+
+async def count_admin_history(
+    db: AsyncSession,
+    *,
+    admin_id: Optional[int] = None,
+    actor_role: Optional[str] = None,
+    agent_ids: Optional[List[int]] = None,
+    include_admin: bool = True,
+) -> int:
+    total = 0
+    if include_admin:
+        q = select(func.count()).select_from(AdminHistory)
+        if admin_id is not None:
+            q = q.where(AdminHistory.admin_id == admin_id)
+        if actor_role == 'admins':
+            q = q.where(AdminHistory.actor_role == 'admin')
+        elif actor_role == 'chef':
+            q = q.where(AdminHistory.actor_role == 'chef')
+        total += (await db.execute(q)).scalar() or 0
+    if agent_ids:
+        q = select(func.count()).select_from(AgentHistory).where(AgentHistory.agent_id.in_(agent_ids))
+        total += (await db.execute(q)).scalar() or 0
+    return total
+
+
+async def count_admin_history(
+    db: AsyncSession,
+    *,
+    admin_id: Optional[int] = None,
+    actor_role: Optional[str] = None,
+    agent_ids: Optional[List[int]] = None,
+) -> int:
+    total = 0
+    if agent_ids is None:
+        q = select(func.count()).select_from(AdminHistory)
+        if admin_id is not None:
+            q = q.where(AdminHistory.admin_id == admin_id)
+        if actor_role == 'admins':
+            q = q.where(AdminHistory.actor_role == 'admin')
+        elif actor_role == 'chef':
+            q = q.where(AdminHistory.actor_role == 'chef')
+        total += (await db.execute(q)).scalar() or 0
+    if agent_ids is not None and len(agent_ids) > 0:
+        q = select(func.count()).select_from(AgentHistory).where(AgentHistory.agent_id.in_(agent_ids))
+        total += (await db.execute(q)).scalar() or 0
+    return total
 
 
 # ==================== Reports ====================

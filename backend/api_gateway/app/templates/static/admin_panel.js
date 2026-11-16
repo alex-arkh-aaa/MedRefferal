@@ -188,36 +188,38 @@ async function loadAll() {
 
 
 async function loadReferrals() {
-    try {
-        const response = await fetch(`${API_BASE}/referrals?limit=100`, {
-            credentials: 'include'
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        allReferrals = Array.isArray(data) ? data : [];
-        filteredReferrals = [...allReferrals];
-        updateStats();
-        renderTableHeader();
-        renderCurrentPage();
-    } catch (error) {
-        console.error('Ошибка загрузки направлений:', error);
-        const tableBody = document.getElementById('referralsTableBody');
-        const totalColumns = currentColumnOrder.length + 1;
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="${totalColumns}">
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
-                        <h3>Ошибка загрузки</h3>
-                        <p>${esc(error.message || 'Не удалось загрузить список направлений')}</p>
-                        <button class="btn btn-primary" onclick="loadReferrals()">
-                            <i class="fas fa-redo"></i> Повторить
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
+  try {
+    // Без status — вернёт ВСЕ направления
+    const list = await api('/admin/referrals');
+    window.__referrals = Array.isArray(list) ? list : [];
+  } catch (e) {
+    window.__referrals = [];
+    const el = document.getElementById('refResults');
+    if (el) el.innerHTML = `<div class="empty">Ошибка загрузки: ${esc(e.message)}</div>`;
+    return;
+  }
+  renderReferralsFiltered();
+}
+
+function renderReferralsFiltered() {
+  const el = document.getElementById('refResults');
+  if (!el) return;
+  const all = window.__referrals || [];
+  const q = (query || '').toLowerCase().trim();
+  const cid = window.__refFilterClinic || 'all';
+  const st = window.__refFilterStatus || 'all';
+
+  const filtered = all.filter(r => {
+    if (q) {
+      const t = [r.patient_full_name, r.agent_full_name, r.clinic_name].join(' ').toLowerCase();
+      if (!t.includes(q)) return false;
     }
+    if (cid !== 'all' && Number(r.clinic_id) !== Number(cid)) return false;
+    if (st !== 'all' && r.status !== st) return false;
+    return true;
+  });
+
+  el.innerHTML = referralTable(filtered);
 }
 
 async function loadPendingAgents() {
@@ -337,18 +339,40 @@ function overview() {
 }
 
 function referrals() {
-  if (!window.__referrals) {
-    return heading('Новые направления', 'Заявки агентов на рассмотрении')
-      + `<section class="panel"><div id="refResults"><div class="empty">Загрузка...</div></div></section>`;
-  }
-  const list = window.__referrals.filter(r => !query || [r.patient_full_name, r.clinic_name].join(' ').toLowerCase().includes(query.toLowerCase()));
-  return heading('Новые направления', 'Заявки агентов на рассмотрении')
-    + `<section class="panel"><div class="panelhead"><input class="search" id="search" placeholder="Пациент или клиника" value="${esc(query)}"></div><div id="refResults">${referralTable(list)}</div></section>`;
+  if (!window.__refFilterClinic) window.__refFilterClinic = 'all';
+  if (!window.__refFilterStatus) window.__refFilterStatus = 'all';
+
+  const clinicOpts = (S.clinics || [])
+    .filter(c => isChef() || myClinicIds().includes(c.id))
+    .map(c => `<option value="${c.id}" ${String(window.__refFilterClinic) === String(c.id) ? 'selected' : ''}>${esc(c.name)}</option>`)
+    .join('');
+
+  return heading('Направления', 'Заявки агентов на обследования пациентов')
+    + `<section class="panel">
+        <div class="panelhead">
+          <div class="controls">
+            <input class="search" id="search" placeholder="Поиск по пациенту, агенту, клинике" value="${esc(query)}">
+            <select class="filter" id="refClinicFilter">
+              <option value="all">Все клиники</option>
+              ${clinicOpts}
+            </select>
+            <select class="filter" id="refStatusFilter">
+              <option value="all" ${window.__refFilterStatus === 'all' ? 'selected' : ''}>Все статусы</option>
+              <option value="new" ${window.__refFilterStatus === 'new' ? 'selected' : ''}>Новая</option>
+              <option value="approved" ${window.__refFilterStatus === 'approved' ? 'selected' : ''}>Подтверждена</option>
+              <option value="rejected" ${window.__refFilterStatus === 'rejected' ? 'selected' : ''}>Отклонена</option>
+            </select>
+            <button class="btn small" data-action="resetReferralsFilters" style="margin-left:auto">↻ Сбросить</button>
+          </div>
+        </div>
+        <div id="refResults">${referralTable(window.__referrals || [])}</div>
+      </section>`;
 }
 
 function referralTable(list) {
-  return table(['Пациент', 'Клиника', 'Специализация', 'Статус', ''], list.map(r => `<tr>
+  return table(['Пациент', 'Агент', 'Клиника', 'Специализация', 'Статус', ''], list.map(r => `<tr>
     <td><strong>${esc(r.patient_full_name || '—')}</strong><small>#${r.id}</small></td>
+    <td class="wrap">${esc(r.agent_full_name || '—')}</td>
     <td class="wrap">${esc(r.clinic_name || '—')}</td>
     <td class="wrap">${esc(r.specialization_name || '—')}</td>
     <td>${r.status === 'new' ? pill('Новая', 'new') : r.status === 'approved' ? pill('Подтверждена', 'approved') : pill('Отклонена', 'rejected')}</td>
@@ -902,15 +926,31 @@ async function handleSpecSubmit(f) {
 function viewReferral(id) {
   const r = (window.__referrals || []).find(x => x.id === Number(id));
   if (!r) { toast('Направление не найдено'); return; }
+
+  const PAYOUT_LABEL = {unpaid: 'Не выплачено', processing: 'К выплате', paid: 'Выплачено'};
+  const statusPill = r.status === 'new' ? pill('Новая', 'new')
+    : r.status === 'approved' ? pill('Подтверждена', 'approved')
+    : pill('Отклонена', 'rejected');
+
   openDrawer('Направление #' + r.id,
     `<dl class="details">
       <div><dt>Пациент</dt><dd>${esc(r.patient_full_name || '—')}</dd></div>
+      <div><dt>Телефон пациента</dt><dd>${esc(r.patient_phone || '—')}</dd></div>
+      <div><dt>Агент</dt><dd>${esc(r.agent_full_name || '—')}</dd></div>
       <div><dt>Клиника</dt><dd>${esc(r.clinic_name || '—')}</dd></div>
+      <div><dt>Адрес клиники</dt><dd>${esc(r.clinic_address || '—')}</dd></div>
       <div><dt>Специализация</dt><dd>${esc(r.specialization_name || '—')}</dd></div>
       <div><dt>Период визита</dt><dd>${esc(r.expected_visit_start || '—')} — ${esc(r.expected_visit_end || '—')}</dd></div>
-      <div><dt>Статус</dt><dd>${r.status === 'new' ? pill('Новая', 'new') : r.status === 'approved' ? pill('Подтверждена', 'approved') : pill('Отклонена', 'rejected')}</dd></div>
+      <div><dt>Стоимость услуги</dt><dd>${r.amount ? Number(r.amount).toLocaleString('ru-RU') + ' ₽' : '—'}</dd></div>
+      <div><dt>Ставка</dt><dd>${r.commission_rate != null ? r.commission_rate + '%' : '—'}</dd></div>
+      <div><dt>Вознаграждение</dt><dd>${r.commission_amount ? Number(r.commission_amount).toLocaleString('ru-RU') + ' ₽' : '—'}</dd></div>
+      <div><dt>Выплата</dt><dd>${PAYOUT_LABEL[r.payout_status] || r.payout_status || '—'}</dd></div>
+      <div><dt>Статус</dt><dd>${statusPill}</dd></div>
+      <div><dt>Изменение статуса</dt><dd>${r.status_changed_at ? dt(r.status_changed_at) : '—'}</dd></div>
+      <div><dt>Создано</dt><dd>${r.created_at ? dt(r.created_at) : '—'}</dd></div>
     </dl>
-    <p class="note">${esc(r.med_indications || 'Показания не указаны.')}</p>
+    <p class="note"><strong>Медицинские показания:</strong><br>${esc(r.med_indications || 'Показания не указаны.')}</p>
+    <p class="note"><strong>Особые пожелания:</strong><br>${esc(r.special_wishes || '—')}</p>
     <form id="referralDecisionForm" data-id="${r.id}">
       <div class="field"><label>Решение</label><select name="decision">
         <option value="approved" ${r.status === 'approved' ? 'selected' : ''}>Подтвердить</option>
@@ -919,6 +959,7 @@ function viewReferral(id) {
       <div class="actions"><button class="btn primary" type="submit">Сохранить</button><button class="btn" type="button" onclick="closeDrawer()">Отмена</button></div>
     </form>`);
 }
+
 async function handleReferralDecision(f) {
   const id = Number(f.dataset.id);
   const fd = new FormData(f);
@@ -957,6 +998,17 @@ document.addEventListener('click', e => {
 document.addEventListener('click', async e => {
   const pg = e.target.closest('[data-page]');
   if (pg) { navigate(pg.dataset.page); return; }
+
+  if (e.target.id === 'refClinicFilter') {
+    window.__refFilterClinic = e.target.value;
+    renderReferralsFiltered();
+    return;
+  }
+  if (e.target.id === 'refStatusFilter') {
+    window.__refFilterStatus = e.target.value;
+    renderReferralsFiltered();
+    return;
+  }
 
   const b = e.target.closest('[data-hist-filter]');
   if (b) { loadHistoryModal(b.dataset.histFilter); return; }
@@ -1006,6 +1058,12 @@ document.addEventListener('click', async e => {
       case 'editClinic': openClinicForm(id); break;
       case 'editSpec': openEditSpec(a.dataset.clinic, a.dataset.spec, a.dataset.rate, a.dataset.active); break;
       case 'editAgentRate': openEditAgentRate(a.dataset.agent, a.dataset.spec, a.dataset.mode, a.dataset.custom); break;
+      case 'resetReferralsFilters':
+        query = '';
+        window.__refFilterClinic = 'all';
+        window.__refFilterStatus = 'all';
+        render();
+        break;
       case 'viewAllHistory':
         document.getElementById('historyModal').classList.add('open');
         document.getElementById('historyModalBody').innerHTML = `

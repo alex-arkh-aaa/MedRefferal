@@ -396,6 +396,11 @@ async def update_profile(
     if not agent:
         raise HTTPException(status_code=404, detail="Агент не найден")
 
+    await crud.add_agent_history(
+        db, current_agent.id,
+        "Профиль обновлён",
+        agent.full_name,
+    )
     return {
         "id": agent.id,
         "email": agent.email,
@@ -551,6 +556,44 @@ async def get_doctor_stats(
     return await crud.get_doctor_stats(db, current_agent.id)
 
 
+# ==================== Agent: My History ====================
+
+@app.get("/api/v1/agents/me/history")
+async def get_my_history(
+    page: int = 1,
+    limit: int = 20,
+    current_agent: Agent = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db),
+):
+    if page < 1:
+        page = 1
+    if limit < 1 or limit > 100:
+        limit = 20
+    skip = (page - 1) * limit
+
+    items = await crud.get_agent_history(db, current_agent.id, skip=skip, limit=limit)
+    total = await crud.count_agent_history(db, current_agent.id)
+
+    return {
+        "items": [
+            {
+                "id": f"g{h.id}",
+                "actor_role": "agent",
+                "actor_id": h.agent_id,
+                "label": h.label,
+                "text": h.text,
+                "created_at": h.created_at,
+                "source": "agent",
+            }
+            for h in items
+        ],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": max(1, (total + limit - 1) // limit),
+    }
+
+
 # ==================== Change Email / Password ====================
 
 @app.post("/api/v1/auth/change_email_send_code", response_model=MessageResponse)
@@ -593,6 +636,12 @@ async def confirm_change_email(
     await crud.update_agent(db, current_agent.id, email=data.new_email)
     await crud.delete_email_verification(db, data.new_email)
 
+    await crud.add_agent_history(
+        db, current_agent.id,
+        "Email изменён",
+        f"{current_agent.email} → {data.new_email}",
+    )
+
     return MessageResponse(message="Email успешно изменён")
 
 
@@ -610,6 +659,12 @@ async def change_password(
 
     new_hash = get_password_hash(data.new_password)
     await crud.update_agent(db, current_agent.id, password_hash=new_hash)
+
+    await crud.add_agent_history(
+        db, current_agent.id,
+        "Пароль изменён",
+        current_agent.email,
+    )
 
     return MessageResponse(message="Пароль успешно изменён")
 
@@ -1163,6 +1218,14 @@ async def update_agent_endpoint(
         await crud.set_agent_specializations(db, agent_id, specialization_ids)
 
     agent = await crud.get_agent(db, agent_id)
+
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
+        "Агент обновлён",
+        f"{agent.full_name} ({agent.email})",
+    )
+
     return await _build_agent_response(db, agent)
 
 
@@ -1193,11 +1256,11 @@ async def approve_agent_endpoint(
     if data.specialization_ids:
         await crud.set_agent_specializations(db, agent_id, data.specialization_ids)
 
-    await crud.add_history(
-        db, "admin", admin.id,
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
         "Агент одобрен",
-        f"Агент #{agent_id} ({agent.email}) одобрен",
-        admin.full_name,
+        f"{agent.full_name} ({agent.email})",
     )
 
     email_data = {
@@ -1236,11 +1299,11 @@ async def reject_agent_endpoint(
         about_myself=(agent.about_myself or "") + f"\n\n[Отклонено: {data.decision_reason}]",
     )
 
-    await crud.add_history(
-        db, "admin", admin.id,
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
         "Агент отклонён",
-        f"Агент #{agent_id} ({agent.email}): {data.decision_reason}",
-        admin.full_name,
+        f"{agent.full_name} ({agent.email}): {data.decision_reason}",
     )
 
     email_data = {
@@ -1271,46 +1334,126 @@ async def delete_agent_endpoint(
             raise HTTPException(status_code=403, detail="Нет доступа")
 
     await crud.soft_delete_agent(db, agent_id)
-    await crud.add_history(
-        db, "admin", admin.id, "Агент удалён",
-        f"Агент #{agent_id} ({agent.email})", admin.full_name,
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
+        "Агент удалён",
+        f"{agent.full_name} ({agent.email})",
     )
     return MessageResponse(message="Агент удалён")
 
 
 
 
+# ==================== Admin: History ====================
 
-# ==================== History ====================
-
-@app.get("/api/v1/history")
-async def get_history_endpoint(
-    actor_type: Optional[str] = None,
-    limit: int = 100,
+@app.get("/api/v1/admin/history")
+async def get_admin_history_endpoint(
+    page: int = 1,
+    limit: int = 20,
+    filter: str = "all",
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    # Шеф видит всё, админ — только свои действия
-    actor_id_filter = None if admin.role == "chef" else admin.id
-    items = await crud.get_history(
+    """
+    filter:
+    - all  → всё (AdminHistory + AgentHistory)
+    - mine → только мои действия (AdminHistory, admin_id=me)
+    - admins → только AdminHistory с actor_role='admin'
+    - agents → только AgentHistory
+    - chef → только AdminHistory с actor_role='chef' (для шефа)
+    """
+    if page < 1:
+        page = 1
+    if limit < 1 or limit > 100:
+        limit = 20
+    skip = (page - 1) * limit
+
+    is_chef = admin.role == "chef"
+
+    # Собираем agent_ids в зависимости от filter
+    if is_chef:
+        if filter == "all":
+            # все агенты
+            result = await db.execute(select(Agent.id))
+            agent_ids = [r[0] for r in result.all()]
+            include_admin = True
+            admin_id = None
+            actor_role = None
+        elif filter == "mine":
+            agent_ids = []
+            include_admin = True
+            admin_id = admin.id
+            actor_role = None
+        elif filter == "admins":
+            agent_ids = []
+            include_admin = True
+            admin_id = None
+            actor_role = "admins"
+        elif filter == "agents":
+            result = await db.execute(select(Agent.id))
+            agent_ids = [r[0] for r in result.all()]
+            include_admin = False
+            admin_id = None
+            actor_role = None
+        elif filter == "chef":
+            agent_ids = []
+            include_admin = True
+            admin_id = None
+            actor_role = "chef"
+        else:
+            raise HTTPException(status_code=400, detail="Неверный filter")
+    else:
+        # админ клиники
+        admin_clinic_ids = await crud.get_admin_clinic_ids(db, admin.id)
+        if not admin_clinic_ids:
+            agent_ids = []
+        else:
+            result = await db.execute(
+                select(AgentClinic.agent_id).where(AgentClinic.clinic_id.in_(admin_clinic_ids))
+            )
+            agent_ids = list({r[0] for r in result.all()})
+
+        if filter == "all":
+            include_admin = True
+            admin_id = None
+            actor_role = None
+        elif filter == "mine":
+            agent_ids = []
+            include_admin = True
+            admin_id = admin.id
+            actor_role = None
+        elif filter == "agents":
+            include_admin = False
+            admin_id = None
+            actor_role = None
+        else:
+            raise HTTPException(status_code=400, detail="Неверный filter")
+
+    items = await crud.get_admin_history(
         db,
-        actor_type=actor_type,
-        actor_id=actor_id_filter,
+        admin_id=admin_id,
+        actor_role=actor_role,
+        agent_ids=agent_ids,
+        include_admin=include_admin,
+        skip=skip,
         limit=limit,
     )
-    return [
-        {
-            "id": h.id,
-            "label": h.label,
-            "text": h.text,
-            "actor_type": h.actor_type,
-            "actor_id": h.actor_id,
-            "actor_name": h.actor_name,
-            "created_at": h.created_at,
-        }
-        for h in items
-    ]
+    total = await crud.count_admin_history(
+        db,
+        admin_id=admin_id,
+        actor_role=actor_role,
+        agent_ids=agent_ids,
+        include_admin=include_admin,
+    )
 
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": max(1, (total + limit - 1) // limit),
+    }
 
 # ==================== Admin: Agents helper ====================
 
@@ -1375,6 +1518,12 @@ async def create_admin_endpoint(
         role="admin",
         clinic_ids=data.clinic_ids,
     )
+
+    await crud.add_admin_history(
+        db, chef.id, "chef",
+        "Администратор создан",
+        f"{admin.full_name} ({admin.email})",
+    )
     return AdminResponse(
         id=admin.id, email=admin.email, full_name=admin.full_name, phone=admin.phone,
         role=admin.role, active=admin.active, permissions=admin.permissions or {},
@@ -1408,6 +1557,12 @@ async def update_admin_endpoint(
 
     admin = await crud.get_admin(db, admin_id)
     clinic_ids_now = await crud.get_admin_clinic_ids(db, admin_id)
+
+    await crud.add_admin_history(
+        db, chef.id, "chef",
+        "Администратор обновлён",
+        f"{admin.full_name} ({admin.email})",
+    )
     return AdminResponse(
         id=admin.id, email=admin.email, full_name=admin.full_name, phone=admin.phone,
         role=admin.role, active=admin.active, permissions=admin.permissions or {},
@@ -1428,6 +1583,12 @@ async def delete_admin_endpoint(
         raise HTTPException(status_code=400, detail="Шефа нельзя удалить")
 
     await crud.delete_admin(db, admin_id)
+
+    await crud.add_admin_history(
+        db, chef.id, "chef",
+        "Администратор удалён",
+        f"{admin.full_name} ({admin.email})",
+    )
     return MessageResponse(message="Админ удалён")
 
 
@@ -1448,6 +1609,12 @@ async def create_clinic_endpoint(
         active=data.active,
         default_rate=data.default_rate if hasattr(data, "default_rate") and data.default_rate is not None else 10.0,
     )
+
+    await crud.add_admin_history(
+        db, chef.id, "chef",
+        "Клиника создана",
+        f"{clinic.name} ({clinic.city})",
+    )
     return clinic
 
 
@@ -1464,6 +1631,12 @@ async def update_clinic_endpoint(
     
     update_data = data.dict(exclude_unset=True)
     clinic = await crud.update_clinic(db, clinic_id, **update_data)
+
+    await crud.add_admin_history(
+        db, chef.id, "chef",
+        "Клиника обновлена",
+        f"{clinic.name} ({clinic.city})",
+    )
     return clinic
 
 
@@ -1510,6 +1683,14 @@ async def upsert_clinic_specialty_endpoint(
     cs = await crud.upsert_clinic_specialty(
         db=db, clinic_id=clinic_id, specialization_id=spec_id,
         default_rate=data.default_rate, active=data.active,
+    )
+
+    clinic = await crud.get_clinic(db, clinic_id)
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
+        "Специализация клиники обновлена",
+        f"{clinic.name if clinic else '—'} · {cs.specialization.name if cs.specialization else '—'}",
     )
     return ClinicSpecialtyResponse(
         id=cs.id,
@@ -1608,6 +1789,13 @@ async def set_agent_rate_endpoint(
     spec = await db.get(Specialization, spec_id)
     spec_name = spec.name if spec else ""
 
+    agent_obj = await crud.get_agent(db, agent_id)
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
+        "Ставка агента изменена",
+        f"{agent_obj.full_name if agent_obj else '—'} · {spec_name}",
+    )
     return AgentRateResponse(
         id=rate.id,
         agent_id=rate.agent_id,
@@ -1636,24 +1824,34 @@ async def admin_list_referrals(
         selectinload(Referral.patient),
         selectinload(Referral.clinic),
         selectinload(Referral.specialization),
+        selectinload(Referral.agent),
     )
     if clinic_ids is not None:
         q = q.where(Referral.clinic_id.in_(clinic_ids))
     if status:
         q = q.where(Referral.status == status)
-    q = q.order_by(Referral.created_at.desc()).limit(200)
+    q = q.order_by(Referral.created_at.desc()).limit(500)
     result = await db.execute(q)
     return [
         {
             "id": r.id,
             "patient_full_name": r.patient.full_name if r.patient else None,
             "patient_phone": r.patient.phone if r.patient else None,
+            "agent_full_name": r.agent.full_name if r.agent else None,
+            "clinic_id": r.clinic_id,
             "clinic_name": r.clinic.name if r.clinic else None,
+            "clinic_address": r.clinic.address if r.clinic else None,
             "specialization_name": r.specialization.name if r.specialization else None,
             "expected_visit_start": r.expected_visit_start,
             "expected_visit_end": r.expected_visit_end,
             "med_indications": r.med_indications,
+            "special_wishes": r.special_wishes,
+            "amount": r.amount,
+            "commission_rate": float(r.commission_rate) if r.commission_rate is not None else None,
+            "commission_amount": r.commission_amount,
+            "payout_status": r.payout_status,
             "status": r.status,
+            "status_changed_at": r.status_changed_at,
             "created_at": r.created_at,
         }
         for r in result.scalars().all()
@@ -1682,6 +1880,16 @@ async def admin_update_referral_status(
     r.status = new_status
     r.status_changed_at = datetime.utcnow()
     await db.commit()
+
+    patient = await db.get(Patient, r.patient_id)
+    agent_obj = await crud.get_agent(db, r.agent_id)
+    actor_role = "chef" if admin.role == "chef" else "admin"
+    status_label = "Направление подтверждено" if new_status == "approved" else "Направление отклонено"
+    await crud.add_admin_history(
+        db, admin.id, actor_role,
+        status_label,
+        f"Пациент: {patient.full_name if patient else '—'} · Агент: {agent_obj.full_name if agent_obj else '—'}",
+    )
     return {"ok": True}
 
 
