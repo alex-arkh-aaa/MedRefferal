@@ -11,7 +11,7 @@ os.environ.setdefault("REDIS_URL", "redis://localhost:6379/15")
 
 # Мокаем Redis ДО импорта app.main (rate_limiting.py создаёт r = redis.from_url)
 import fakeredis
-_fake_redis = fakeredis.FakeRedis(decode_responses=True)
+_fake_redis = fakeredis.FakeRedis(decode_responses=True, protocol=2)
 with patch("redis.from_url", return_value=_fake_redis):
     from app.main import app
 
