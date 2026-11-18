@@ -98,8 +98,8 @@ services:
 
   api_gateway:
     build: ./api_gateway
-    ports:
-      - "80:8000"
+    expose:
+      - "8000"
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
