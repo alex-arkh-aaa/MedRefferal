@@ -16,6 +16,15 @@ request_counts: Dict[str, Tuple[int, float]] = {}
 
 r = redis.from_url(os.getenv('REDIS_URL'))
 
+# в начале файла, после импортов
+LIMITS_CONFIG = {
+    "/api/v1/auth/login": {"limit": 10, "window": 60},
+    "/api/v1/auth/register": {"limit": 5, "window": 60},
+    "/api/v1/auth/send_code": {"limit": 5, "window": 60},
+    "/api/v1/auth/recover_account": {"limit": 5, "window": 60},
+    "default": {"limit": 300, "window": 60},
+}
+
 class RateLimitExceededException(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=429, detail=detail)
@@ -47,6 +56,9 @@ def should_rate_limit(request: Request) -> bool:
 
 async def rate_limit_middleware(request: Request, call_next):
     """Middleware для ограничения запросов по IP"""
+
+    limits_config = LIMITS_CONFIG
+
     
     # Пропускаем OPTIONS запросы (CORS preflight)
     if request.method == "OPTIONS":
@@ -55,21 +67,11 @@ async def rate_limit_middleware(request: Request, call_next):
     # Проверяем, нужно ли ограничивать этот путь
     if not should_rate_limit(request):
         return await call_next(request)
-    
-    if should_rate_limit(request):
-        return await call_next(request)
-    
+        
     client_ip = get_client_ip(request)
     path = request.url.path
     current_time = time.time()  # ← ТВОЯ СТРОКА НА МЕСТЕ
     
-    # Определяем лимиты в зависимости от пути
-    limits_config = {
-        "/api/v1/users/login": {"limit": 500, "window": 60},
-        "/api/v1/users/register": {"limit": 500, "window": 300},
-        "/api/v1/orders": {"limit": 3000, "window": 60},
-        "default": {"limit": 1000, "window": 60}  # исправил 100 → 10
-    }
     
     # Находим подходящий лимит
     limit_config = limits_config.get(path, limits_config["default"])
@@ -104,7 +106,6 @@ async def rate_limit_middleware(request: Request, call_next):
         
         if not current_count:  # Первый запрос
             pipe.setex(key_reqs, window, 1)
-            pipe.setex(key_blocking, window, '')  # пустой флаг блокировки
             print(f'first request - set counters')
         else:
             current_count = int(current_count)

@@ -1,6 +1,5 @@
+## DOCKER
 docker-compose up --build
-
-
 
 Таблицы юзеров и пользователей можно посмореть через Docker Desktop: 
 psql -U admin -d users_db
@@ -10,16 +9,13 @@ psql -U admin -d users_db
 \dt
 \c orders_db
 \l
-
 \x auto
 select * from users;
 
 DELETE FROM users;
 DROP TABLE users;
 
-
-
-ALEMBIC
+## ALEMBIC
 # Создать структуру Alembic в проекте
 alembic init alembic
 
@@ -87,17 +83,36 @@ alembic --help
 alembic branches
 
 
+## GIT
 
+# 1. Убедись, что ты на develop и она актуальна
+git checkout develop
+git pull origin develop
 
-Браузер
-    ↓
-NGINX (порт 80)
-    ↓
-API Gateway (порт 8000) ← 👈 JWT, безопасность, логи
-    ↓
-Service Users (порт 8000) ← 👈 Только бизнес-логика
-Service Orders (порт 8000) ← 👈 Только бизнес-логика
+# 2. Добавь изменения и закоммить
+git add .
+git commit -m "fix bugs"
 
+# 3. Прогони тесты локально (опционально, но полезно)
+cd backend\service_users
+pytest -q
+cd ..\..
+cd backend\api_gateway
+pytest -q
+cd ..\..
 
-API Gateway: проверка токенов и прав доступа
-Service Users: создание токенов, хеширование паролей
+# 4. Запушь develop
+git push origin develop
+
+# 5. Переключись на main и подтяни актуальную
+git checkout main
+git pull origin main
+
+# 6. Смержи develop в main
+git merge develop --no-edit
+
+# 7. Запушь main — это триггерит CD
+git push origin main
+
+# 8. Вернись на develop для дальнейшей работы
+git checkout develop
