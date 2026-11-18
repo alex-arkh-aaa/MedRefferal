@@ -46,8 +46,9 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
 
     public_paths = [
-        '/', '/index', '/terms_and_privacy', '/api/v1/auth/login', '/register', '/api/v1/health',
+        '/', '/index', '/terms_and_privacy', '/api/v1/auth/login', '/register',
         '/api/v1/login',
+        '/health', '/api/health', '/api/v1/health',
         '/api/v1/auth/register', '/api/v1/auth/send_code', '/favicon.ico',
         '/api/v1/auth/recover_account',
         '/clinic-admin', '/portal-admin',
