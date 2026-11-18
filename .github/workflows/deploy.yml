@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test before deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/service_users
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/service_users/reqs.txt
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r reqs.txt
+      - name: Run tests
+        env:
+          JWT_SECRET_KEY: test-secret-key-for-ci-only
+          JWT_ALGORITHM: HS256
+          ACC_TOKEN_EXP_MIN: "60"
+          DATABASE_URL: sqlite+aiosqlite:///:memory:
+        run: pytest -q
+
+  deploy:
+    name: Deploy to VPS
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /root/MedRefferal
+            git fetch origin main
+            git reset --hard origin/main
+            cd backend
+            docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
+            docker compose ps
