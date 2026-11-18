@@ -27,7 +27,7 @@ jobs:
           JWT_SECRET_KEY: test-secret-key-for-ci-only
           JWT_ALGORITHM: HS256
           ACC_TOKEN_EXP_MIN: "60"
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: sqlite+aiosqlite:///:memory
         run: pytest -q
 
   deploy:
