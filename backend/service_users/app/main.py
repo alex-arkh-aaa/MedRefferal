@@ -157,7 +157,7 @@ async def health():
 
 @app.post("/api/v1/auth/send_code", response_model=MessageResponse)
 async def send_code(
-    email: str = Body(..., embed=True),
+    email: EmailStr = Body(..., embed=True),
     db: AsyncSession = Depends(get_db),
 ):
     existing_agent = await crud.get_user_by_email_including_inactive(db, email)
@@ -976,7 +976,7 @@ async def update_referral(
     referral = await crud.update_referral(
         db=db,
         referral_id=referral_id,
-        agent_id=current_agent.id,
+        doctor_id=current_agent.id,
         **update_data,
     )
     if not referral:
