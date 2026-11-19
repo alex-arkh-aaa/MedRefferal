@@ -343,11 +343,21 @@ function navigate(p) {
 function nav() {
   const el = $('#nav');
   if (!el) return;
-  el.innerHTML = NAV.map(t => `
-    <button class="${page === t ? 'active' : ''}" data-page="${t}" title="${NAME[t]}">
-      <i class="fas ${ICONS[t]}"></i>
-      <span class="nav-label">${NAME[t]}</span>
-    </button>`).join('');
+
+  // Создаём кнопки только один раз
+  if (!el.dataset.built) {
+    el.innerHTML = NAV.map(t => `
+      <button data-page="${t}" title="${NAME[t]}">
+        <i class="fas ${ICONS[t]}"></i>
+        <span class="nav-label">${NAME[t]}</span>
+      </button>`).join('');
+    el.dataset.built = '1';
+  }
+
+  // Только переключаем класс active — благодаря этому работает CSS-transition
+  el.querySelectorAll('button[data-page]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === page);
+  });
 
   const u = S.user || {};
   const fullName = (u.full_name || u.email || 'Пользователь').trim();
