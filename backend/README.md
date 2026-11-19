@@ -1,4 +1,7 @@
-## DOCKER
+ssh -i "C:\Users\alexa\.ssh\clinic_key" root@82.147.89.211## DOCKER
+
+docker compose -f docker-compose.yml -f docker-compose.caddy.yml -f docker-compose.caddy.local.yml up -d
+
 docker-compose up --build
 
 Таблицы юзеров и пользователей можно посмореть через Docker Desktop: 

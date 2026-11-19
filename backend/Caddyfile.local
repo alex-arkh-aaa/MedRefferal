@@ -1,4 +1,0 @@
-http://localhost {
-    reverse_proxy api_gateway:8000
-    encode gzip
-}
