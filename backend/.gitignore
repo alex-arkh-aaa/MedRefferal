@@ -17,3 +17,5 @@ venv/
 
 .env
 *.env
+
+backend/Caddyfile.local
