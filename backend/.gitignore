@@ -19,3 +19,7 @@ venv/
 *.env
 
 backend/Caddyfile.local
+
+Caddyfile.local
+
+docker-compose.caddy.local.yml
